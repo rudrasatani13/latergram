@@ -1,28 +1,31 @@
-import { useState } from "react";
+import { Routes, Route, Navigate, useLocation } from "react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { LandingPage } from "./pages/LandingPage";
 import { AuthPage } from "./pages/AuthPage";
 import { HomePage } from "./pages/HomePage";
-
-type Page = "landing" | "auth" | "home";
+import { NotFoundPage } from "./pages/NotFoundPage";
 
 const easeSoft = [0.22, 1, 0.36, 1] as const;
 
 export default function App() {
-  const [page, setPage] = useState<Page>("landing");
+  const location = useLocation();
 
   return (
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
-        key={page}
+        key={location.pathname}
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
         transition={{ duration: 0.55, ease: easeSoft }}
       >
-        {page === "auth" && <AuthPage onNavigate={setPage} />}
-        {page === "home" && <HomePage onNavigate={setPage} />}
-        {page === "landing" && <LandingPage onNavigate={setPage} />}
+        <Routes location={location}>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/app" element={<HomePage />} />
+          <Route path="/404" element={<NotFoundPage />} />
+          <Route path="*" element={<Navigate to="/404" replace />} />
+        </Routes>
       </motion.div>
     </AnimatePresence>
   );

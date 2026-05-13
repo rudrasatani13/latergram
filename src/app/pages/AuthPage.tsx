@@ -6,13 +6,9 @@ import { BackgroundPetals } from "../components/BackgroundPetals";
 import { FeatureUnavailableNote } from "../components/shared/FeatureUnavailableNote";
 import { SoftField } from "../components/shared/SoftField";
 
-interface AuthPageProps {
-  onNavigate: (page: "landing" | "auth" | "home") => void;
-}
-
 const easeSoft = [0.22, 1, 0.36, 1] as const;
 
-export function AuthPage({ onNavigate }: AuthPageProps) {
+export function AuthPage() {
   const [mode, setMode] = useState<"signin" | "create">("signin");
   const [showUnavailable, setShowUnavailable] = useState(false);
 
@@ -21,7 +17,7 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
       <BackgroundPetals />
       <Grain />
       <div className="relative z-10">
-        <Header current="auth" onNavigate={onNavigate} variant="minimal" />
+        <Header current="auth" variant="minimal" />
 
         <main className="px-6 md:px-12 pb-24 pt-12">
           <div className="max-w-[560px] mx-auto text-center">

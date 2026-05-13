@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useCallback } from "react";
+import { useSearchParams } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { Header } from "../components/Header";
 import { Grain } from "../components/Grain";
@@ -10,10 +11,6 @@ import { LateLettersView } from "../components/diary/LateLettersView";
 import { TimeSinceView } from "../components/diary/TimeSinceView";
 import { MemoryCardView } from "../components/diary/MemoryCardView";
 
-interface HomePageProps {
-  onNavigate: (page: "landing" | "auth" | "home") => void;
-}
-
 const easeSoft = [0.22, 1, 0.36, 1] as const;
 
 const reveal = {
@@ -22,13 +19,23 @@ const reveal = {
   transition: { duration: 0.95, ease: easeSoft },
 };
 
+const VALID_SECTIONS = ["write", "private", "garden", "later", "time", "memory"] as const;
+type Section = (typeof VALID_SECTIONS)[number];
+
+function resolveSection(raw: string | null): Section {
+  if (raw && (VALID_SECTIONS as readonly string[]).includes(raw)) {
+    return raw as Section;
+  }
+  return "write";
+}
+
 const categories = [
-  { id: "write", label: "Write", glyph: "✿" },
-  { id: "private", label: "Keep Private", glyph: "❀" },
-  { id: "garden", label: "The Garden", glyph: "✾" },
-  { id: "later", label: "Late Letters", glyph: "❁" },
-  { id: "time", label: "Time Since", glyph: "❃" },
-  { id: "memory", label: "Memory Cards", glyph: "❀" },
+  { id: "write" as Section, label: "Write", glyph: "✿" },
+  { id: "private" as Section, label: "Keep Private", glyph: "❀" },
+  { id: "garden" as Section, label: "The Garden", glyph: "✾" },
+  { id: "later" as Section, label: "Late Letters", glyph: "❁" },
+  { id: "time" as Section, label: "Time Since", glyph: "❃" },
+  { id: "memory" as Section, label: "Memory Cards", glyph: "❀" },
 ];
 
 const quickAreas = [
@@ -37,40 +44,53 @@ const quickAreas = [
     desc: "a quiet anonymous space for planted feelings.",
     cta: "view Garden space",
     glyph: "✾",
-    target: "garden",
+    target: "garden" as Section,
   },
   {
     title: "Late Letters",
     desc: "letters that arrive on a date that feels right.",
     cta: "view letters space",
     glyph: "❁",
-    target: "later",
+    target: "later" as Section,
   },
   {
     title: "Time Since",
     desc: "a quiet counter for the days since something mattered.",
     cta: "view counter space",
     glyph: "❃",
-    target: "time",
+    target: "time" as Section,
   },
   {
     title: "Memory Cards",
     desc: "turn a message into a small card you can keep softly.",
     cta: "view cards space",
     glyph: "❀",
-    target: "memory",
+    target: "memory" as Section,
   },
 ];
 
-export function HomePage({ onNavigate }: HomePageProps) {
-  const [active, setActive] = useState("write");
+export function HomePage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const active = resolveSection(searchParams.get("section"));
+
+  const setActive = useCallback(
+    (section: Section) => {
+      if (section === "write") {
+        // "write" is the default, so we remove the param for a clean URL
+        setSearchParams({}, { replace: false });
+      } else {
+        setSearchParams({ section }, { replace: false });
+      }
+    },
+    [setSearchParams]
+  );
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-[var(--lg-cream)]">
       <BackgroundPetals />
       <Grain />
       <div className="relative z-10">
-        <Header current="home" onNavigate={onNavigate} variant="minimal" />
+        <Header current="home" variant="minimal" />
 
         <main className="px-6 md:px-12 pb-24">
           <div className="max-w-[960px] mx-auto pt-8">

@@ -1,11 +1,8 @@
 import { motion } from "motion/react";
+import { useNavigate } from "react-router";
 import { Header } from "../components/Header";
 import { Grain } from "../components/Grain";
 import { BackgroundPetals } from "../components/BackgroundPetals";
-
-interface LandingPageProps {
-  onNavigate: (page: "landing" | "auth" | "home") => void;
-}
 
 const easeSoft = [0.22, 1, 0.36, 1] as const;
 
@@ -31,13 +28,15 @@ const ritual = [
   { step: "three", title: "let it rest", desc: "save it, plant it, send it later. or never." },
 ];
 
-export function LandingPage({ onNavigate }: LandingPageProps) {
+export function LandingPage() {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen relative overflow-hidden bg-[var(--lg-cream)]">
       <BackgroundPetals />
       <Grain />
       <div className="relative z-10">
-        <Header current="landing" onNavigate={onNavigate} variant="full" />
+        <Header current="landing" variant="full" />
 
         <main className="px-6 md:px-12">
           <section className="max-w-[960px] mx-auto pt-16 pb-28 text-center">
@@ -98,7 +97,7 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
               className="mt-10 flex items-center justify-center gap-7 flex-wrap"
             >
               <button
-                onClick={() => onNavigate("auth")}
+                onClick={() => navigate("/auth")}
                 className="group inline-flex items-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700"
               >
                 <span style={{ fontSize: "0.78rem", letterSpacing: "0.32em", textTransform: "uppercase" }}>
@@ -107,7 +106,7 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
                 <span className="block w-6 h-px bg-[var(--lg-cream)] transition-all duration-500 group-hover:w-10" />
               </button>
               <button
-                onClick={() => onNavigate("home")}
+                onClick={() => navigate("/app")}
                 className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
                 style={{ fontSize: "1.25rem" }}
               >
@@ -288,7 +287,7 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
               <span className="font-serif-italic text-[var(--lg-rose)]">even if it's late.</span>
             </h2>
             <button
-              onClick={() => onNavigate("auth")}
+              onClick={() => navigate("/auth")}
               className="group mt-10 inline-flex items-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700"
             >
               <span style={{ fontSize: "0.78rem", letterSpacing: "0.32em", textTransform: "uppercase" }}>
