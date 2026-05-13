@@ -1,26 +1,15 @@
 import { useState } from "react";
 import { DiaryFrame } from "./DiaryFrame";
 import { decor } from "../BrandAssets";
-
-type Status = "scheduled" | "sent" | "opened";
-
-const seed: { to: string; email: string; preview: string; date: string; status: Status }[] = [
-  { to: "amma", email: "amma@home", preview: "for your birthday — a little late, like always.", date: "may 22 · 9:00 am", status: "scheduled" },
-  { to: "ravi", email: "ravi@somewhere.com", preview: "i hope this finds you on a quiet morning.", date: "apr 30 · 7:30 pm", status: "opened" },
-  { to: "future me", email: "self", preview: "open this when you forget you were brave.", date: "dec 31 · 11:59 pm", status: "scheduled" },
-];
-
-const statusColor: Record<Status, string> = {
-  scheduled: "var(--lg-butter)",
-  sent: "var(--lg-rose-soft)",
-  opened: "var(--lg-sage)",
-};
+import { FeatureUnavailableNote } from "../shared/FeatureUnavailableNote";
+import { EmptyState } from "../shared/EmptyState";
 
 export function LateLettersView() {
   const [composing, setComposing] = useState(false);
   const [to, setTo] = useState("");
   const [date, setDate] = useState("");
   const [body, setBody] = useState("");
+  const [showUnavailable, setShowUnavailable] = useState(false);
 
   return (
     <DiaryFrame
@@ -30,77 +19,35 @@ export function LateLettersView() {
       {/* Header strip */}
       <div className="flex items-center justify-between px-7 pt-6 pb-3 border-b border-dashed border-[var(--lg-border)]">
         <span className="font-cute text-[var(--lg-rose)]" style={{ fontSize: "1.15rem" }}>
-          scheduled with love
+          letters written with love
         </span>
         <button
-          onClick={() => setComposing((c) => !c)}
+          onClick={() => {
+            setComposing((c) => !c);
+            setShowUnavailable(false);
+          }}
           className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-300"
           style={{ fontSize: "1.1rem" }}
         >
-          {composing ? "← back to letters" : "+ new letter"}
+          {composing ? "← back to letters" : "+ write a letter"}
         </button>
       </div>
 
       {!composing ? (
         <div className="px-7 py-6 space-y-3 min-h-[280px]">
-          {seed.map((l, i) => (
-            <div
-              key={i}
-              className="flex items-start gap-4 bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-2xl p-4 shadow-[0_8px_22px_-16px_rgba(120,80,70,0.4)]"
-            >
-              <img src={decor.envelopeHeartSeal} alt="" className="w-10 h-10 object-contain shrink-0" />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span
-                    className="text-[var(--lg-ink)]"
-                    style={{ fontFamily: "'Fraunces', serif", fontWeight: 500, fontSize: "1.05rem" }}
-                  >
-                    to {l.to}
-                  </span>
-                  <span className="text-[var(--lg-cocoa)]/60" style={{ fontSize: "0.85rem" }}>
-                    · {l.email}
-                  </span>
-                </div>
-                <p
-                  className="font-cute text-[var(--lg-cocoa)] mt-1"
-                  style={{ fontSize: "1.15rem", lineHeight: 1.3 }}
-                >
-                  {l.preview}
-                </p>
-                <div className="mt-2 flex items-center gap-3 flex-wrap">
-                  <span
-                    className="text-[var(--lg-rose)]"
-                    style={{ fontSize: "0.78rem", letterSpacing: "0.18em", textTransform: "uppercase" }}
-                  >
-                    {l.date}
-                  </span>
-                  <span
-                    className="px-2.5 py-0.5 rounded-full"
-                    style={{
-                      background: statusColor[l.status],
-                      color: "var(--lg-ink)",
-                      fontSize: "0.72rem",
-                      letterSpacing: "0.18em",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    {l.status}
-                  </span>
-                </div>
-              </div>
-              {l.status === "scheduled" && (
-                <button
-                  className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-error)] transition-colors duration-300 self-center"
-                  style={{ fontSize: "1.05rem" }}
-                >
-                  cancel
-                </button>
-              )}
-            </div>
-          ))}
+          <EmptyState
+            message="No letters are scheduled yet."
+            note="Delivery is not connected yet."
+          />
         </div>
       ) : (
         <div className="px-7 py-6 space-y-4 min-h-[280px]">
+          <p
+            className="font-cute text-[var(--lg-cocoa)] text-center mb-2"
+            style={{ fontSize: "1rem" }}
+          >
+            you can write here, but delivery is not connected yet
+          </p>
           <Row label="to (name)">
             <input
               value={to}
@@ -135,24 +82,29 @@ export function LateLettersView() {
               className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)]"
               style={{ fontSize: "1.1rem" }}
             >
-              keep as draft
+              close
             </button>
             <button
+              onClick={() => setShowUnavailable(true)}
               className="inline-flex items-center gap-2 bg-[var(--lg-rose)] text-white py-3 px-6 rounded-full hover:bg-[var(--lg-focus-rose)] transition-colors duration-300 shadow-[0_8px_22px_-12px_rgba(200,110,124,0.5)]"
               style={{ fontSize: "0.95rem", fontWeight: 600 }}
             >
-              <img src={decor.envelopeMini} alt="" className="w-4 h-4 object-contain" />
+              <img src={decor.envelopeMini} alt="" aria-hidden="true" className="w-4 h-4 object-contain" />
               schedule letter
             </button>
           </div>
+          <FeatureUnavailableNote
+            message="Delivery is not connected yet. You can write here, but it will not be sent."
+            visible={showUnavailable}
+          />
         </div>
       )}
 
       <div className="px-7 pt-2 pb-6 flex items-center justify-between border-t border-dashed border-[var(--lg-border)]">
         <span className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1.05rem" }}>
-          delivered by a soft magic link, on the day you chose
+          delivery is not connected yet
         </span>
-        <img src={decor.heartLockKey} alt="" className="w-7 h-7 object-contain opacity-80" />
+        <img src={decor.heartLockKey} alt="" aria-hidden="true" className="w-7 h-7 object-contain opacity-80" />
       </div>
     </DiaryFrame>
   );

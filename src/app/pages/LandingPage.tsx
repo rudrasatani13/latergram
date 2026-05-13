@@ -88,7 +88,7 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
               style={{ fontSize: "1.05rem" }}
             >
               Lategram is a quiet place for the things you didn't say in time. write them down,
-              keep them close, or let them bloom into a small garden.
+              keep them close, or let them find a gentle home.
             </motion.p>
 
             <motion.div

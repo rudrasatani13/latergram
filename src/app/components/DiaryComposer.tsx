@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { decor } from "./BrandAssets";
+import { FeatureUnavailableNote } from "./shared/FeatureUnavailableNote";
 
 const easeSoft = [0.22, 1, 0.36, 1] as const;
 
@@ -26,6 +27,7 @@ const today = new Date().toLocaleDateString("en-US", {
 export function DiaryComposer({ active }: DiaryComposerProps) {
   const [text, setText] = useState("");
   const [to, setTo] = useState("");
+  const [showUnavailable, setShowUnavailable] = useState(false);
 
   return (
     <motion.div
@@ -66,14 +68,14 @@ export function DiaryComposer({ active }: DiaryComposerProps) {
         <img
           src={decor.pinkRibbonBow}
           alt=""
-          aria-hidden
+          aria-hidden="true"
           className="pointer-events-none absolute -top-6 left-8 w-14 h-14 object-contain rotate-[-8deg]"
         />
         {/* Wax seal */}
         <img
           src={decor.heartWaxSeal}
           alt=""
-          aria-hidden
+          aria-hidden="true"
           className="pointer-events-none absolute -top-5 -right-3 w-14 h-14 object-contain rotate-[10deg]"
         />
 
@@ -106,7 +108,7 @@ export function DiaryComposer({ active }: DiaryComposerProps) {
               <img
                 src={decor.softHeart}
                 alt=""
-                aria-hidden
+                aria-hidden="true"
                 className="w-5 h-5 object-contain"
               />
             </div>
@@ -116,13 +118,13 @@ export function DiaryComposer({ active }: DiaryComposerProps) {
           <div className="relative">
             {/* Pink left margin line */}
             <span
-              aria-hidden
+              aria-hidden="true"
               className="pointer-events-none absolute left-12 top-0 bottom-0 w-px"
               style={{ background: "var(--lg-rose-soft)" }}
             />
             {/* Ruled lines */}
             <div
-              aria-hidden
+              aria-hidden="true"
               className="pointer-events-none absolute inset-0"
               style={{
                 backgroundImage:
@@ -167,7 +169,7 @@ export function DiaryComposer({ active }: DiaryComposerProps) {
               <img
                 src={decor.pastelStarSparkles}
                 alt=""
-                aria-hidden
+                aria-hidden="true"
                 className="w-5 h-5 object-contain"
               />
             </div>
@@ -176,7 +178,7 @@ export function DiaryComposer({ active }: DiaryComposerProps) {
 
         {/* Bottom decor */}
         <div className="mt-6 flex items-center justify-center gap-4 opacity-80">
-          <img src={decor.envelopeMini} alt="" aria-hidden className="w-7 h-7 object-contain" />
+          <img src={decor.envelopeMini} alt="" aria-hidden="true" className="w-7 h-7 object-contain" />
           <span
             className="font-cute text-[var(--lg-rose)]"
             style={{ fontSize: "1.15rem" }}
@@ -186,7 +188,7 @@ export function DiaryComposer({ active }: DiaryComposerProps) {
           <img
             src={decor.foldedLetterHeart}
             alt=""
-            aria-hidden
+            aria-hidden="true"
             className="w-7 h-7 object-contain"
           />
         </div>
@@ -194,7 +196,10 @@ export function DiaryComposer({ active }: DiaryComposerProps) {
 
       {/* Actions */}
       <div className="mt-8 flex items-center justify-center gap-6 flex-wrap">
-        <button className="group inline-flex items-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700">
+        <button
+          onClick={() => setShowUnavailable(true)}
+          className="group inline-flex items-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700"
+        >
           <span
             style={{
               fontSize: "0.78rem",
@@ -207,12 +212,18 @@ export function DiaryComposer({ active }: DiaryComposerProps) {
           <span className="block w-6 h-px bg-[var(--lg-cream)] transition-all duration-500 group-hover:w-10" />
         </button>
         <button
+          onClick={() => setShowUnavailable(true)}
           className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
           style={{ fontSize: "1.2rem" }}
         >
           keep as draft →
         </button>
       </div>
+
+      <FeatureUnavailableNote
+        message="Saving is not connected yet. Copy your words before leaving."
+        visible={showUnavailable}
+      />
     </motion.div>
   );
 }

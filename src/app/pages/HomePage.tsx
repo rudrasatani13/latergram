@@ -34,27 +34,31 @@ const categories = [
 const quickAreas = [
   {
     title: "The Garden",
-    desc: "plant a feeling anonymously, or read what others have planted.",
-    cta: "open the Garden",
+    desc: "a quiet anonymous space for planted feelings.",
+    cta: "view Garden space",
     glyph: "✾",
+    target: "garden",
   },
   {
     title: "Late Letters",
-    desc: "schedule a letter to arrive on a date that feels right.",
-    cta: "write a letter",
+    desc: "letters that arrive on a date that feels right.",
+    cta: "view letters space",
     glyph: "❁",
+    target: "later",
   },
   {
     title: "Time Since",
     desc: "a quiet counter for the days since something mattered.",
-    cta: "add a counter",
+    cta: "view counter space",
     glyph: "❃",
+    target: "time",
   },
   {
     title: "Memory Cards",
     desc: "turn a message into a small card you can keep softly.",
-    cta: "create a card",
+    cta: "view cards space",
     glyph: "❀",
+    target: "memory",
   },
 ];
 
@@ -105,8 +109,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 className="text-[var(--lg-cocoa)] leading-[1.8] max-w-xl mx-auto"
                 style={{ fontSize: "1.02rem" }}
               >
-                open with the feeling. choose where it should belong. Lategram will hold it for as
-                long as you need.
+                open with the feeling. choose where it should belong. your words stay here only while
+                you keep this page open.
               </p>
             </motion.div>
 
@@ -233,6 +237,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                   </div>
                   <div className="col-span-12 md:col-span-2 md:col-start-11 md:text-right">
                     <button
+                      onClick={() => setActive(q.target)}
                       className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
                       style={{ fontSize: "1.1rem" }}
                     >
@@ -273,10 +278,11 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 className="mt-5 text-[var(--lg-cocoa)] leading-[1.7]"
                 style={{ fontSize: "1rem" }}
               >
-                things saved here never leave this device. open it when you're ready to read what
-                you wrote.
+                a place for the things you choose to keep. saving is not connected yet — copy
+                anything important before leaving.
               </p>
               <button
+                onClick={() => setActive("private")}
                 className="group mt-8 inline-flex items-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700"
               >
                 <span
@@ -300,100 +306,6 @@ export function HomePage({ onNavigate }: HomePageProps) {
           </div>
         </main>
       </div>
-    </div>
-  );
-}
-
-function Composer({ active }: { active: string }) {
-  const titles: Record<string, string> = {
-    write: "write a Lategram",
-    private: "keep it private",
-    garden: "plant in the Garden",
-    later: "send it later",
-    time: "mark a Time Since",
-    memory: "make a Memory Card",
-  };
-
-  return (
-    <div className="max-w-[760px] mx-auto">
-      <p
-        className="text-center font-cute text-[var(--lg-rose)] mb-3"
-        style={{ fontSize: "1.3rem" }}
-      >
-        composing ✿
-      </p>
-      <h2
-        className="text-center text-[var(--lg-ink)] mb-8"
-        style={{
-          fontFamily: "'Fraunces', serif",
-          fontWeight: 300,
-          fontSize: "clamp(1.6rem, 3vw, 2.2rem)",
-          letterSpacing: "-0.02em",
-        }}
-      >
-        <span className="font-serif-italic text-[var(--lg-rose)]">{titles[active]}</span>
-      </h2>
-
-      <div className="border-t border-b border-[var(--lg-border)] py-7">
-        <textarea
-          placeholder="start with the feeling, not the form…"
-          rows={9}
-          className="w-full bg-transparent border-0 text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/50 focus:outline-none resize-none leading-relaxed"
-          style={{ fontFamily: "'Fraunces', serif", fontSize: "1.15rem" }}
-        />
-      </div>
-
-      <p
-        className="mt-3 text-center font-cute text-[var(--lg-cocoa)]"
-        style={{ fontSize: "1.05rem" }}
-      >
-        drafts are kept softly on this device ❀
-      </p>
-
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <SmallField label="who is it for" placeholder="yourself, or a name" />
-        <SmallField label="when should it arrive" placeholder="a date, or never" />
-        <SmallField label="a title, if it has one" placeholder="optional" />
-      </div>
-
-      <div className="mt-10 flex items-center justify-center gap-6 flex-wrap">
-        <button className="group inline-flex items-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700">
-          <span
-            style={{
-              fontSize: "0.78rem",
-              letterSpacing: "0.32em",
-              textTransform: "uppercase",
-            }}
-          >
-            Save Lategram
-          </span>
-          <span className="block w-6 h-px bg-[var(--lg-cream)] transition-all duration-500 group-hover:w-10" />
-        </button>
-        <button
-          className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
-          style={{ fontSize: "1.2rem" }}
-        >
-          keep as draft →
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function SmallField({ label, placeholder }: { label: string; placeholder: string }) {
-  return (
-    <div>
-      <label
-        className="block font-cute text-[var(--lg-rose)] mb-1"
-        style={{ fontSize: "1.05rem" }}
-      >
-        {label}
-      </label>
-      <input
-        placeholder={placeholder}
-        className="w-full bg-transparent border-0 border-b border-[var(--lg-border)] py-2 text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/50 focus:outline-none focus:border-[var(--lg-rose)] transition-colors duration-500"
-        style={{ fontSize: "0.95rem" }}
-      />
     </div>
   );
 }

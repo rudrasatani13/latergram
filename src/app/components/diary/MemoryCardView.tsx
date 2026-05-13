@@ -2,6 +2,9 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { DiaryFrame } from "./DiaryFrame";
 import { blooms, decor } from "../BrandAssets";
+import { PillChip } from "../shared/PillChip";
+import { FeatureUnavailableNote } from "../shared/FeatureUnavailableNote";
+import { designPreviewCardSources } from "../../fixtures/designPreviewData";
 
 const formats = [
   { id: "square", label: "square", w: 280, h: 280 },
@@ -18,16 +21,18 @@ const themeBlooms = [
   { id: "apricot", bloom: blooms.apricotRose, bg: "linear-gradient(160deg,#FFE0CF,#FFF8ED)" },
 ];
 
-const sources = [
-  { id: "s1", label: "Lategram · 'soft sundays'", body: "soft sundays are a kind of forgiveness." },
-  { id: "s2", label: "Time Since · started writing again", body: "47 days of small, brave pages." },
-  { id: "s3", label: "Lategram · for amma", body: "you taught me to keep tea warm for the ones who are late." },
-];
+/**
+ * Design preview only — fixture sources used to preserve layout shape.
+ * Memory Cards need real saved memories first.
+ * Will be replaced with real content in Phase 6 + Phase 16.
+ */
+const sources = designPreviewCardSources;
 
 export function MemoryCardView() {
   const [format, setFormat] = useState<typeof formats[number]>(formats[0]);
   const [theme, setTheme] = useState(themeBlooms[0]);
   const [source, setSource] = useState(sources[0]);
+  const [showUnavailable, setShowUnavailable] = useState(false);
 
   return (
     <DiaryFrame
@@ -53,13 +58,13 @@ export function MemoryCardView() {
             <img
               src={theme.bloom}
               alt=""
-              aria-hidden
+              aria-hidden="true"
               className="pointer-events-none absolute -top-6 -right-6 w-32 h-32 object-contain opacity-90"
             />
             <img
               src={decor.pastelStarSparkles}
               alt=""
-              aria-hidden
+              aria-hidden="true"
               className="pointer-events-none absolute bottom-3 left-3 w-7 h-7 object-contain opacity-80"
             />
             <div className="relative h-full w-full p-5 flex flex-col">
@@ -97,6 +102,12 @@ export function MemoryCardView() {
             <p className="font-cute text-[var(--lg-rose)] mb-2" style={{ fontSize: "1.15rem" }}>
               choose a memory
             </p>
+            <p
+              className="font-cute text-[var(--lg-cocoa)]/60 mb-2"
+              style={{ fontSize: "0.85rem" }}
+            >
+              design preview — no saved memories yet
+            </p>
             <div className="space-y-2">
               {sources.map((s) => (
                 <button
@@ -131,18 +142,13 @@ export function MemoryCardView() {
             </p>
             <div className="flex gap-2 flex-wrap">
               {formats.map((f) => (
-                <button
+                <PillChip
                   key={f.id}
+                  active={format.id === f.id}
                   onClick={() => setFormat(f)}
-                  className={`font-cute px-3.5 py-1.5 rounded-full border transition-all duration-300 ${
-                    format.id === f.id
-                      ? "bg-[var(--lg-rose)] border-[var(--lg-rose)] text-white"
-                      : "bg-[var(--lg-cream)] border-[var(--lg-border)] text-[var(--lg-cocoa)] hover:border-[var(--lg-rose-soft)]"
-                  }`}
-                  style={{ fontSize: "1.05rem" }}
                 >
                   {f.label}
-                </button>
+                </PillChip>
               ))}
             </div>
           </div>
@@ -162,8 +168,9 @@ export function MemoryCardView() {
                       : "border-[var(--lg-border)] hover:scale-105"
                   }`}
                   style={{ background: t.bg }}
+                  aria-label={`${t.id} flower theme`}
                 >
-                  <img src={t.bloom} alt="" className="w-7 h-7 object-contain" />
+                  <img src={t.bloom} alt="" aria-hidden="true" className="w-7 h-7 object-contain" />
                 </button>
               ))}
             </div>
@@ -173,16 +180,24 @@ export function MemoryCardView() {
 
       <div className="px-7 pt-2 pb-6 flex items-center justify-between border-t border-dashed border-[var(--lg-border)]">
         <span className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1.05rem" }}>
-          export as image · share gently
+          export is not connected yet
         </span>
         <button
-          className="inline-flex items-center gap-2 bg-[var(--lg-rose)] text-white py-2.5 px-5 rounded-full hover:bg-[var(--lg-focus-rose)] transition-colors duration-300 shadow-[0_8px_22px_-12px_rgba(200,110,124,0.5)]"
+          onClick={() => setShowUnavailable(true)}
+          className="inline-flex items-center gap-2 bg-[var(--lg-border)] text-[var(--lg-cocoa)] py-2.5 px-5 rounded-full cursor-not-allowed opacity-70"
           style={{ fontSize: "0.9rem", fontWeight: 600 }}
+          disabled
+          aria-label="Download card — not available yet"
         >
-          <img src={decor.keepsakeBoxHeart} alt="" className="w-4 h-4 object-contain" />
+          <img src={decor.keepsakeBoxHeart} alt="" aria-hidden="true" className="w-4 h-4 object-contain" />
           download card
         </button>
       </div>
+
+      <FeatureUnavailableNote
+        message="Download is not connected yet. Memory Cards need a real saved memory first."
+        visible={showUnavailable}
+      />
     </DiaryFrame>
   );
 }

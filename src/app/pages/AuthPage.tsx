@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { Header } from "../components/Header";
 import { Grain } from "../components/Grain";
 import { BackgroundPetals } from "../components/BackgroundPetals";
+import { FeatureUnavailableNote } from "../components/shared/FeatureUnavailableNote";
+import { SoftField } from "../components/shared/SoftField";
 
 interface AuthPageProps {
   onNavigate: (page: "landing" | "auth" | "home") => void;
@@ -12,6 +14,7 @@ const easeSoft = [0.22, 1, 0.36, 1] as const;
 
 export function AuthPage({ onNavigate }: AuthPageProps) {
   const [mode, setMode] = useState<"signin" | "create">("signin");
+  const [showUnavailable, setShowUnavailable] = useState(false);
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-[var(--lg-cream)]">
@@ -85,8 +88,8 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
               style={{ fontSize: "1rem" }}
             >
               {mode === "signin"
-                ? "continue where you left off — your letters and gardens are waiting."
-                : "create a small, private archive for the things you didn't say in time."}
+                ? "a quiet account space is being prepared. you can explore the writing space for now."
+                : "a quiet account space is being prepared. you can still explore the writing space for now."}
             </motion.p>
 
             <motion.form
@@ -96,7 +99,7 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
               className="mt-12 text-left"
               onSubmit={(e) => {
                 e.preventDefault();
-                onNavigate("home");
+                setShowUnavailable(true);
               }}
             >
               <AnimatePresence>
@@ -107,13 +110,13 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.5, ease: easeSoft }}
                   >
-                    <Field label="your name" placeholder="what should we call you" type="text" />
+                    <SoftField label="your name" placeholder="what should we call you" type="text" />
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              <Field label="email" placeholder="you@somewhere" type="email" />
-              <Field label="password" placeholder="••••••••" type="password" />
+              <SoftField label="email" placeholder="you@somewhere" type="email" />
+              <SoftField label="password" placeholder="••••••••" type="password" />
 
               <div className="flex items-center justify-between mt-7">
                 {mode === "signin" ? (
@@ -127,7 +130,10 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setMode("create")}
+                      onClick={() => {
+                        setMode("create");
+                        setShowUnavailable(false);
+                      }}
                       className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
                       style={{ fontSize: "1.2rem" }}
                     >
@@ -137,7 +143,10 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
                 ) : (
                   <button
                     type="button"
-                    onClick={() => setMode("signin")}
+                    onClick={() => {
+                      setMode("signin");
+                      setShowUnavailable(false);
+                    }}
                     className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500 ml-auto"
                     style={{ fontSize: "1.2rem" }}
                   >
@@ -156,6 +165,11 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
                 <span className="block w-6 h-px bg-[var(--lg-cream)] transition-all duration-500 group-hover:w-10" />
               </button>
 
+              <FeatureUnavailableNote
+                message="Accounts are not connected yet. You can still explore the writing space."
+                visible={showUnavailable}
+              />
+
               <p
                 className="mt-6 font-cute text-center text-[var(--lg-cocoa)]"
                 style={{ fontSize: "1.05rem" }}
@@ -170,33 +184,6 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
           </div>
         </main>
       </div>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  type,
-  placeholder,
-}: {
-  label: string;
-  type: string;
-  placeholder: string;
-}) {
-  return (
-    <div className="mt-6">
-      <label
-        className="block font-cute text-[var(--lg-rose)] mb-1"
-        style={{ fontSize: "1.15rem" }}
-      >
-        {label}
-      </label>
-      <input
-        type={type}
-        placeholder={placeholder}
-        className="w-full bg-transparent border-0 border-b border-[var(--lg-border)] py-3 text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/50 focus:outline-none focus:border-[var(--lg-rose)] transition-colors duration-500"
-        style={{ fontSize: "1rem" }}
-      />
     </div>
   );
 }
