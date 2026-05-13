@@ -164,10 +164,7 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
               </p>
             </motion.form>
 
-            <div
-              className="mt-16 text-[var(--lg-rose-soft)]"
-              style={{ fontSize: "1.4rem" }}
-            >
+            <div className="mt-16 text-[var(--lg-rose-soft)]" style={{ fontSize: "1.4rem" }}>
               ✿ ❀ ✿
             </div>
           </div>
