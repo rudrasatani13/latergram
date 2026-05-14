@@ -24,7 +24,7 @@ const themeBlooms = [
 /**
  * Design preview only — fixture sources used to preserve layout shape.
  * Memory Cards need real saved memories first.
- * Will be replaced with real content in Phase 6 + Phase 16.
+ * Will be replaced only when real saved content and card export are connected.
  */
 const sources = designPreviewCardSources;
 

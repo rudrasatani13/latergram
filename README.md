@@ -4,9 +4,9 @@ Some words arrive late. Latergram gives them a place.
 
 ## Current Status
 
-Phase 5 Device Storage Foundation complete.
+Phase 6 Keepsake Box / Private Archive V1 complete.
 
-The app now has real route-based navigation with React Router, clean page boundaries, query-param-driven app sections, and browser/device-local saving for the first writing experience. Saved data is stored only in this browser for now, is not synced, and may be removed if browser data is cleared. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
+The app now has real route-based navigation with React Router, clean page boundaries, query-param-driven app sections, browser/device-local saving for the first writing experience, and a real local Keepsake Box archive for saved writing and Time Since counters. Saved data is stored only in this browser for now, is not synced, and may be removed if browser data is cleared. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
 
 ## Development Rule
 
@@ -33,7 +33,9 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 - A writing surface for drafting text on screen.
 - Local browser/device saving for private Lategrams.
 - One local draft that can be saved, restored, and cleared on this device.
-- Keep Private **My Lategrams** showing real locally saved writing.
+- Keep Private **My Lategrams** showing real locally saved writing with view, copy, destination filter, and remove actions.
+- Keep Private draft visibility for the one local draft, with a path back to the writer for restore.
+- Keep Private **Time Since** archive showing real locally saved counters.
 - Local Time Since counters with save and remove behavior.
 - A real copy action for the write flow using the browser clipboard.
 - Recipient, subject, and intended-destination context inside the write flow.
@@ -88,6 +90,15 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 - [x] Show real local Lategrams in Keep Private and allow removing them from this device.
 - [x] Save and remove local Time Since counters.
 - [x] Keep copy honest: no sync, account storage, delivery, Garden posting, or card output claims.
+
+### Phase 6: Keepsake Box / Private Archive V1
+- [x] Turn Keep Private into a real local archive center.
+- [x] Show saved Latergrams newest first with destination filters.
+- [x] Add full saved Latergram view, copy, and two-step local remove.
+- [x] Surface the one local draft without adding cross-component draft state.
+- [x] Show real Time Since counters in the Keepsake Box and allow local removal.
+- [x] Keep Late Letters, Saved Cards, and Received tabs honestly unavailable.
+- [x] Keep copy honest: browser/device-only data, no accounts or cloud sync.
 
 ## Run Locally
 

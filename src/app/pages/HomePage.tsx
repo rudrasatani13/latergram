@@ -196,7 +196,7 @@ export function HomePage() {
                 transition={{ duration: 0.32, ease: "easeOut" }}
               >
                 {active === "write" && <DiaryComposer active={active} onViewSection={setActive} />}
-                {active === "private" && <KeepPrivateView />}
+                {active === "private" && <KeepPrivateView onViewSection={setActive} />}
                 {active === "garden" && <GardenView />}
                 {active === "later" && <LateLettersView />}
                 {active === "time" && <TimeSinceView />}
