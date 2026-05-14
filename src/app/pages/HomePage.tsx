@@ -49,7 +49,7 @@ const quickAreas = [
   },
   {
     title: "Late Letters",
-    desc: "letters can be shaped here while delivery stays unavailable.",
+    desc: "letters can be saved for future delivery while delivery stays disconnected.",
     cta: "view letters space",
     glyph: "❁",
     target: "later" as Section,

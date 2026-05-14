@@ -4,11 +4,11 @@ Some words arrive late. Latergram gives them a place.
 
 ## Current Status
 
-Phase 9 Account-Backed Private Storage V1 complete.
+Phase 10 Late Letters Scheduling V1 complete.
 
-The app now has a fully wired authentication foundation using Supabase Auth and a true backend persistence model for "Keep Private" and "Time Since" counters. Real accounts are strictly segregated from local writing. Signed-in users save to their account archive, while signed-out users continue to save to their local device. No automatic migration occurs; local saves can be explicitly imported by the user.
+The app now has a fully wired authentication foundation using Supabase Auth and a true backend persistence model for "Keep Private", "Time Since" counters, and scheduled Late Letter records. Real accounts are strictly segregated from local writing. Signed-in users save private Lategrams and Time Since counters to their account archive, while signed-out users continue to save supported local records to their local device. No automatic migration occurs; local saves can be explicitly imported by the user.
 
-Late Letters, the Garden, and Memory Cards are not connected yet, and delivery/cloud sync for those features is not active. Migrations live under `supabase/migrations`. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
+Late Letter scheduling records are real for signed-in users, but email delivery is not connected yet. Recipient email is stored for future delivery and masked in the saved-letter UI after saving. The Garden and Memory Cards are not connected yet, and delivery/cloud sync for those features is not active. Migrations live under `supabase/migrations`. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
 
 ## Development Rule
 
@@ -34,6 +34,9 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 - Supabase database schema.
 - Account-backed private Lategrams for signed-in users.
 - Account-backed Time Since counters for signed-in users.
+- Account-backed Late Letter scheduling records for signed-in users.
+- Recipient email masking in saved Late Letter UI.
+- Late Letter cancellation before delivery is connected.
 - Local browser/device saving for signed-out users.
 - Explicit local-to-account import.
 - Account/device archive separation.
@@ -47,14 +50,14 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 - Recipient, subject, and intended-destination context inside the write flow.
 - Clear/reset behavior that asks before removing current words.
 - Visible guidance that saved writing is only available in this browser/device for signed-out users.
-- Honest empty/unavailable states for The Garden, Late Letters, and Memory Cards.
+- Honest empty/unavailable states for The Garden and Memory Cards.
 - A soft Latergram-style 404 page for unknown routes.
 - Stable design system with shared components (Phase 2).
 - Browser back/forward navigation and direct URL access.
 
 ## What Is Not Live Yet
 
-- Late Letter scheduling, email delivery, secure open links, or recipient tracking.
+- Late Letter email delivery, secure open links, or recipient tracking.
 - Public Garden posting, reading, reactions, reporting, or moderation frontend.
 - Memory Card generation, download, sharing, or export.
 - Received letters.
@@ -128,6 +131,14 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 - [x] Updated KeepPrivateView to separate account archive from local device archive.
 - [x] Added explicit "Import local saves" feature to explicitly move local storage to the account archive.
 - [x] Maintained strict live-only design rules (no generic UI destruction or fake sync).
+
+### Phase 10: Late Letters Scheduling V1
+- [x] Added typed database access for `late_letters`.
+- [x] Let signed-in users create real scheduled Late Letter records.
+- [x] Store recipient email for future delivery while showing only masked email after saving.
+- [x] Show saved Late Letters from the account database with honest delivery-not-connected copy.
+- [x] Allow scheduled/draft Late Letter records to be cancelled with a two-step confirmation.
+- [x] Confirmed no email provider, delivery job, secure open link, recipient page, or tracking flow was added.
 
 ## Run Locally
 
