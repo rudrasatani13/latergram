@@ -51,7 +51,10 @@ export function Header({ current, variant = "full" }: HeaderProps) {
                   {user?.email || "signed in"}
                 </span>
                 <button
-                  onClick={() => signOut()}
+                  onClick={async () => {
+                    await signOut();
+                    navigate("/");
+                  }}
                   className="px-4 py-2 rounded-full border border-[var(--lg-rose-soft)] text-[var(--lg-rose)] hover:bg-[var(--lg-rose-soft)] hover:text-white transition-colors duration-300"
                   style={{ fontSize: "0.9rem", fontWeight: 500 }}
                 >
@@ -78,7 +81,10 @@ export function Header({ current, variant = "full" }: HeaderProps) {
                   {user?.email || "signed in"}
                 </span>
                 <button
-                  onClick={() => signOut()}
+                  onClick={async () => {
+                    await signOut();
+                    navigate("/");
+                  }}
                   className="px-4 py-2 rounded-full border border-[var(--lg-rose-soft)] text-[var(--lg-rose)] hover:bg-[var(--lg-rose-soft)] hover:text-white transition-colors duration-300"
                   style={{ fontSize: "0.9rem", fontWeight: 500 }}
                 >

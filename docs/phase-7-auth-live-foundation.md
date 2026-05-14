@@ -47,3 +47,10 @@ If `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are not configured:
 
 ## Build Results
 `npm run build` runs efficiently with no errors, confirming the structural integrity of the application.
+
+## Phase 7 Polish
+- **Copy Update**: Stale "account space is being prepared" copy was corrected to accurately describe the environment's state based on actual auth availability.
+- **Sign Out Flow**: Sign-out now consistently calls the provider and cleanly navigates to `/` without deleting any local data.
+- **Password Reset Prep**: Added safe redirect behavior using `window.location.origin` for return trips.
+- **Data Guarantee**: Confirmed again that local saved writing remains local-only. No database or account-backed archives have been added. No cloud sync was added.
+- **Build Status**: Verified `npm run build` continues to pass.

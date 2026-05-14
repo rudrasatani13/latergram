@@ -130,7 +130,10 @@ export function AuthPage() {
                   Go to app
                 </button>
                 <button
-                  onClick={() => signOut()}
+                  onClick={async () => {
+                    await signOut();
+                    navigate("/");
+                  }}
                   className="bg-transparent border border-[var(--lg-rose-soft)] text-[var(--lg-rose)] py-3 px-6 rounded-full hover:bg-[var(--lg-rose-soft)] hover:text-white transition-colors duration-500 font-cute"
                 >
                   Sign out
@@ -214,9 +217,11 @@ export function AuthPage() {
               className="text-[var(--lg-cocoa)] leading-[1.7]"
               style={{ fontSize: "1rem" }}
             >
-              {mode === "signin"
-                ? "a quiet account space is being prepared. you can explore the writing space for now."
-                : "a quiet account space is being prepared. you can still explore the writing space for now."}
+              {!authAvailable 
+                ? "Accounts are not connected in this environment. You can explore the local writing space for now." 
+                : mode === "signin"
+                  ? "Sign in to your Latergram account. Your saved writing is still stored only in this browser for now."
+                  : "Create your Latergram account. Local saved writing is not synced to your account yet."}
             </motion.p>
 
             <motion.form

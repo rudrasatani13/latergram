@@ -4,6 +4,8 @@ interface SoftFieldProps {
   type: string;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
+  required?: boolean;
 }
 
 export function SoftField({
@@ -12,6 +14,8 @@ export function SoftField({
   type,
   value,
   onChange,
+  disabled,
+  required,
 }: SoftFieldProps) {
   return (
     <div className="mt-6">
@@ -26,7 +30,9 @@ export function SoftField({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className="w-full bg-transparent border-0 border-b border-[var(--lg-border)] py-3 text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/50 focus:outline-none focus:border-[var(--lg-rose)] transition-colors duration-500"
+        disabled={disabled}
+        required={required}
+        className="w-full bg-transparent border-0 border-b border-[var(--lg-border)] py-3 text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/50 focus:outline-none focus:border-[var(--lg-rose)] transition-colors duration-500 disabled:opacity-50 disabled:cursor-not-allowed"
         style={{ fontSize: "1rem" }}
       />
     </div>
