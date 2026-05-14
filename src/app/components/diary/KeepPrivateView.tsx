@@ -157,8 +157,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
     loading: accountCountersLoading,
     error: accountCountersError,
     refresh: refreshAccountCounters, 
-    remove: removeAccountCounter, 
-    create: createAccountCounter 
+    remove: removeAccountCounter 
   } = useAccountCounters();
   
   const [tab, setTab] = useState<KeepPrivateTab>("lategrams");
