@@ -68,12 +68,26 @@ export interface DbGardenPost {
   deleted_at: string | null;
 }
 
+export interface DbPublicGardenPost {
+  id: string; // UUID
+  body: string;
+  category: string | null;
+  anonymous_seed: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface DbGardenReaction {
   id: string; // UUID
   post_id: string; // UUID
   user_id: string | null; // UUID
   anonymous_fingerprint_hash: string | null;
   created_at: string;
+}
+
+export interface DbPublicGardenReactionCount {
+  post_id: string; // UUID
+  reaction_count: number;
 }
 
 export interface DbGardenReport {

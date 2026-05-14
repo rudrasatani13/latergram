@@ -37,9 +37,10 @@ There is **no public read or write access** to these tables.
 ### The Garden (Public/Moderated Data)
 
 To support public read capabilities safely in the future without leaking PII:
-- **`garden_posts`**: Authenticated users can insert posts, but must insert them as `pending` moderation state. Users can delete or edit their own posts if they are pending. Normal users cannot approve, reject, or remove posts.
-- **Public View (`public_garden_posts`)**: A dedicated view exposes only approved posts, excluding the underlying `user_id` and other sensitive columns. The public select policy restricts queries to approved posts with no deleted timestamp.
-- **`garden_reactions`**: Reactions can be added by authenticated users. Reactions on approved posts will be viewable by the public.
+- **`garden_posts`**: Authenticated users can insert posts, but must insert them as `pending` moderation state. Users can delete or edit their own posts if they are pending. Normal users cannot approve, reject, or remove posts. No public SELECT policy exists on the raw table.
+- **Public View (`public_garden_posts`)**: A dedicated view exposes only approved posts, excluding the underlying `user_id` and other sensitive columns.
+- **`garden_reactions`**: Reactions can be added by authenticated users only if the post is approved. No public SELECT policy exists on the raw table.
+- **Public View (`public_garden_reaction_counts`)**: Exposes aggregated reaction counts safely.
 - **`garden_reports`**: Users can create reports, but no public read policy is available. Only moderation/admin access will be allowed to view these.
 
 ### Safety and Compliance
@@ -47,6 +48,15 @@ To support public read capabilities safely in the future without leaking PII:
 - **`recipient_opt_outs`**: Stores hashes of emails that have opted out of future deliveries. No public access.
 - **`safety_events`**: An audit table for moderation and system-level actions. No public access.
 - **Service Roles**: No service-role key is exposed in the frontend. All client interactions respect RLS.
+
+## Phase 8 Security Polish: Garden Public Access Hardening
+
+To ensure zero-trust safety and prevent accidental data leaks (like `user_id` or anonymous fingerprints), the public access policies for the Garden have been tightened:
+- **Raw Base-Table Access Removed:** Public `SELECT` policies were completely removed from `garden_posts` and `garden_reactions`. The public cannot query these tables directly.
+- **Safe Public Views:** Public reads must happen through explicitly defined views (`public_garden_posts` and `public_garden_reaction_counts`). These views omit sensitive columns (`user_id`, `anonymous_fingerprint_hash`, moderation metadata) and filter for `approved` content only.
+- **Strict Reaction Policies:** Reactions can only be added to posts that are already approved and not deleted. Reaction counts are aggregated safely in the `public_garden_reaction_counts` view.
+- **Private Reports:** Garden reports remain strictly private, with no public read access. Admin/moderation access will be implemented in later phases.
+- **Frontend Remains Local:** No frontend behaviors were altered. The Garden remains intentionally disconnected and not live. No account-backed storage has been added.
 
 ## Migration Files
 

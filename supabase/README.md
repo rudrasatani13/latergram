@@ -31,3 +31,4 @@ supabase db push
 - **Authentication:** Must be configured in the Supabase Dashboard.
 - **RLS (Row Level Security):** RLS is enabled across all sensitive tables.
 - **Service Role:** The Supabase Service Role key should **never** be used in the client application. The client must only interact with the database using the anon key and authenticated sessions, relying on RLS policies.
+- **Public Garden Access:** Must use safe views (`public_garden_posts`, `public_garden_reaction_counts`) or RPCs, not raw base-table access. Do not expose `user_id` or reaction fingerprints from public Garden reads.
