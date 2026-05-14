@@ -90,7 +90,7 @@ export function MemoryCardView() {
                 className="font-cute text-[var(--lg-cocoa)] mt-3"
                 style={{ fontSize: "1rem" }}
               >
-                — Lategram
+                — Latergram
               </p>
             </div>
           </motion.div>

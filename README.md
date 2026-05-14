@@ -4,9 +4,9 @@ Some words arrive late. Latergram gives them a place.
 
 ## Current Status
 
-Phase 3 App Structure and Navigation complete.
+Phase 4 Write Flow Live V1 complete.
 
-The app now has real route-based navigation with React Router, clean page boundaries, query-param-driven app sections, and a soft 404 page. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
+The app now has real route-based navigation with React Router, clean page boundaries, query-param-driven app sections, and a browser-session write flow with honest copy/clear actions. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
 
 ## Development Rule
 
@@ -29,7 +29,11 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 - A soft landing page that describes the product vision (`/`).
 - An account access page with honest unavailable messaging (`/auth`).
 - A main app shell with section navigation via URL query params (`/app`).
-- An unsaved writing surface for drafting text on screen.
+- A browser-session writing surface for drafting text on screen.
+- A real copy action for the write flow using the browser clipboard.
+- Recipient, subject, and intended-destination context inside the write flow.
+- Clear/reset behavior that asks before removing current words.
+- Visible guidance that writing is not saved yet.
 - Honest empty/unavailable states for Keep Private, The Garden, Late Letters, Time Since, and Memory Cards.
 - A soft Latergram-style 404 page for unknown routes.
 - Stable design system with shared components (Phase 2).
@@ -67,6 +71,13 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 - [x] Simplify Header navigation (removed non-live feature links).
 - [x] Preserve page transitions with AnimatePresence.
 - [x] Confirm all routes work with direct URL access and browser back/forward.
+
+### Phase 4: Write Flow Live V1
+- [x] Keep write flow state in the browser session only.
+- [x] Add recipient, optional subject, and intended destination context.
+- [x] Replace fake Save/Draft actions with copy, guarded clear, and continue-shaping behavior.
+- [x] Keep visible "not saved yet" guidance.
+- [x] Confirm no storage, backend, auth, delivery, Garden posting, or export behavior was added.
 
 ## Run Locally
 

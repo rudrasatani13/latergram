@@ -69,9 +69,18 @@ const quickAreas = [
   },
 ];
 
+function formatTodayLabel() {
+  const monthDay = new Date()
+    .toLocaleDateString("en-US", { month: "long", day: "numeric" })
+    .toLowerCase();
+
+  return `today, ${monthDay} ✿`;
+}
+
 export function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const active = resolveSection(searchParams.get("section"));
+  const todayLabel = formatTodayLabel();
 
   const setActive = useCallback(
     (section: Section) => {
@@ -100,7 +109,7 @@ export function HomePage() {
                 className="font-cute text-[var(--lg-rose)] mb-5"
                 style={{ fontSize: "1.5rem" }}
               >
-                today, may 12 ✿
+                {todayLabel}
               </p>
               <h1
                 className="text-[var(--lg-ink)]"
@@ -186,7 +195,7 @@ export function HomePage() {
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.32, ease: "easeOut" }}
               >
-                {active === "write" && <DiaryComposer active={active} />}
+                {active === "write" && <DiaryComposer active={active} onViewSection={setActive} />}
                 {active === "private" && <KeepPrivateView />}
                 {active === "garden" && <GardenView />}
                 {active === "later" && <LateLettersView />}

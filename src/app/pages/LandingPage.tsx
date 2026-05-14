@@ -86,7 +86,7 @@ export function LandingPage() {
               className="text-[var(--lg-cocoa)] leading-[1.8] max-w-xl mx-auto"
               style={{ fontSize: "1.05rem" }}
             >
-              Lategram is a quiet place for the things you didn't say in time. write them down,
+              Latergram is a quiet place for the things you didn't say in time. write them down,
               keep them close, or let them find a gentle home.
             </motion.p>
 
@@ -302,7 +302,7 @@ export function LandingPage() {
               className="font-cute text-[var(--lg-cocoa)]"
               style={{ fontSize: "1.15rem" }}
             >
-              made gently — © Lategram ✿
+              made gently — © Latergram ✿
             </p>
           </footer>
         </main>

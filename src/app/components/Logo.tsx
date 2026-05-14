@@ -11,7 +11,7 @@ export function Logo({ size = "md" }: LogoProps) {
     <div className="flex items-center gap-2.5">
       <img
         src={brand.logo}
-        alt="Lategram"
+        alt="Latergram"
         style={{ width: dim, height: dim }}
         className="object-contain"
       />
@@ -19,7 +19,7 @@ export function Logo({ size = "md" }: LogoProps) {
         className="font-display text-[var(--lg-ink)]"
         style={{ fontSize: fs, fontWeight: 500 }}
       >
-        Lategram
+        Latergram
       </span>
     </div>
   );
