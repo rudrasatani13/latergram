@@ -31,9 +31,9 @@ This phase connects signed-in users to real account-backed private storage using
 
 ## What Was NOT Changed (Intentionally)
 - **Automatic Migration**: No automatic copying of `localStorage` data occurs. The user has explicit control over migration.
-- **Late Letters**: Still simulated. Letters are saved as private lategrams marked with the `later` destination. Delivery is not active.
-- **Garden**: Still simulated. Garden posts are saved as private lategrams marked with the `garden` destination.
-- **Memory Cards**: Still simulated.
+- **Late Letters**: Not connected yet. Letters are saved as private intent marked with the `later` destination. Delivery is not live.
+- **Garden**: Garden posting is not live. Garden posts are saved as private intent marked with the `garden` destination.
+- **Memory Cards**: Export is not live.
 - **UI Architecture**: No broad redesigns or changes to typography, animations, etc., were made, preserving the exact frontend aesthetic.
 
 ## Security and Architecture Note

@@ -8,7 +8,7 @@ Phase 9 Account-Backed Private Storage V1 complete.
 
 The app now has a fully wired authentication foundation using Supabase Auth and a true backend persistence model for "Keep Private" and "Time Since" counters. Real accounts are strictly segregated from local writing. Signed-in users save to their account archive, while signed-out users continue to save to their local device. No automatic migration occurs; local saves can be explicitly imported by the user.
 
-Late Letters, the Garden, and Memory Cards remain simulated, and delivery/cloud sync for those features is not active. Migrations live under `supabase/migrations`. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
+Late Letters, the Garden, and Memory Cards are not connected yet, and delivery/cloud sync for those features is not active. Migrations live under `supabase/migrations`. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
 
 ## Development Rule
 
