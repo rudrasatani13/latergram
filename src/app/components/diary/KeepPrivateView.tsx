@@ -13,6 +13,7 @@ import {
   removeLocalLategram,
 } from "../../storage/localStorage";
 import type { LocalCounter, LocalDestination, LocalDraft, LocalLategram } from "../../storage/types";
+import { useAuth } from "../../auth/useAuth";
 
 const tabs = [
   { id: "lategrams", label: "My Lategrams" },
@@ -127,6 +128,7 @@ function lategramTitle(lategram: LocalLategram) {
 }
 
 export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
+  const { authAvailable } = useAuth();
   const [tab, setTab] = useState<KeepPrivateTab>("lategrams");
   const [filter, setFilter] = useState<DestinationFilter>("all");
   const [lategrams, setLategrams] = useState<LocalLategram[]>(() => sortLategrams(readLocalLategrams()));
@@ -656,7 +658,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
       <div className="px-7 py-6 min-h-[280px]">
         <div className="mb-5 rounded-[22px] border border-dashed border-[var(--lg-border)] bg-[var(--lg-cream)]/50 px-5 py-4 flex items-center justify-between gap-4 flex-wrap">
           <p className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem" }}>
-            Saved on this device only. Clearing browser data may remove these. Accounts are not connected yet.
+            {authAvailable ? "Accounts are connected, but this archive is still stored only in this browser." : "Saved on this device only. Clearing browser data may remove these. Accounts are not connected yet."}
           </p>
           <button
             type="button"

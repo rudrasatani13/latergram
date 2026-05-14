@@ -6,8 +6,11 @@ import { BackgroundPetals } from "../components/BackgroundPetals";
 
 const easeSoft = [0.22, 1, 0.36, 1] as const;
 
+import { useAuth } from "../auth/useAuth";
+
 export function NotFoundPage() {
   const navigate = useNavigate();
+  const { session, user } = useAuth();
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-[var(--lg-cream)]">
@@ -76,7 +79,7 @@ export function NotFoundPage() {
               className="mt-10 flex items-center justify-center gap-7 flex-wrap"
             >
               <button
-                onClick={() => navigate("/")}
+                onClick={() => navigate((session || user) ? "/app" : "/")}
                 className="group inline-flex items-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700"
               >
                 <span style={{ fontSize: "0.78rem", letterSpacing: "0.32em", textTransform: "uppercase" }}>

@@ -3,3 +3,8 @@ dist/
 .DS_Store
 .idea/
 *.local
+.env
+.env.local
+.env.development
+.env.production
+.env.*.local

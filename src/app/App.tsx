@@ -4,11 +4,23 @@ import { LandingPage } from "./pages/LandingPage";
 import { AuthPage } from "./pages/AuthPage";
 import { HomePage } from "./pages/HomePage";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { useAuth } from "./auth/useAuth";
 
 const easeSoft = [0.22, 1, 0.36, 1] as const;
 
 export default function App() {
   const location = useLocation();
+  const { loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[var(--lg-cream)] flex items-center justify-center">
+        <p className="font-cute text-[var(--lg-rose)] animate-pulse" style={{ fontSize: "1.2rem", letterSpacing: "0.1em" }}>
+          loading softly ✿
+        </p>
+      </div>
+    );
+  }
 
   return (
     <AnimatePresence mode="wait" initial={false}>

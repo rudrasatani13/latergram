@@ -4,9 +4,9 @@ Some words arrive late. Latergram gives them a place.
 
 ## Current Status
 
-Phase 6 Keepsake Box / Private Archive V1 complete.
+Phase 7 Auth Live Foundation complete.
 
-The app now has real route-based navigation with React Router, clean page boundaries, query-param-driven app sections, browser/device-local saving for the first writing experience, and a real local Keepsake Box archive for saved writing and Time Since counters. Saved data is stored only in this browser for now, is not synced, and may be removed if browser data is cleared. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
+The app now has a fully wired authentication foundation using Supabase Auth. It supports real account creation, sign in, sign out, password reset, and session persistence. If environment variables are missing, the UI gracefully degrades and remains honest without crashing. Real accounts are strictly segregated from local writing. Saved data is stored only in this browser for now, is not synced, and may be removed if browser data is cleared. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
 
 ## Development Rule
 
@@ -99,6 +99,15 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 - [x] Show real Time Since counters in the Keepsake Box and allow local removal.
 - [x] Keep Late Letters, Saved Cards, and Received tabs honestly unavailable.
 - [x] Keep copy honest: browser/device-only data, no accounts or cloud sync.
+
+### Phase 7: Auth Live Foundation
+- [x] Chose and configured Supabase Auth as the identity provider.
+- [x] Added `authClient`, `useAuth`, and `AuthProvider` for a centralized auth foundation.
+- [x] Set up environment variable templates (`.env.example`, `.env.local.example`, `.env.development.example`, `.env.production.example`) and ignored real `.env` files.
+- [x] Wired real `signIn`, `signUp`, and `resetPassword` to the `AuthPage`.
+- [x] Updated `Header` and `HomePage` / Keepsake views to accurately reflect auth state.
+- [x] Failed gracefully with honest "Accounts are not connected" messages if env vars are missing.
+- [x] Preserved local-only storage (no cloud sync or account backing was added yet).
 
 ## Run Locally
 

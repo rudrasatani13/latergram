@@ -10,6 +10,7 @@ import { GardenView } from "../components/diary/GardenView";
 import { LateLettersView } from "../components/diary/LateLettersView";
 import { TimeSinceView } from "../components/diary/TimeSinceView";
 import { MemoryCardView } from "../components/diary/MemoryCardView";
+import { useAuth } from "../auth/useAuth";
 
 const easeSoft = [0.22, 1, 0.36, 1] as const;
 
@@ -81,6 +82,7 @@ export function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const active = resolveSection(searchParams.get("section"));
   const todayLabel = formatTodayLabel();
+  const { session } = useAuth();
 
   const setActive = useCallback(
     (section: Section) => {
@@ -138,8 +140,7 @@ export function HomePage() {
                 className="text-[var(--lg-cocoa)] leading-[1.8] max-w-xl mx-auto"
                 style={{ fontSize: "1.02rem" }}
               >
-                open with the feeling. choose where it should belong. saved words stay only in this
-                browser for now.
+                {session ? "Signed in. Saved writing is still local to this browser." : "You can write locally without an account. Saved words stay only in this browser for now."}
               </p>
             </motion.div>
 

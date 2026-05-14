@@ -1,8 +1,9 @@
 import { motion } from "motion/react";
-import { useNavigate } from "react-router";
+import { useNavigate, Navigate } from "react-router";
 import { Header } from "../components/Header";
 import { Grain } from "../components/Grain";
 import { BackgroundPetals } from "../components/BackgroundPetals";
+import { useAuth } from "../auth/useAuth";
 
 const easeSoft = [0.22, 1, 0.36, 1] as const;
 
@@ -30,6 +31,12 @@ const ritual = [
 
 export function LandingPage() {
   const navigate = useNavigate();
+  const { session, user } = useAuth();
+
+  if (session || user) {
+    // User is logged in; redirect them to the app
+    return <Navigate to="/app" replace />;
+  }
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-[var(--lg-cream)]">
