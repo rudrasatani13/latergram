@@ -88,6 +88,19 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
   const characterCount = text.trim().length;
 
+  const getDestinationGuidance = (id: LocalDestination) => {
+    if (session?.user) {
+      if (id === "private") return "Save privately to your account, or keep a device copy.";
+      if (id === "later") return "Delivery is not connected yet. Save privately to your account for now.";
+      if (id === "garden") return "The Garden is closed for now. Save privately to your account for now.";
+      if (id === "memory") return "Export is not connected yet. Save privately to your account for now.";
+    }
+    
+    // Default/Signed-out guidance
+    const d = destinations.find(dest => dest.id === id);
+    return d?.guidance || "";
+  };
+
   const markEdited = () => {
     setHasEdited(true);
     setClearNeedsConfirm(false);
@@ -507,7 +520,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
               choose where this might belong
             </p>
             <p className="font-cute text-[var(--lg-cocoa)]/70" style={{ fontSize: "0.98rem" }}>
-              stored only in this browser when you save
+              {session?.user ? "save to your account, or keep a device copy" : "stored only in this browser when you save"}
             </p>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -537,7 +550,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
           </div>
           <div className="mt-3 flex items-center justify-between gap-4 flex-wrap">
             <p className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem" }}>
-              {selectedDestination.guidance}
+              {getDestinationGuidance(destination)}
             </p>
             {onViewSection && (
               <button
