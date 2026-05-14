@@ -151,9 +151,8 @@ Migration files:
 
 ### Garden Safe Read Surface
 
-- **`public_garden_posts` view** — Only approved, non-deleted posts. Columns: id, body, category, anonymous_seed, created_at.
-- **`public_garden_reaction_counts` view** — Aggregated counts for approved posts. Columns: post_id, reaction_count.
-- **`get_public_garden_posts` RPC** — Preferred read surface. Includes reaction_count. Supports category filter and cursor pagination.
+- **`get_public_garden_posts` RPC** — Canonical safe public read surface. Includes reaction_count. Supports category filter and cursor pagination.
+- The old `public_garden_posts` and `public_garden_reaction_counts` views were dropped in `20260304000000_phase_12_security_advisor_cleanup.sql` to avoid SECURITY DEFINER view warnings.
 
 ### Raw Table Access Rules
 
@@ -190,5 +189,5 @@ Migration files:
 - **Edge Functions:** The service-role key is allowed only inside Supabase Edge Function secrets for delivery jobs, recipient token validation, webhook processing, and recipient opt-out hashing. Never import it into frontend code.
 - **Phase 9 Frontend Usage**: The frontend actively uses the `private_lategrams` and `time_since_counters` tables for signed-in users using the `anon` key. Local data import is strictly explicit. No automatic localStorage migration occurs.
 - **Phase 11 Frontend Usage:** The frontend reads Late Letter sender rows through the anon client and RLS, but it only selects masked recipient email and real status timestamps. Recipient `/letter/:token` pages call `open-letter` and do not query private tables directly.
-- **Phase 12 Garden Backend:** Public Garden reads use safe RPCs (`get_public_garden_posts`) or views (`public_garden_posts`, `public_garden_reaction_counts`). Raw base-table SELECT is revoked from anon/authenticated, including the initial schema's old column-level grants. No `user_id`, `reporter_user_id`, or `anonymous_fingerprint_hash` is exposed through any public surface. The Garden product UI is closed/unavailable.
+- **Phase 12 Garden Backend:** Public Garden reads use the safe RPC `get_public_garden_posts`. Raw base-table SELECT is revoked from anon/authenticated, including the initial schema's old column-level grants. No `user_id`, `reporter_user_id`, or `anonymous_fingerprint_hash` is exposed through any public surface. The Garden product UI is closed/unavailable.
 - **Webhook Events:** `resend_webhook_events` has RLS enabled and no public policies. Webhook payloads must not be exposed through frontend reads.

@@ -10,7 +10,7 @@ The app now has a fully wired authentication foundation using Supabase Auth and 
 
 Late Letters can now be delivered through Resend when the Supabase Edge Function secrets and delivery job are configured. Scheduled letters are sent server-side, receive real Resend message IDs, and open through secure recipient links. Sender status labels are backed by database/provider/page-open state. Recipient email remains masked in the saved-letter UI after saving.
 
-The Garden backend is ready. Authenticated users can submit Garden posts (which start as pending moderation). Approved posts can be read through safe RPCs/views that do not expose user identity. "Felt this" reactions and reports are real backend surfaces. The Garden product UI remains closed/unavailable; the app may show a closed Garden placeholder, but no public Garden browsing, posting, reactions, or reporting are visible in the product until Phase 13 safety and moderation work is complete.
+The Garden backend is ready. Authenticated users can submit Garden posts (which start as pending moderation). Approved posts can be read through the safe `get_public_garden_posts` RPC that does not expose user identity. "Felt this" reactions and reports are real backend surfaces. The Garden product UI remains closed/unavailable; the app may show a closed Garden placeholder, but no public Garden browsing, posting, reactions, or reporting are visible in the product until Phase 13 safety and moderation work is complete.
 
 Memory Cards are not connected yet; no Memory Card generation, export, sharing, or cloud sync is active. Migrations live under `supabase/migrations`. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
 
@@ -45,7 +45,7 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 - Recipient opt-out hashing and send-time opt-out checks.
 - Recipient email masking in saved Late Letter UI.
 - Late Letter cancellation before sending.
-- Garden backend RPCs/views for safe approved-post reads, pending submissions, reactions, and reports.
+- Garden backend RPCs for safe approved-post reads, pending submissions, reactions, and reports.
 - Local browser/device saving for signed-out users.
 - Explicit local-to-account import.
 - Account/device archive separation.
@@ -163,8 +163,9 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 ### Phase 12: Garden Backend V1
 - [x] Created Phase 12 migration (`supabase/migrations/20260301000000_phase_12_garden_backend.sql`).
 - [x] Added Phase 12 cleanup migration (`supabase/migrations/20260302000000_phase_12_garden_backend_cleanup.sql`) to explicitly revoke old column-level raw table grants.
+- [x] Dropped old public Garden views to clear Security Advisor SECURITY DEFINER view errors.
 - [x] Hardened raw Garden table access — revoked direct SELECT from anon/authenticated on base tables.
-- [x] Recreated safe public views with `security_barrier`.
+- [x] Uses `get_public_garden_posts` as the safe public read surface; old public Garden views were dropped.
 - [x] Built `get_public_garden_posts` RPC for safe approved-post reads with category filter and pagination.
 - [x] Built `submit_garden_post` RPC — posts always start pending, no auto-approval.
 - [x] Built `get_my_garden_submissions` RPC for own submission tracking.

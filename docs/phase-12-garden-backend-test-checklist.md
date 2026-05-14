@@ -4,6 +4,7 @@ This checklist documents the security invariants that must hold for the Garden b
 
 - `supabase/migrations/20260301000000_phase_12_garden_backend.sql`
 - `supabase/migrations/20260302000000_phase_12_garden_backend_cleanup.sql`
+- `supabase/migrations/20260304000000_phase_12_security_advisor_cleanup.sql`
 
 ## Access Control Tests
 
@@ -165,14 +166,32 @@ ORDER BY grantee, table_name, column_name;
 ```
 
 ### Safe public read surface remains granted
-```sql
-SELECT has_function_privilege(
-  'anon',
-  'public.get_public_garden_posts(text, int, timestamptz)',
-  'EXECUTE'
-) AS anon_can_execute_public_posts_rpc;
 
-SELECT has_table_privilege('anon', 'public.public_garden_posts', 'SELECT') AS anon_can_select_safe_posts_view;
-SELECT has_table_privilege('anon', 'public.public_garden_reaction_counts', 'SELECT') AS anon_can_select_safe_reaction_counts_view;
--- Expected: true for all three if the safe views are intentionally kept.
-```
+Check that anon can execute only the safe public Garden read RPC:
+
+    SELECT has_function_privilege(anon, public.get_public_garden_posts(text, int, timestamptz), EXECUTE) AS anon_can_execute_public_posts_rpc;
+
+Expected: true.
+
+### Old Garden views are dropped
+
+Check that Security Advisor flagged views no longer exist:
+
+    SELECT table_name
+    FROM information_schema.views
+    WHERE table_schema = public
+      AND table_name IN (public_garden_posts, public_garden_reaction_counts)
+    ORDER BY table_name;
+
+Expected: 0 rows.
+
+### Anon can only execute the public read RPC
+
+Check anon function privileges for Garden RPCs:
+
+    anon_can_read_public_posts should be true
+    anon_can_submit should be false
+    anon_can_get_my_submissions should be false
+    anon_can_toggle_reaction should be false
+    anon_can_report should be false
+    anon_can_get_reaction_state should be false

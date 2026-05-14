@@ -7,7 +7,7 @@ Phase 12 builds the real backend infrastructure for The Garden — Latergram's a
 After this phase:
 - Garden backend exists and is real.
 - Authenticated users can submit Garden posts into pending moderation state.
-- Approved posts can be read through safe public RPCs/views.
+- Approved posts can be read through the safe public RPC.
 - "Felt this" reactions work with duplicate prevention.
 - Reports can be created safely.
 - Category filtering is real.
@@ -19,11 +19,13 @@ After this phase:
 
 **Cleanup file:** `supabase/migrations/20260302000000_phase_12_garden_backend_cleanup.sql`
 
+**Security Advisor cleanup file:** `supabase/migrations/20260304000000_phase_12_security_advisor_cleanup.sql`
+
 ### What the migration does:
 
 1. **Hardens raw table access** — Drops broad SELECT policies on `garden_posts` and `garden_reactions`. Revokes direct SELECT grants from anon/authenticated on base tables. Public reads must go through safe RPCs or views.
 
-2. **Recreates safe views** — `public_garden_posts` and `public_garden_reaction_counts` are recreated with `security_barrier = true` to prevent information leakage.
+2. **Uses RPC-only public reads** — `get_public_garden_posts` is the canonical safe public read surface. The older public Garden views were dropped in `20260304000000_phase_12_security_advisor_cleanup.sql` to avoid SECURITY DEFINER view warnings.
 
 3. **Creates RPCs:**
    - `get_public_garden_posts(p_category, p_limit, p_before)` — Safe public read
@@ -39,7 +41,7 @@ The cleanup migration explicitly revokes the old column-level grants from the in
 - `garden_posts`: `id`, `body`, `category`, `anonymous_seed`, `created_at`, `updated_at`, `moderation_state`, `deleted_at`
 - `garden_reactions`: `post_id`
 
-It also repeats broad raw table revokes, drops the old broad public raw SELECT policies idempotently, and preserves grants for the safe views/RPC.
+It also repeats broad raw table revokes and drops the old broad public raw SELECT policies idempotently. The Security Advisor cleanup migration drops the old Garden views and keeps the safe public read RPC.
 
 ## Backend APIs / RPCs
 
@@ -162,10 +164,10 @@ It also repeats broad raw table revokes, drops the old broad public raw SELECT p
 
 ## Anonymity Guarantees
 
-- No public RPC or view returns `user_id`
-- No public RPC or view returns `reporter_user_id`
-- No public RPC or view returns `anonymous_fingerprint_hash`
-- No public RPC or view returns `rejected_at`, `deleted_at`, or moderation reviewer data
+- No public RPC returns `user_id`
+- No public RPC returns `reporter_user_id`
+- No public RPC returns `anonymous_fingerprint_hash`
+- No public RPC returns `rejected_at`, `deleted_at`, or moderation reviewer data
 - `anonymous_seed` is a random value generated per post, not derived from user identity
 - Reaction toggle returns only count and boolean state, never user lists
 
@@ -267,7 +269,7 @@ All functions:
 - [ ] Direct SELECT on garden_reactions from anon client returns nothing (revoked)
 - [ ] garden_reports has no public SELECT policy
 - [ ] Normal users cannot UPDATE moderation_state to 'approved'
-- [ ] Safe views return only approved posts with safe columns
+- [ ] `get_public_garden_posts` returns only approved posts with safe columns
 
 ## Build Result
 

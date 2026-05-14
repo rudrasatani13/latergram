@@ -38,9 +38,9 @@ There is **no public read or write access** to these tables.
 
 To support public read capabilities safely in the future without leaking PII:
 - **`garden_posts`**: Authenticated users can insert posts, but must insert them as `pending` moderation state. Users can delete or edit their own posts if they are pending. Normal users cannot approve, reject, or remove posts. Public `SELECT` is restricted to approved posts via RLS and column-level grants.
-- **Public View (`public_garden_posts`)**: A `SECURITY INVOKER` view exposes only approved posts, excluding the underlying `user_id` and other sensitive columns.
+- **Historical Garden read surface**: Phase 8 originally prepared a `public_garden_posts` view. Phase 12 replaced public Garden reads with the safe `get_public_garden_posts` RPC and later dropped the old view to clear Security Advisor warnings.
 - **`garden_reactions`**: Reactions can be added by authenticated users only if the post is approved. Public `SELECT` is restricted via RLS and column-level grants.
-- **Public View (`public_garden_reaction_counts`)**: A `SECURITY INVOKER` view exposes aggregated reaction counts safely.
+- **Historical Garden reaction-count surface**: Phase 8 originally prepared a `public_garden_reaction_counts` view. Phase 12 now returns reaction counts through safe Garden RPCs and dropped the old view.
 - **`garden_reports`**: Users can create reports, but no public read policy is available. Only moderation/admin access will be allowed to view these.
 
 ### Safety and Compliance
@@ -53,9 +53,9 @@ To support public read capabilities safely in the future without leaking PII:
 
 To ensure zero-trust safety and prevent accidental data leaks (like `user_id` or anonymous fingerprints), the public access policies for the Garden have been tightened:
 - **Restricted Base-Table Access:** Public `SELECT` access to `garden_posts` and `garden_reactions` is strictly controlled via Row Level Security (RLS) and PostgreSQL column-level grants. The public can only see approved rows and non-sensitive columns.
-- **Security Invoker Views:** Public reads happen through `SECURITY INVOKER` views (`public_garden_posts` and `public_garden_reaction_counts`). These views respect the caller's RLS policies and only expose permitted columns, following modern security best practices and avoiding `SECURITY DEFINER` risks.
+- **Security Invoker Views:** Phase 8 originally prepared `SECURITY INVOKER` Garden views. Phase 12 replaced the public Garden read surface with the `get_public_garden_posts` RPC and later dropped the old Garden views to clear Security Advisor SECURITY DEFINER view warnings.
 - **Function Search Path Security:** Database functions (like `update_updated_at_column`) are defined with a pinned `search_path = ''` to prevent search path hijacking and ensure predictable resolution of objects (e.g., using `pg_catalog.now()` instead of `NOW()`).
-- **Strict Reaction Policies:** Reactions can only be added to posts that are already approved and not deleted. Reaction counts are aggregated safely in the `public_garden_reaction_counts` view.
+- **Strict Reaction Policies:** Reactions can only be added to posts that are already approved and not deleted. Reaction counts are returned through the safe `get_public_garden_posts` and reaction-state RPCs.
 - **Private Reports:** Garden reports remain strictly private, with no public read access. Admin/moderation access will be implemented in later phases.
 - **Frontend Remains Local:** No frontend behaviors were altered. The Garden remains intentionally disconnected and not live. No account-backed storage has been added.
 
