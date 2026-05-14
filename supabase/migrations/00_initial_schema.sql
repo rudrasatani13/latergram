@@ -93,14 +93,16 @@ CREATE TABLE IF NOT EXISTS garden_posts (
 CREATE TRIGGER update_garden_posts_updated_at BEFORE UPDATE ON garden_posts FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Safe public view for Garden Posts (excluding user_id and sensitive fields)
--- By default, views run with the privileges of the creator (bypassing RLS),
--- so this safely exposes only approved posts to the public without base-table access.
-CREATE OR REPLACE VIEW public_garden_posts AS
+-- This view uses security_invoker = true to respect RLS and follow security best practices.
+CREATE OR REPLACE VIEW public_garden_posts 
+WITH (security_invoker = true)
+AS
 SELECT id, body, category, anonymous_seed, created_at, updated_at
 FROM garden_posts
 WHERE moderation_state = 'approved' AND deleted_at IS NULL;
 
 GRANT SELECT ON public_garden_posts TO anon, authenticated;
+GRANT SELECT (id, body, category, anonymous_seed, created_at, updated_at, moderation_state, deleted_at) ON garden_posts TO anon, authenticated;
 
 -- 6. Garden Reactions
 CREATE TABLE IF NOT EXISTS garden_reactions (
@@ -113,7 +115,10 @@ CREATE TABLE IF NOT EXISTS garden_reactions (
 );
 
 -- Safe public view for Garden Reaction Counts
-CREATE OR REPLACE VIEW public_garden_reaction_counts AS
+-- This view uses security_invoker = true to respect RLS and follow security best practices.
+CREATE OR REPLACE VIEW public_garden_reaction_counts 
+WITH (security_invoker = true)
+AS
 SELECT post_id, count(*) as reaction_count
 FROM garden_reactions gr
 JOIN garden_posts gp ON gr.post_id = gp.id
@@ -121,6 +126,7 @@ WHERE gp.moderation_state = 'approved' AND gp.deleted_at IS NULL
 GROUP BY post_id;
 
 GRANT SELECT ON public_garden_reaction_counts TO anon, authenticated;
+GRANT SELECT (post_id) ON garden_reactions TO anon, authenticated;
 
 -- 7. Garden Reports
 CREATE TABLE IF NOT EXISTS garden_reports (
@@ -210,7 +216,7 @@ CREATE POLICY "Users can delete own late_letters" ON late_letters FOR DELETE USI
 
 -- Garden Posts: 
 CREATE POLICY "Authenticated users can insert pending garden posts" ON garden_posts FOR INSERT WITH CHECK (auth.role() = 'authenticated' AND moderation_state = 'pending' AND auth.uid() = user_id);
--- Note: Public read is handled by public_garden_posts view, so no public SELECT policy is created for garden_posts base table.
+CREATE POLICY "Anyone can view approved garden posts" ON garden_posts FOR SELECT USING (moderation_state = 'approved' AND deleted_at IS NULL);
 CREATE POLICY "Users can update own garden posts if not approved" ON garden_posts FOR UPDATE USING (auth.uid() = user_id AND moderation_state = 'pending');
 CREATE POLICY "Users can delete own garden posts" ON garden_posts FOR DELETE USING (auth.uid() = user_id);
 
@@ -224,7 +230,14 @@ CREATE POLICY "Users can insert reactions on approved posts" ON garden_reactions
         AND deleted_at IS NULL
     )
 );
--- Note: Public read is handled by public_garden_reaction_counts view, so no public SELECT policy is created for garden_reactions base table.
+CREATE POLICY "Anyone can view reactions for approved posts" ON garden_reactions FOR SELECT USING (
+    EXISTS (
+        SELECT 1 FROM garden_posts 
+        WHERE id = post_id 
+        AND moderation_state = 'approved' 
+        AND deleted_at IS NULL
+    )
+);
 CREATE POLICY "Users can delete own reactions" ON garden_reactions FOR DELETE USING (auth.uid() = user_id);
 
 -- Garden Reports: Users can insert reports, cannot read all reports
