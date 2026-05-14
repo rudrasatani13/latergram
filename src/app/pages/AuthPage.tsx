@@ -1,11 +1,12 @@
 import { useState } from "react";
+import type { FormEvent } from "react";
 import { useNavigate } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { Header } from "../components/Header";
 import { Grain } from "../components/Grain";
 import { BackgroundPetals } from "../components/BackgroundPetals";
-import { FeatureUnavailableNote } from "../components/shared/FeatureUnavailableNote";
-import { SoftField } from "../components/shared/SoftField";
+import { FeatureUnavailableNote } from "../components/shared";
+import { SoftField } from "../components/shared";
 import { useAuth } from "../auth/useAuth";
 
 const easeSoft = [0.22, 1, 0.36, 1] as const;
@@ -42,7 +43,7 @@ export function AuthPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!authAvailable) return;
     
