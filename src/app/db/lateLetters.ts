@@ -12,6 +12,11 @@ export type LateLetterRecord = Pick<
   | "subject"
   | "scheduled_for"
   | "status"
+  | "delivery_attempted_at"
+  | "sent_at"
+  | "opened_at"
+  | "delivered_at"
+  | "bounced_at"
   | "failed_at"
   | "cancelled_at"
   | "failure_reason"
@@ -39,6 +44,11 @@ const lateLetterSelectColumns = [
   "subject",
   "scheduled_for",
   "status",
+  "delivery_attempted_at",
+  "sent_at",
+  "opened_at",
+  "delivered_at",
+  "bounced_at",
   "failed_at",
   "cancelled_at",
   "failure_reason",
@@ -96,7 +106,7 @@ export async function listLateLetters(): DataResult<LateLetterRecord[]> {
       return { data: [], error: "Your scheduled letters could not load right now." };
     }
 
-    return { data: (data || []) as LateLetterRecord[], error: null };
+    return { data: (data || []) as unknown as LateLetterRecord[], error: null };
   } catch (error) {
     safeLog("listLateLetters exception:", error);
     return { data: [], error: "Could not connect to your letters right now." };
@@ -133,7 +143,7 @@ export async function createLateLetter(input: CreateLateLetterInput): DataResult
       return { data: null, error: "Could not save this Late Letter. Your words are still here." };
     }
 
-    return { data: data as LateLetterRecord, error: null };
+    return { data: data as unknown as LateLetterRecord, error: null };
   } catch (error) {
     safeLog("createLateLetter exception:", error);
     return { data: null, error: "Could not connect to your account right now." };
@@ -171,7 +181,7 @@ export async function cancelLateLetter(id: string): DataResult<LateLetterRecord 
       return { data: null, error: "Only scheduled Late Letters can be cancelled here." };
     }
 
-    return { data: data as LateLetterRecord, error: null };
+    return { data: data as unknown as LateLetterRecord, error: null };
   } catch (error) {
     safeLog("cancelLateLetter exception:", error);
     return { data: null, error: "Could not connect to your account right now." };

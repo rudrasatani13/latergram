@@ -93,32 +93,62 @@ function letterTitle(letter: LateLetterRecord) {
 }
 
 function statusLabel(status: LateLetterRecord["status"]) {
-  if (status === "scheduled") {
-    return "scheduled record";
-  }
-
-  return status;
-}
-
-function statusNote(status: LateLetterRecord["status"]) {
   switch (status) {
     case "scheduled":
-      return "Delivery is not connected yet.";
-    case "cancelled":
-      return "Cancelled. This letter will not be delivered.";
-    case "draft":
-      return "Draft record.";
-    case "failed":
-      return "Marked failed in the database.";
+      return "Scheduled";
     case "sending":
-      return "Marked sending in the database.";
+      return "Sending...";
     case "sent":
-      return "Marked sent in the database.";
+      return "Sent";
     case "opened":
-      return "Marked opened in the database.";
+      return "Opened";
+    case "failed":
+      return "Failed";
+    case "cancelled":
+      return "Cancelled";
+    case "draft":
+      return "Draft";
+    default:
+      return status;
+  }
+}
+
+function statusNote(letter: LateLetterRecord) {
+  switch (letter.status) {
+    case "scheduled":
+      return "Cancel before it is sent.";
+    case "cancelled":
+      return "Cancelled.";
+    case "draft":
+      return "Draft.";
+    case "failed":
+      return safeFailureNote(letter.failure_reason);
+    case "sending":
+      return "Sending...";
+    case "sent":
+      return "This letter was sent.";
+    case "opened":
+      return "This letter was opened.";
     default:
       return "Stored in your account.";
   }
+}
+
+function safeFailureNote(reason: string | null) {
+  const safeReasons = new Set([
+    "Recipient opted out.",
+    "Recipient email bounced.",
+    "Recipient email could not be used.",
+    "Delivery safety check failed.",
+    "Delivery provider rejected the sender address.",
+    "Delivery provider rejected the email request.",
+    "Delivery provider rate limit or quota stopped this send.",
+    "Delivery provider had a temporary failure.",
+    "Delivery provider could not send this letter.",
+    "Delivery provider reported a send failure.",
+  ]);
+
+  return reason && safeReasons.has(reason) ? reason : "Delivery failed.";
 }
 
 function canCancel(status: LateLetterRecord["status"]) {
@@ -212,7 +242,7 @@ export function LateLettersView() {
     setComposing(false);
     setSelectedLetterId(savedLetter.id);
     setPendingCancelId(null);
-    setStatus("Saved as a scheduled Late Letter. Delivery is not connected yet.");
+    setStatus("Scheduled. Cancel before it is sent.");
   };
 
   const cancelLetter = async (letter: LateLetterRecord) => {
@@ -235,7 +265,7 @@ export function LateLettersView() {
     }
 
     setPendingCancelId(null);
-    setStatus("Cancelled. This letter will not be delivered.");
+    setStatus("Cancelled.");
   };
 
   const signedIn = Boolean(session?.user);
@@ -284,7 +314,7 @@ export function LateLettersView() {
         </div>
       ) : !signedIn ? (
         <div className="px-7 py-6 space-y-4 min-h-[280px]">
-          <EmptyState message="Sign in to schedule a Late Letter." note="Delivery is not connected yet." />
+          <EmptyState message="Sign in to schedule a Late Letter." note="Recipient email is hidden after saving." />
           <div className="text-center">
             <a
               href="/auth"
@@ -300,7 +330,7 @@ export function LateLettersView() {
         <form onSubmit={saveLetter} className="px-7 py-6 space-y-4 min-h-[280px]">
           <div className="bg-[var(--lg-cream)] border border-dashed border-[var(--lg-rose-soft)] rounded-2xl px-4 py-3">
             <p className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem" }}>
-              Recipient email is stored for future delivery and hidden after saving. Delivery is not connected yet. You can cancel this record before delivery is connected.
+              Recipient email is hidden after saving. Cancel before it is sent.
             </p>
           </div>
 
@@ -399,7 +429,7 @@ export function LateLettersView() {
         <div className="px-7 py-6 space-y-4 min-h-[280px]">
           <div className="bg-[var(--lg-cream)] border border-dashed border-[var(--lg-rose-soft)] rounded-2xl px-4 py-3">
             <p className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem" }}>
-              Recipient email is stored for future delivery and hidden after saving. Delivery is not connected yet. You can cancel this record before delivery is connected.
+              Recipient email is hidden after saving. Delivery uses the configured server job.
             </p>
           </div>
 
@@ -422,7 +452,7 @@ export function LateLettersView() {
           {lettersLoading ? (
             <EmptyState message="Loading your Late Letters." note="Stored in your account." />
           ) : letters.length === 0 ? (
-            <EmptyState message="No scheduled Late Letters yet." note="Write one to store a future-delivery record." />
+            <EmptyState message="No scheduled Late Letters yet." note="Write one to schedule a future email." />
           ) : (
             <div className="space-y-3">
               {letters.map((letter) => (
@@ -458,7 +488,7 @@ export function LateLettersView() {
 
       <div className="px-7 pt-2 pb-6 flex items-center justify-between border-t border-dashed border-[var(--lg-border)]">
         <span className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1.05rem" }}>
-          {signedIn ? "Stored in your account. Delivery is not connected yet." : "Late Letters need a signed-in account."}
+          {signedIn ? "Stored in your account. Delivery uses the configured server job." : "Late Letters need a signed-in account."}
         </span>
         <img src={decor.heartLockKey} alt="" aria-hidden="true" className="w-7 h-7 object-contain opacity-80" />
       </div>
@@ -509,7 +539,7 @@ function LetterCard({
         <Meta label="created" value={formatShortDate(letter.created_at)} />
       </div>
       <p className="mt-2 font-cute text-[var(--lg-cocoa)]/70" style={{ fontSize: "0.95rem" }}>
-        {statusNote(letter.status)}
+        {statusNote(letter)}
       </p>
 
       <div className="mt-4 flex items-center gap-4 flex-wrap">
@@ -528,7 +558,7 @@ function LetterCard({
             className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
             style={{ fontSize: "1rem" }}
           >
-            {pendingCancel ? "confirm cancel" : "cancel before delivery"}
+            {pendingCancel ? "confirm cancel" : "cancel before it is sent"}
           </button>
         )}
         {pendingCancel && (
@@ -573,10 +603,24 @@ function LetterDetail({ letter }: { letter: LateLetterRecord }) {
       <p className="mt-4 whitespace-pre-wrap font-cute text-[var(--lg-ink)]" style={{ fontSize: "1.18rem", lineHeight: "30px" }}>
         {letter.body}
       </p>
-      <p className="mt-4 font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem" }}>
-        Delivery is not connected yet.
-      </p>
+      <LetterStatusDetails letter={letter} />
     </section>
+  );
+}
+
+function LetterStatusDetails({ letter }: { letter: LateLetterRecord }) {
+  return (
+    <div className="mt-4 space-y-2">
+      <p className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem" }}>
+        {statusNote(letter)}
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {letter.sent_at && <Meta label="sent" value={formatDateTime(letter.sent_at)} />}
+        {letter.opened_at && <Meta label="opened" value={formatDateTime(letter.opened_at)} />}
+        {letter.failed_at && <Meta label="failed" value={formatDateTime(letter.failed_at)} />}
+        {letter.cancelled_at && <Meta label="cancelled" value={formatDateTime(letter.cancelled_at)} />}
+      </div>
+    </div>
   );
 }
 

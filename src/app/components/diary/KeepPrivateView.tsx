@@ -43,7 +43,7 @@ const destinationLabels: Record<LocalDestination, string> = {
 
 const destinationNotes: Record<LocalDestination, string> = {
   private: "Saved on this device.",
-  later: "Written as a late letter, saved privately on this device. Delivery is not connected yet.",
+  later: "Written as a late letter, saved privately on this device. Use Late Letters to schedule delivery.",
   garden: "Written for the Garden, saved privately on this device.",
   memory: "Written for a Memory Card, saved privately on this device. Card export is not connected yet.",
 };
@@ -958,7 +958,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
       return (
         <EmptyState
           message="No late letters are connected here yet."
-          note="Delivery is not connected yet."
+          note="Scheduled Late Letters live in the Late Letters space."
         />
       );
     }

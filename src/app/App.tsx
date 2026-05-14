@@ -4,6 +4,7 @@ import { LandingPage } from "./pages/LandingPage";
 import { AuthPage } from "./pages/AuthPage";
 import { HomePage } from "./pages/HomePage";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { RecipientLetterPage } from "./pages/RecipientLetterPage";
 import { useAuth } from "./auth/useAuth";
 
 const easeSoft = [0.22, 1, 0.36, 1] as const;
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/app" element={<HomePage />} />
+          <Route path="/letter/:token" element={<RecipientLetterPage />} />
           <Route path="/404" element={<NotFoundPage />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
         </Routes>

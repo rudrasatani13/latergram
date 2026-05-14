@@ -17,7 +17,7 @@ const reveal = {
 const fates = [
   { title: "Write", desc: "open with the feeling, not the form.", glyph: "✿" },
   { title: "Keep Private", desc: "stay close to yourself, only.", glyph: "❀" },
-  { title: "Late Letters", desc: "shape a letter while delivery stays unavailable.", glyph: "❁" },
+  { title: "Late Letters", desc: "schedule words to arrive later.", glyph: "❁" },
   { title: "The Garden", desc: "write what might belong there when it opens.", glyph: "✾" },
   { title: "Time Since", desc: "a soft counter for what mattered.", glyph: "❃" },
   { title: "Memory Cards", desc: "turn a message into a tiny keepsake.", glyph: "❀" },

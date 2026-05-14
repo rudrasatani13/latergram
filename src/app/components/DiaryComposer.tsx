@@ -46,7 +46,7 @@ const destinations: Array<{
   {
     id: "later",
     label: "late letter",
-    guidance: "Delivery is not connected yet. Save locally or copy before leaving.",
+    guidance: "Use Late Letters to schedule delivery. Save locally or copy before leaving.",
     viewLabel: "view Letter space",
   },
   {
@@ -91,7 +91,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
   const getDestinationGuidance = (id: LocalDestination) => {
     if (session?.user) {
       if (id === "private") return "Save privately to your account, or keep a device copy.";
-      if (id === "later") return "Delivery is not connected yet. Save privately to your account for now.";
+      if (id === "later") return "Use Late Letters to schedule delivery. Save privately to your account for now.";
       if (id === "garden") return "The Garden is closed for now. Save privately to your account for now.";
       if (id === "memory") return "Export is not connected yet. Save privately to your account for now.";
     }
@@ -256,7 +256,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
     const noteText = destination === "private" 
       ? "Saved to your account as private writing."
       : destination === "later"
-      ? "Written as a future letter, saved privately to your account. Delivery is not connected yet."
+      ? "Written as a future letter, saved privately to your account. Use Late Letters to schedule delivery."
       : destination === "garden"
       ? "Written for the Garden, saved privately to your account."
       : "Written for a memory card, saved privately to your account. Export is not connected yet.";

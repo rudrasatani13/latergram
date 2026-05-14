@@ -44,6 +44,10 @@ export interface DbLateLetter {
   delivery_provider: string | null;
   delivery_provider_message_id: string | null;
   secure_open_token_hash: string | null;
+  delivery_attempted_at: string | null;
+  delivered_at: string | null;
+  bounced_at: string | null;
+  provider_event_last_seen_at: string | null;
   opened_at: string | null;
   sent_at: string | null;
   failed_at: string | null;
@@ -121,6 +125,16 @@ export interface DbRecipientOptOut {
   recipient_email_hash: string;
   reason: string | null;
   created_at: string;
+}
+
+export interface DbResendWebhookEvent {
+  id: string; // UUID
+  svix_id: string;
+  event_type: string;
+  resend_email_id: string | null;
+  late_letter_id: string | null; // UUID
+  received_at: string;
+  payload: Record<string, unknown> | null;
 }
 
 export interface DbSafetyEvent {

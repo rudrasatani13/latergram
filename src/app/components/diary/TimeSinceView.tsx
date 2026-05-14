@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { DiaryFrame } from "./DiaryFrame";
 import { blooms, decor } from "../BrandAssets";
 import { EmptyState } from "../shared/EmptyState";

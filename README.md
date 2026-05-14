@@ -4,11 +4,11 @@ Some words arrive late. Latergram gives them a place.
 
 ## Current Status
 
-Phase 10 Late Letters Scheduling V1 complete.
+Phase 11 Real Letter Delivery complete.
 
 The app now has a fully wired authentication foundation using Supabase Auth and a true backend persistence model for "Keep Private", "Time Since" counters, and scheduled Late Letter records. Real accounts are strictly segregated from local writing. Signed-in users save private Lategrams and Time Since counters to their account archive, while signed-out users continue to save supported local records to their local device. No automatic migration occurs; local saves can be explicitly imported by the user.
 
-Late Letter scheduling records are real for signed-in users, but email delivery is not connected yet. Recipient email is stored for future delivery and masked in the saved-letter UI after saving. The Garden and Memory Cards are not connected yet, and delivery/cloud sync for those features is not active. Migrations live under `supabase/migrations`. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
+Late Letters can now be delivered through Resend when the Supabase Edge Function secrets and delivery job are configured. Scheduled letters are sent server-side, receive real Resend message IDs, and open through secure recipient links. Sender status labels are backed by database/provider/page-open state. Recipient email remains masked in the saved-letter UI after saving. The Garden and Memory Cards are not connected yet, and delivery/cloud sync for those features is not active. Migrations live under `supabase/migrations`. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
 
 ## Development Rule
 
@@ -35,8 +35,12 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 - Account-backed private Lategrams for signed-in users.
 - Account-backed Time Since counters for signed-in users.
 - Account-backed Late Letter scheduling records for signed-in users.
+- Resend-backed Late Letter delivery from Supabase Edge Functions when server secrets and cron are configured.
+- Secure recipient open links at `/letter/:token`.
+- Real sender statuses for scheduled, sending, sent, opened, failed, and cancelled Late Letters.
+- Recipient opt-out hashing and send-time opt-out checks.
 - Recipient email masking in saved Late Letter UI.
-- Late Letter cancellation before delivery is connected.
+- Late Letter cancellation before sending.
 - Local browser/device saving for signed-out users.
 - Explicit local-to-account import.
 - Account/device archive separation.
@@ -57,10 +61,10 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 
 ## What Is Not Live Yet
 
-- Late Letter email delivery, secure open links, or recipient tracking.
 - Public Garden posting, reading, reactions, reporting, or moderation frontend.
 - Memory Card generation, download, sharing, or export.
 - Received letters.
+- Guaranteed delivery or guaranteed read receipts.
 - Analytics, payments, AI, or public launch infrastructure.
 
 ## Completed Phases
@@ -136,9 +140,19 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 - [x] Added typed database access for `late_letters`.
 - [x] Let signed-in users create real scheduled Late Letter records.
 - [x] Store recipient email for future delivery while showing only masked email after saving.
-- [x] Show saved Late Letters from the account database with honest delivery-not-connected copy.
+- [x] Show saved Late Letters from the account database without fake sent/opened states.
 - [x] Allow scheduled/draft Late Letter records to be cancelled with a two-step confirmation.
 - [x] Confirmed no email provider, delivery job, secure open link, recipient page, or tracking flow was added.
+
+### Phase 11: Real Letter Delivery
+- [x] Installed Resend SDK and kept Resend usage server-side only.
+- [x] Added Supabase Edge Functions for due-letter sending, secure recipient opening, Resend webhooks, and recipient opt-out.
+- [x] Added server-only env template under `supabase/functions/.env.example`.
+- [x] Added `resend_webhook_events` for webhook dedupe and delivery event audit.
+- [x] Added secure token hashing for recipient open links; raw tokens are only emailed.
+- [x] Added `/letter/:token` recipient page with no account requirement.
+- [x] Updated sender Late Letter UI to show only real database-backed statuses.
+- [x] Preserved cancellation before send and masked recipient email display.
 
 ## Run Locally
 

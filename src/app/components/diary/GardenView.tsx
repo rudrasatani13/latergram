@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { motion } from "motion/react";
 import { DiaryFrame } from "./DiaryFrame";
 import { decor } from "../BrandAssets";
 import { PillChip } from "../shared/PillChip";

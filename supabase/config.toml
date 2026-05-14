@@ -1,0 +1,11 @@
+[functions.send-due-late-letters]
+verify_jwt = false
+
+[functions.resend-webhook]
+verify_jwt = false
+
+[functions.open-letter]
+verify_jwt = false
+
+[functions.recipient-opt-out]
+verify_jwt = false
