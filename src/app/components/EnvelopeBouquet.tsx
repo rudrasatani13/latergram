@@ -43,7 +43,7 @@ export function EnvelopeBouquet() {
               A letter<br />for later
             </p>
             <p className="mt-3 text-[var(--lg-cocoa)] font-handwritten" style={{ fontSize: "1rem", lineHeight: 1.4 }}>
-              A quiet note that won't<br />be sent until it's gentle to.
+              A quiet note kept here<br />until it has a real path.
             </p>
           </div>
           <div className="mt-7 border-t border-dashed border-[var(--lg-border)] pt-3">

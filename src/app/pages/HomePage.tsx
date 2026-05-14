@@ -41,14 +41,14 @@ const categories = [
 const quickAreas = [
   {
     title: "The Garden",
-    desc: "a quiet anonymous space for planted feelings.",
+    desc: "a quiet anonymous space that stays closed until safety tools are ready.",
     cta: "view Garden space",
     glyph: "✾",
     target: "garden" as Section,
   },
   {
     title: "Late Letters",
-    desc: "letters that arrive on a date that feels right.",
+    desc: "letters can be shaped here while delivery stays unavailable.",
     cta: "view letters space",
     glyph: "❁",
     target: "later" as Section,
@@ -138,8 +138,8 @@ export function HomePage() {
                 className="text-[var(--lg-cocoa)] leading-[1.8] max-w-xl mx-auto"
                 style={{ fontSize: "1.02rem" }}
               >
-                open with the feeling. choose where it should belong. your words stay here only while
-                you keep this page open.
+                open with the feeling. choose where it should belong. saved words stay only in this
+                browser for now.
               </p>
             </motion.div>
 
@@ -307,8 +307,8 @@ export function HomePage() {
                 className="mt-5 text-[var(--lg-cocoa)] leading-[1.7]"
                 style={{ fontSize: "1rem" }}
               >
-                a place for the things you choose to keep. saving is not connected yet — copy
-                anything important before leaving.
+                a place for the things you choose to keep. saved writing stays on this device only.
+                clearing browser data may remove it.
               </p>
               <button
                 onClick={() => setActive("private")}

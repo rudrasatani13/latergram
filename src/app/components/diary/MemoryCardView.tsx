@@ -180,22 +180,22 @@ export function MemoryCardView() {
 
       <div className="px-7 pt-2 pb-6 flex items-center justify-between border-t border-dashed border-[var(--lg-border)]">
         <span className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1.05rem" }}>
-          export is not connected yet
+          card output is not connected yet
         </span>
         <button
           onClick={() => setShowUnavailable(true)}
           className="inline-flex items-center gap-2 bg-[var(--lg-border)] text-[var(--lg-cocoa)] py-2.5 px-5 rounded-full cursor-not-allowed opacity-70"
           style={{ fontSize: "0.9rem", fontWeight: 600 }}
           disabled
-          aria-label="Download card — not available yet"
+          aria-label="Card output is not available yet"
         >
           <img src={decor.keepsakeBoxHeart} alt="" aria-hidden="true" className="w-4 h-4 object-contain" />
-          download card
+          not available yet
         </button>
       </div>
 
       <FeatureUnavailableNote
-        message="Download is not connected yet. Memory Cards need a real saved memory first."
+        message="Memory Cards need a real saved memory first."
         visible={showUnavailable}
       />
     </DiaryFrame>

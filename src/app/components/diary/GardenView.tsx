@@ -73,7 +73,7 @@ export function GardenView() {
           className="inline-flex items-center gap-2 text-[var(--lg-cocoa)]/50 py-2.5 px-5"
           style={{ fontSize: "0.9rem", fontWeight: 600 }}
         >
-          plant a feeling
+          Garden closed
         </span>
       </div>
     </DiaryFrame>

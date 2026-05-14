@@ -36,7 +36,7 @@ export function LateLettersView() {
       {!composing ? (
         <div className="px-7 py-6 space-y-3 min-h-[280px]">
           <EmptyState
-            message="No letters are scheduled yet."
+            message="No late letters are connected yet."
             note="Delivery is not connected yet."
           />
         </div>
@@ -90,11 +90,11 @@ export function LateLettersView() {
               style={{ fontSize: "0.95rem", fontWeight: 600 }}
             >
               <img src={decor.envelopeMini} alt="" aria-hidden="true" className="w-4 h-4 object-contain" />
-              schedule letter
+              keep writing here
             </button>
           </div>
           <FeatureUnavailableNote
-            message="Delivery is not connected yet. You can write here, but it will not be sent."
+            message="Delivery is not connected yet. Nothing leaves this page."
             visible={showUnavailable}
           />
         </div>

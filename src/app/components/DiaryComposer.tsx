@@ -2,10 +2,18 @@ import { useRef, useState } from "react";
 import { motion } from "motion/react";
 import { decor } from "./BrandAssets";
 import { FeatureUnavailableNote } from "./shared/FeatureUnavailableNote";
+import {
+  addLocalLategram,
+  createLocalId,
+  deleteLocalDraft,
+  readLocalDraft,
+  writeLocalDraft,
+} from "../storage/localStorage";
+import type { LocalDestination, LocalDraft, LocalLategram } from "../storage/types";
 
 const easeSoft = [0.22, 1, 0.36, 1] as const;
 
-type DestinationId = "private" | "later" | "garden" | "memory";
+type DestinationId = LocalDestination;
 
 interface DiaryComposerProps {
   active: string;
@@ -15,8 +23,8 @@ interface DiaryComposerProps {
 const titles: Record<string, string> = {
   write: "write a Lategram",
   private: "keep it private",
-  garden: "plant in the Garden",
-  later: "send it later",
+  garden: "write for the Garden",
+  later: "shape a late letter",
   time: "mark a Time Since",
   memory: "make a Memory Card",
 };
@@ -30,25 +38,25 @@ const destinations: Array<{
   {
     id: "private",
     label: "keep private",
-    guidance: "Saving is not connected yet. Copy before leaving.",
+    guidance: "Save privately on this device before leaving.",
     viewLabel: "view Keep Private space",
   },
   {
     id: "later",
     label: "late letter",
-    guidance: "Delivery is not connected yet. You can shape the letter here.",
+    guidance: "Delivery is not connected yet. Save locally or copy before leaving.",
     viewLabel: "view Letter space",
   },
   {
     id: "garden",
     label: "garden",
-    guidance: "The Garden is closed for now. You can still write what you would plant.",
+    guidance: "The Garden is closed for now. You can still write what might belong there.",
     viewLabel: "view Garden space",
   },
   {
     id: "memory",
     label: "memory card",
-    guidance: "Cards need saved memories first. You can still shape the words.",
+    guidance: "Cards need saved memories first. Save locally or copy before leaving.",
     viewLabel: "view Card space",
   },
 ];
@@ -65,6 +73,8 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
   const [subject, setSubject] = useState("");
   const [destination, setDestination] = useState<DestinationId>("private");
   const [note, setNote] = useState("");
+  const [saveState, setSaveState] = useState("not saved yet");
+  const [storedDraft, setStoredDraft] = useState<LocalDraft | null>(() => readLocalDraft());
   const [copyFailed, setCopyFailed] = useState(false);
   const [clearNeedsConfirm, setClearNeedsConfirm] = useState(false);
   const [hasEdited, setHasEdited] = useState(false);
@@ -72,11 +82,14 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
 
   const selectedDestination = destinations.find((item) => item.id === destination) ?? destinations[0];
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+  const characterCount = text.trim().length;
 
   const markEdited = () => {
     setHasEdited(true);
     setClearNeedsConfirm(false);
     setCopyFailed(false);
+    setSaveState("not saved yet");
+    setNote("");
   };
 
   const buildCopyText = () => {
@@ -109,7 +122,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
     try {
       await navigator.clipboard.writeText(buildCopyText());
       setCopyFailed(false);
-      setNote("Copied. Your words are still not saved here.");
+      setNote("Copied. Save on this device if you want these words to stay here.");
     } catch {
       setCopyFailed(true);
       setNote("Copy did not work in this browser. Select the words and copy them manually.");
@@ -136,6 +149,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
     setTo("");
     setSubject("");
     setDestination("private");
+    setSaveState("not saved yet");
     setHasEdited(false);
     setClearNeedsConfirm(false);
     setCopyFailed(false);
@@ -145,8 +159,114 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
   const continueShaping = () => {
     setClearNeedsConfirm(false);
     setCopyFailed(false);
-    setNote("Keep shaping. Copy before leaving.");
+    setNote("Keep shaping. Save on this device or save a draft before leaving.");
     textareaRef.current?.focus();
+  };
+
+  const buildLocalLategram = (): LocalLategram | null => {
+    const body = text.trim();
+
+    if (!body) {
+      return null;
+    }
+
+    const now = new Date().toISOString();
+
+    return {
+      id: createLocalId("lategram"),
+      body,
+      to: to.trim() || undefined,
+      subject: subject.trim() || undefined,
+      destination,
+      createdAt: now,
+      updatedAt: now,
+      wordCount,
+      characterCount,
+    };
+  };
+
+  const saveOnDevice = () => {
+    setClearNeedsConfirm(false);
+    setCopyFailed(false);
+
+    const lategram = buildLocalLategram();
+
+    if (!lategram) {
+      setNote("Write a few words first.");
+      return;
+    }
+
+    const result = addLocalLategram(lategram);
+
+    if (!result.ok) {
+      setNote("Could not save in this browser. Copy your words before leaving.");
+      return;
+    }
+
+    setSaveState("saved on this device");
+    setHasEdited(false);
+    setNote("Saved on this device.");
+  };
+
+  const saveDraft = () => {
+    setClearNeedsConfirm(false);
+    setCopyFailed(false);
+
+    if (!text.trim()) {
+      setNote("Write a few words first.");
+      return;
+    }
+
+    const draft: LocalDraft = {
+      body: text,
+      to: to.trim() || undefined,
+      subject: subject.trim() || undefined,
+      destination,
+      updatedAt: new Date().toISOString(),
+    };
+
+    const result = writeLocalDraft(draft);
+
+    if (!result.ok) {
+      setNote("Could not save a draft in this browser. Copy your words before leaving.");
+      return;
+    }
+
+    setStoredDraft(draft);
+    setSaveState("draft saved on this device");
+    setHasEdited(false);
+    setNote("Draft saved on this device.");
+  };
+
+  const restoreDraft = () => {
+    if (!storedDraft) {
+      return;
+    }
+
+    setText(storedDraft.body);
+    setTo(storedDraft.to ?? "");
+    setSubject(storedDraft.subject ?? "");
+    setDestination(storedDraft.destination);
+    setSaveState("draft restored from this device");
+    setHasEdited(true);
+    setClearNeedsConfirm(false);
+    setCopyFailed(false);
+    setNote("Draft restored. Only available in this browser.");
+    textareaRef.current?.focus();
+  };
+
+  const clearDraft = () => {
+    const result = deleteLocalDraft();
+
+    if (!result.ok) {
+      setNote("Could not clear draft in this browser.");
+      return;
+    }
+
+    setStoredDraft(null);
+    setClearNeedsConfirm(false);
+    setCopyFailed(false);
+    setNote("Draft cleared from this device.");
   };
 
   return (
@@ -302,7 +422,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
               className="font-cute text-[var(--lg-cocoa)]"
               style={{ fontSize: "1.05rem" }}
             >
-              with love, <span className="text-[var(--lg-rose)]">not saved yet</span>
+              with love, <span className="text-[var(--lg-rose)]">{saveState}</span>
             </span>
             <div className="flex items-center gap-2 sm:justify-end">
               <span
@@ -344,7 +464,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
               choose where this might belong
             </p>
             <p className="font-cute text-[var(--lg-cocoa)]/70" style={{ fontSize: "0.98rem" }}>
-              written here only while this page stays open
+              stored only in this browser when you save
             </p>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -388,12 +508,45 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
             )}
           </div>
         </div>
+        {storedDraft && (
+          <div className="mt-5 rounded-[22px] border border-dashed border-[var(--lg-border)] bg-[var(--lg-paper)]/55 px-5 py-4">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <p className="font-cute text-[var(--lg-rose)]" style={{ fontSize: "1.08rem" }}>
+                  Draft found on this device.
+                </p>
+                <p className="font-cute text-[var(--lg-cocoa)]/70 mt-1" style={{ fontSize: "0.98rem" }}>
+                  Only available in this browser.
+                </p>
+              </div>
+              <div className="flex items-center gap-4 flex-wrap">
+                <button
+                  type="button"
+                  onClick={restoreDraft}
+                  className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
+                  style={{ fontSize: "1.05rem" }}
+                >
+                  Restore draft
+                </button>
+                <button
+                  type="button"
+                  onClick={clearDraft}
+                  className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
+                  style={{ fontSize: "1.05rem" }}
+                >
+                  Clear draft
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Actions */}
       <div className="mt-8 flex items-center justify-center gap-6 flex-wrap">
         <button
-          onClick={copyWords}
+          type="button"
+          onClick={saveOnDevice}
           className="group inline-flex items-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700"
         >
           <span
@@ -403,11 +556,28 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
               textTransform: "uppercase",
             }}
           >
-            Copy words
+            Save on this device
           </span>
           <span className="block w-6 h-px bg-[var(--lg-cream)] transition-all duration-500 group-hover:w-10" />
         </button>
         <button
+          type="button"
+          onClick={copyWords}
+          className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
+          style={{ fontSize: "1.2rem" }}
+        >
+          Copy words
+        </button>
+        <button
+          type="button"
+          onClick={saveDraft}
+          className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
+          style={{ fontSize: "1.2rem" }}
+        >
+          Save draft
+        </button>
+        <button
+          type="button"
           onClick={clearPage}
           className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
           style={{ fontSize: "1.2rem" }}
@@ -415,6 +585,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
           {clearNeedsConfirm ? "yes, clear page" : "clear page"}
         </button>
         <button
+          type="button"
           onClick={continueShaping}
           className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
           style={{ fontSize: "1.2rem" }}
@@ -424,7 +595,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
       </div>
 
       <FeatureUnavailableNote
-        message={note || "Your words are only here while this page stays open. Copy before leaving."}
+        message={note || "Save on this device before leaving. Clearing browser data may remove saved items."}
         visible={Boolean(note) || hasEdited}
       />
       {copyFailed && (

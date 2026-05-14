@@ -16,8 +16,8 @@ const reveal = {
 const fates = [
   { title: "Write", desc: "open with the feeling, not the form.", glyph: "✿" },
   { title: "Keep Private", desc: "stay close to yourself, only.", glyph: "❀" },
-  { title: "Late Letters", desc: "schedule a letter to arrive on time, late.", glyph: "❁" },
-  { title: "The Garden", desc: "plant feelings, anonymously read others'.", glyph: "✾" },
+  { title: "Late Letters", desc: "shape a letter while delivery stays unavailable.", glyph: "❁" },
+  { title: "The Garden", desc: "write what might belong there when it opens.", glyph: "✾" },
   { title: "Time Since", desc: "a soft counter for what mattered.", glyph: "❃" },
   { title: "Memory Cards", desc: "turn a message into a tiny keepsake.", glyph: "❀" },
 ];
@@ -25,7 +25,7 @@ const fates = [
 const ritual = [
   { step: "one", title: "open softly", desc: "no prompts, no metrics — just a page that waits." },
   { step: "two", title: "say it", desc: "type the thing you didn't, or wouldn't, or couldn't." },
-  { step: "three", title: "let it rest", desc: "save it, plant it, send it later. or never." },
+  { step: "three", title: "let it rest", desc: "save it on this device, keep shaping, or leave other paths for later." },
 ];
 
 export function LandingPage() {
@@ -47,7 +47,7 @@ export function LandingPage() {
               className="font-cute text-[var(--lg-rose)] mb-5"
               style={{ fontSize: "1.5rem" }}
             >
-              for the words you almost sent ✿
+              for the words you almost said ✿
             </motion.p>
 
             <motion.h1
@@ -135,7 +135,7 @@ export function LandingPage() {
                 letterSpacing: "-0.025em",
               }}
             >
-              not everything needs to be sent.{" "}
+              not everything needs an audience.{" "}
               <span className="font-serif-italic text-[var(--lg-rose)]">some things just need a place.</span>
             </h2>
           </motion.section>

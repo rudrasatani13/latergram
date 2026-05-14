@@ -4,9 +4,9 @@ Some words arrive late. Latergram gives them a place.
 
 ## Current Status
 
-Phase 4 Write Flow Live V1 complete.
+Phase 5 Device Storage Foundation complete.
 
-The app now has real route-based navigation with React Router, clean page boundaries, query-param-driven app sections, and a browser-session write flow with honest copy/clear actions. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
+The app now has real route-based navigation with React Router, clean page boundaries, query-param-driven app sections, and browser/device-local saving for the first writing experience. Saved data is stored only in this browser for now, is not synced, and may be removed if browser data is cleared. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
 
 ## Development Rule
 
@@ -20,6 +20,7 @@ Latergram is live-only product development:
 - No fake Memory Card sources.
 - No fake account-backed behavior.
 - No UI that makes a non-live feature look complete.
+- Local saved content must be described as device/browser-only until account storage exists.
 
 If a feature is not working end-to-end with real data, the UI must say so clearly or stay disabled.
 
@@ -29,11 +30,15 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 - A soft landing page that describes the product vision (`/`).
 - An account access page with honest unavailable messaging (`/auth`).
 - A main app shell with section navigation via URL query params (`/app`).
-- A browser-session writing surface for drafting text on screen.
+- A writing surface for drafting text on screen.
+- Local browser/device saving for private Lategrams.
+- One local draft that can be saved, restored, and cleared on this device.
+- Keep Private **My Lategrams** showing real locally saved writing.
+- Local Time Since counters with save and remove behavior.
 - A real copy action for the write flow using the browser clipboard.
 - Recipient, subject, and intended-destination context inside the write flow.
 - Clear/reset behavior that asks before removing current words.
-- Visible guidance that writing is not saved yet.
+- Visible guidance that saved writing is only available in this browser/device for now.
 - Honest empty/unavailable states for Keep Private, The Garden, Late Letters, Time Since, and Memory Cards.
 - A soft Latergram-style 404 page for unknown routes.
 - Stable design system with shared components (Phase 2).
@@ -42,12 +47,9 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 ## What Is Not Live Yet
 
 - Real auth, sessions, account creation, and password reset.
-- Database, backend APIs, or account-backed storage.
-- LocalStorage or device persistence.
-- Private Lategram saving.
+- Database, backend APIs, account-backed storage, or cloud sync.
 - Late Letter scheduling, email delivery, secure open links, or recipient tracking.
 - Public Garden posting, reading, reactions, reporting, or moderation.
-- Time Since counter persistence.
 - Memory Card generation, download, sharing, or export.
 - Analytics, payments, AI, or public launch infrastructure.
 
@@ -78,6 +80,14 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 - [x] Replace fake Save/Draft actions with copy, guarded clear, and continue-shaping behavior.
 - [x] Keep visible "not saved yet" guidance.
 - [x] Confirm no storage, backend, auth, delivery, Garden posting, or export behavior was added.
+
+### Phase 5: Device Storage Foundation
+- [x] Add typed local storage helpers under `latergram:v1`.
+- [x] Save real private Lategrams on this browser/device.
+- [x] Save, restore, and clear one local draft.
+- [x] Show real local Lategrams in Keep Private and allow removing them from this device.
+- [x] Save and remove local Time Since counters.
+- [x] Keep copy honest: no sync, account storage, delivery, Garden posting, or card output claims.
 
 ## Run Locally
 
