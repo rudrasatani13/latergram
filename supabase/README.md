@@ -129,6 +129,50 @@ Subscribe to at least:
 
 The webhook handler verifies the raw body with `RESEND_WEBHOOK_SECRET`, dedupes by `svix-id`, and matches letters by `delivery_provider_message_id`, never by recipient email.
 
+## Garden Backend (Phase 12)
+
+Phase 12 adds the real Garden backend infrastructure. The Garden UI remains hidden until Phase 13 safety and moderation work is complete.
+
+### Garden RPCs
+
+| Function | Access | Description |
+|----------|--------|-------------|
+| `get_public_garden_posts(p_category, p_limit, p_before)` | anon, authenticated | Read approved posts with reaction counts |
+| `submit_garden_post(p_body, p_category)` | authenticated | Submit a post (always starts pending) |
+| `get_my_garden_submissions()` | authenticated | List own submissions with moderation state |
+| `toggle_garden_reaction(p_post_id)` | authenticated | Toggle "felt this" on approved post |
+| `get_garden_reaction_state(p_post_id)` | anon, authenticated | Get reaction count + viewer state |
+| `report_garden_post(p_post_id, p_reason, p_details)` | authenticated | Report an approved post |
+
+### Garden Safe Read Surface
+
+- **`public_garden_posts` view** — Only approved, non-deleted posts. Columns: id, body, category, anonymous_seed, created_at.
+- **`public_garden_reaction_counts` view** — Aggregated counts for approved posts. Columns: post_id, reaction_count.
+- **`get_public_garden_posts` RPC** — Preferred read surface. Includes reaction_count. Supports category filter and cursor pagination.
+
+### Raw Table Access Rules
+
+- Direct SELECT on `garden_posts` is revoked from anon/authenticated (except own rows for authenticated users).
+- Direct SELECT on `garden_reactions` is revoked from anon/authenticated (except own rows for authenticated users).
+- `garden_reports` has no public SELECT policy. Reports are private.
+- All public Garden reads go through safe views or SECURITY DEFINER RPCs.
+
+### Garden RLS Notes
+
+- Authenticated users can INSERT pending posts (user_id = auth.uid()).
+- Authenticated users can SELECT their own posts and reactions.
+- Authenticated users can INSERT reactions on approved posts.
+- Authenticated users can INSERT reports.
+- No user can approve/reject/remove posts through RLS policies.
+- No public SELECT on reports or raw reaction rows.
+
+### Garden Status
+
+- Garden backend is ready.
+- Garden posts are submitted for review (pending moderation).
+- Approved posts are available through safe backend APIs.
+- The Garden remains hidden until safety and moderation are complete (Phase 13).
+
 ## Security Requirements
 
 - **Authentication:** Must be configured in the Supabase Dashboard.
@@ -137,5 +181,5 @@ The webhook handler verifies the raw body with `RESEND_WEBHOOK_SECRET`, dedupes 
 - **Edge Functions:** The service-role key is allowed only inside Supabase Edge Function secrets for delivery jobs, recipient token validation, webhook processing, and recipient opt-out hashing. Never import it into frontend code.
 - **Phase 9 Frontend Usage**: The frontend actively uses the `private_lategrams` and `time_since_counters` tables for signed-in users using the `anon` key. Local data import is strictly explicit. No automatic localStorage migration occurs.
 - **Phase 11 Frontend Usage:** The frontend reads Late Letter sender rows through the anon client and RLS, but it only selects masked recipient email and real status timestamps. Recipient `/letter/:token` pages call `open-letter` and do not query private tables directly.
-- **Public Garden Access:** Must use safe views (`public_garden_posts`, `public_garden_reaction_counts`) or RPCs, not raw base-table access. Do not expose `user_id` or reaction fingerprints from public Garden reads.
+- **Phase 12 Garden Backend:** Public Garden reads use safe RPCs (`get_public_garden_posts`) or views (`public_garden_posts`, `public_garden_reaction_counts`). Raw base-table SELECT is revoked from anon/authenticated. No `user_id`, `reporter_user_id`, or `anonymous_fingerprint_hash` is exposed through any public surface. The Garden UI is not live.
 - **Webhook Events:** `resend_webhook_events` has RLS enabled and no public policies. Webhook payloads must not be exposed through frontend reads.

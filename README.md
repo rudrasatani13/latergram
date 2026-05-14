@@ -4,11 +4,15 @@ Some words arrive late. Latergram gives them a place.
 
 ## Current Status
 
-Phase 11 Real Letter Delivery complete.
+Phase 12 Garden Backend complete.
 
 The app now has a fully wired authentication foundation using Supabase Auth and a true backend persistence model for "Keep Private", "Time Since" counters, and scheduled Late Letter records. Real accounts are strictly segregated from local writing. Signed-in users save private Lategrams and Time Since counters to their account archive, while signed-out users continue to save supported local records to their local device. No automatic migration occurs; local saves can be explicitly imported by the user.
 
-Late Letters can now be delivered through Resend when the Supabase Edge Function secrets and delivery job are configured. Scheduled letters are sent server-side, receive real Resend message IDs, and open through secure recipient links. Sender status labels are backed by database/provider/page-open state. Recipient email remains masked in the saved-letter UI after saving. The Garden and Memory Cards are not connected yet, and delivery/cloud sync for those features is not active. Migrations live under `supabase/migrations`. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
+Late Letters can now be delivered through Resend when the Supabase Edge Function secrets and delivery job are configured. Scheduled letters are sent server-side, receive real Resend message IDs, and open through secure recipient links. Sender status labels are backed by database/provider/page-open state. Recipient email remains masked in the saved-letter UI after saving.
+
+The Garden backend is ready. Authenticated users can submit Garden posts (which start as pending moderation). Approved posts can be read through safe RPCs that do not expose user identity. "Felt this" reactions and reports are real and backed by the database. The Garden UI remains hidden from users — no public Garden browsing, posting, or reactions are visible in the product until Phase 13 safety and moderation work is complete.
+
+Memory Cards are not connected yet, and delivery/cloud sync for those features is not active. Migrations live under `supabase/migrations`. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
 
 ## Development Rule
 
@@ -61,7 +65,8 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 
 ## What Is Not Live Yet
 
-- Public Garden posting, reading, reactions, reporting, or moderation frontend.
+- Public Garden browsing, posting, reactions, or reporting in the product UI (backend is ready but UI remains hidden until safety/moderation is complete).
+- Garden moderation queue, admin review, or content filtering.
 - Memory Card generation, download, sharing, or export.
 - Received letters.
 - Guaranteed delivery or guaranteed read receipts.
@@ -153,6 +158,24 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 - [x] Added `/letter/:token` recipient page with no account requirement.
 - [x] Updated sender Late Letter UI to show only real database-backed statuses.
 - [x] Preserved cancellation before send and masked recipient email display.
+
+### Phase 12: Garden Backend V1
+- [x] Created Phase 12 migration (`supabase/migrations/0003_phase_12_garden_backend.sql`).
+- [x] Hardened raw Garden table access — revoked direct SELECT from anon/authenticated on base tables.
+- [x] Recreated safe public views with `security_barrier`.
+- [x] Built `get_public_garden_posts` RPC for safe approved-post reads with category filter and pagination.
+- [x] Built `submit_garden_post` RPC — posts always start pending, no auto-approval.
+- [x] Built `get_my_garden_submissions` RPC for own submission tracking.
+- [x] Built `toggle_garden_reaction` RPC with duplicate prevention and toggle behavior.
+- [x] Built `get_garden_reaction_state` RPC for reaction count and viewer state.
+- [x] Built `report_garden_post` RPC with duplicate report prevention and safety event logging.
+- [x] Added category normalization (unsent, grief, apology, gratitude, memory, hope, other).
+- [x] Added performance indexes for reactions, reports, and category filtering.
+- [x] Created typed frontend data layer (`src/app/db/garden.ts`) using RPC calls only.
+- [x] Confirmed no user_id, reporter_user_id, or anonymous_fingerprint_hash exposed publicly.
+- [x] Garden UI remains hidden — "The Garden is not open yet."
+- [x] No fake posts, reactions, reports, or moderation added.
+- [x] Documented Phase 13 safety dependencies.
 
 ## Run Locally
 

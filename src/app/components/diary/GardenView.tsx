@@ -58,8 +58,8 @@ export function GardenView() {
       {/* Closed Garden state */}
       <div className="px-7 py-6 min-h-[280px]">
         <EmptyState
-          message="The Garden is closed for now."
-          note="Anonymous sharing will open only when safety tools are ready."
+          message="The Garden is not open yet."
+          note="Safety and moderation are being prepared before posts are shown."
         />
       </div>
 
