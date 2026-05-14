@@ -4,9 +4,11 @@ Some words arrive late. Latergram gives them a place.
 
 ## Current Status
 
-Phase 7 Auth Live Foundation complete.
+Phase 8 Database and Security Model complete.
 
-The app now has a fully wired authentication foundation using Supabase Auth. It supports real account creation, sign in, sign out, password reset, and session persistence. If environment variables are missing, the UI gracefully degrades and remains honest without crashing. Real accounts are strictly segregated from local writing. Saved data is stored only in this browser for now, is not synced, and may be removed if browser data is cleared. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
+The app now has a fully wired authentication foundation using Supabase Auth and a corresponding database/security schema structure prepared using PostgreSQL. It supports real account creation, sign in, sign out, password reset, and session persistence. The database schema has been created with all tables required for upcoming phases, protected by robust Row Level Security (RLS) policies.
+
+However, account-backed storage is not connected yet. Real accounts are strictly segregated from local writing. Saved data is stored only in this browser for now, is not synced, and may be removed if browser data is cleared. Migrations live under `supabase/migrations`. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
 
 ## Development Rule
 
@@ -108,6 +110,14 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 - [x] Updated `Header` and `HomePage` / Keepsake views to accurately reflect auth state.
 - [x] Failed gracefully with honest "Accounts are not connected" messages if env vars are missing.
 - [x] Preserved local-only storage (no cloud sync or account backing was added yet).
+
+### Phase 8: Database and Security Model
+- [x] Chose Supabase PostgreSQL and created migration structure (`supabase/migrations`).
+- [x] Defined all real database tables needed for user data, public content, moderation, and safety.
+- [x] Enabled Row Level Security (RLS) and strict policies on all user and sensitive tables.
+- [x] Prepared safe public view for the future Garden.
+- [x] Added TypeScript definitions for database models.
+- [x] Kept storage safely disconnected: no UI changes, fake synced data, or local migration was added.
 
 ## Run Locally
 
