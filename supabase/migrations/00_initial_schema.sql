@@ -4,13 +4,16 @@
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- Function to automatically update 'updated_at' column
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = ''
+AS $$
 BEGIN
-    NEW.updated_at = NOW();
+    NEW.updated_at = pg_catalog.now();
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 -- 1. Profiles
 CREATE TABLE IF NOT EXISTS profiles (
@@ -19,7 +22,7 @@ CREATE TABLE IF NOT EXISTS profiles (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON profiles FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 -- 2. Private Lategrams
 CREATE TABLE IF NOT EXISTS private_lategrams (
@@ -35,7 +38,7 @@ CREATE TABLE IF NOT EXISTS private_lategrams (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMPTZ
 );
-CREATE TRIGGER update_private_lategrams_updated_at BEFORE UPDATE ON private_lategrams FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_private_lategrams_updated_at BEFORE UPDATE ON private_lategrams FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 -- 3. Time Since Counters
 CREATE TABLE IF NOT EXISTS time_since_counters (
@@ -49,7 +52,7 @@ CREATE TABLE IF NOT EXISTS time_since_counters (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMPTZ
 );
-CREATE TRIGGER update_time_since_counters_updated_at BEFORE UPDATE ON time_since_counters FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_time_since_counters_updated_at BEFORE UPDATE ON time_since_counters FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 -- 4. Late Letters
 CREATE TABLE IF NOT EXISTS late_letters (
@@ -74,7 +77,7 @@ CREATE TABLE IF NOT EXISTS late_letters (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMPTZ
 );
-CREATE TRIGGER update_late_letters_updated_at BEFORE UPDATE ON late_letters FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_late_letters_updated_at BEFORE UPDATE ON late_letters FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 -- 5. Garden Posts
 CREATE TABLE IF NOT EXISTS garden_posts (
@@ -90,7 +93,7 @@ CREATE TABLE IF NOT EXISTS garden_posts (
     rejected_at TIMESTAMPTZ,
     deleted_at TIMESTAMPTZ
 );
-CREATE TRIGGER update_garden_posts_updated_at BEFORE UPDATE ON garden_posts FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_garden_posts_updated_at BEFORE UPDATE ON garden_posts FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 -- Safe public view for Garden Posts (excluding user_id and sensitive fields)
 -- This view uses security_invoker = on to respect RLS and follow security best practices.
@@ -155,7 +158,7 @@ CREATE TABLE IF NOT EXISTS memory_cards (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMPTZ
 );
-CREATE TRIGGER update_memory_cards_updated_at BEFORE UPDATE ON memory_cards FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_memory_cards_updated_at BEFORE UPDATE ON memory_cards FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 -- 9. Recipient Opt Outs
 CREATE TABLE IF NOT EXISTS recipient_opt_outs (
