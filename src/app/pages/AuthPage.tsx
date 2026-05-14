@@ -220,8 +220,8 @@ export function AuthPage() {
               {!authAvailable 
                 ? "Accounts are not connected in this environment. You can explore the local writing space for now." 
                 : mode === "signin"
-                  ? "Sign in to your Latergram account. Your saved writing is still stored only in this browser for now."
-                  : "Create your Latergram account. Local saved writing is not synced to your account yet."}
+                  ? "Sign in to your Latergram account to access your private archive."
+                  : "Create your Latergram account. Signed-in users can save private writing to their account."}
             </motion.p>
 
             <motion.form

@@ -28,33 +28,36 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 
 ## What Is Currently Live
 
+- Real Supabase Auth.
+- Real account sessions.
+- Sign up / sign in / sign out / password reset.
+- Supabase database schema.
+- Account-backed private Lategrams for signed-in users.
+- Account-backed Time Since counters for signed-in users.
+- Local browser/device saving for signed-out users.
+- Explicit local-to-account import.
+- Account/device archive separation.
 - A Vite React app shell with real route-based navigation (React Router v7).
 - A soft landing page that describes the product vision (`/`).
-- An account access page with honest unavailable messaging (`/auth`).
+- An account access page (`/auth`).
 - A main app shell with section navigation via URL query params (`/app`).
 - A writing surface for drafting text on screen.
-- Local browser/device saving for private Lategrams.
 - One local draft that can be saved, restored, and cleared on this device.
-- Keep Private **My Lategrams** showing real locally saved writing with view, copy, destination filter, and remove actions.
-- Keep Private draft visibility for the one local draft, with a path back to the writer for restore.
-- Keep Private **Time Since** archive showing real locally saved counters.
-- Local Time Since counters with save and remove behavior.
 - A real copy action for the write flow using the browser clipboard.
 - Recipient, subject, and intended-destination context inside the write flow.
 - Clear/reset behavior that asks before removing current words.
-- Visible guidance that saved writing is only available in this browser/device for now.
-- Honest empty/unavailable states for Keep Private, The Garden, Late Letters, Time Since, and Memory Cards.
+- Visible guidance that saved writing is only available in this browser/device for signed-out users.
+- Honest empty/unavailable states for The Garden, Late Letters, and Memory Cards.
 - A soft Latergram-style 404 page for unknown routes.
 - Stable design system with shared components (Phase 2).
 - Browser back/forward navigation and direct URL access.
 
 ## What Is Not Live Yet
 
-- Real auth, sessions, account creation, and password reset.
-- Database, backend APIs, account-backed storage, or cloud sync.
 - Late Letter scheduling, email delivery, secure open links, or recipient tracking.
-- Public Garden posting, reading, reactions, reporting, or moderation.
+- Public Garden posting, reading, reactions, reporting, or moderation frontend.
 - Memory Card generation, download, sharing, or export.
+- Received letters.
 - Analytics, payments, AI, or public launch infrastructure.
 
 ## Completed Phases
