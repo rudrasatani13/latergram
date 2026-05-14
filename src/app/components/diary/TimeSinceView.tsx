@@ -1,17 +1,17 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { DiaryFrame } from "./DiaryFrame";
 import { blooms, decor } from "../BrandAssets";
 import { EmptyState } from "../shared/EmptyState";
 import { addLocalCounter, createLocalId, readLocalCounters, removeLocalCounter } from "../../storage/localStorage";
 import type { LocalCounter } from "../../storage/types";
+import { useAuth } from "../../auth/useAuth";
+import { useAccountCounters } from "../../db/useAccountCounters";
 
 function daysBetween(iso: string) {
   const d1 = new Date(iso);
-
   if (Number.isNaN(d1.getTime())) {
     return 0;
   }
-
   const d2 = new Date();
   const ms = d2.getTime() - d1.getTime();
   return Math.max(0, Math.floor(ms / (1000 * 60 * 60 * 24)));
@@ -19,25 +19,39 @@ function daysBetween(iso: string) {
 
 function prettyDate(iso: string) {
   const date = new Date(iso);
-
   if (Number.isNaN(date.getTime())) {
     return "a saved date";
   }
-
   return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 }
 
 export function TimeSinceView() {
+  const { session } = useAuth();
+  const { data: accountCounters, create: createAccountCounter, remove: removeAccountCounter } = useAccountCounters();
+  
   const [list, setList] = useState<LocalCounter[]>(() => readLocalCounters());
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState({ title: "", start: "", context: "" });
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [status, setStatus] = useState("");
 
-  const featured = useMemo(() => list[0], [list]);
+  const combinedList = useMemo(() => {
+    if (session?.user) {
+      return accountCounters.map(c => ({
+        id: c.id,
+        title: c.title,
+        start: c.start_date,
+        context: c.context,
+        source: 'account' as const
+      }));
+    }
+    return list.map(c => ({ ...c, source: 'local' as const }));
+  }, [session?.user, accountCounters, list]);
+
+  const featured = useMemo(() => combinedList[0], [combinedList]);
   const featuredDays = featured ? daysBetween(featured.start) : 0;
 
-  const saveCounter = () => {
+  const saveCounter = async () => {
     const title = draft.title.trim();
 
     if (!title || !draft.start) {
@@ -45,47 +59,69 @@ export function TimeSinceView() {
       return;
     }
 
-    const now = new Date().toISOString();
-    const counter: LocalCounter = {
-      id: createLocalId("counter"),
-      title,
-      start: draft.start,
-      context: draft.context.trim() || undefined,
-      createdAt: now,
-      updatedAt: now,
-    };
+    if (session?.user) {
+      const { error } = await createAccountCounter({
+        title,
+        start_date: draft.start,
+        context: draft.context.trim() || null,
+        flower_key: null
+      });
 
-    const result = addLocalCounter(counter);
+      if (error) {
+        setStatus("Could not save to your account.");
+        return;
+      }
+      setStatus("Counter saved to your account.");
+    } else {
+      const now = new Date().toISOString();
+      const counter: LocalCounter = {
+        id: createLocalId("counter"),
+        title,
+        start: draft.start,
+        context: draft.context.trim() || undefined,
+        createdAt: now,
+        updatedAt: now,
+      };
 
-    if (!result.ok) {
-      setStatus("Could not save this counter in this browser.");
-      return;
+      const result = addLocalCounter(counter);
+      if (!result.ok) {
+        setStatus("Could not save this counter in this browser.");
+        return;
+      }
+      setList((items) => [counter, ...items]);
+      setStatus("Counter saved on this device.");
     }
 
-    setList((items) => [counter, ...items]);
     setDraft({ title: "", start: "", context: "" });
     setAdding(false);
     setPendingDeleteId(null);
-    setStatus("Counter saved on this device.");
   };
 
-  const removeCounter = (counter: LocalCounter) => {
-    if (pendingDeleteId !== counter.id) {
-      setPendingDeleteId(counter.id);
+  const removeCounter = async (item: any) => {
+    if (pendingDeleteId !== item.id) {
+      setPendingDeleteId(item.id);
       setStatus("remove this counter?");
       return;
     }
 
-    const result = removeLocalCounter(counter.id);
-
-    if (!result.ok) {
-      setStatus("Could not remove this counter in this browser.");
-      return;
+    if (item.source === 'account') {
+      const { success } = await removeAccountCounter(item.id);
+      if (!success) {
+        setStatus("Could not remove this counter from your account.");
+        return;
+      }
+      setStatus("Counter removed from your account.");
+    } else {
+      const result = removeLocalCounter(item.id);
+      if (!result.ok) {
+        setStatus("Could not remove this counter in this browser.");
+        return;
+      }
+      setList((items) => items.filter((i) => i.id !== item.id));
+      setStatus("Counter removed from this device.");
     }
 
-    setList((items) => items.filter((item) => item.id !== counter.id));
     setPendingDeleteId(null);
-    setStatus("Counter removed from this device.");
   };
 
   return (
@@ -136,7 +172,7 @@ export function TimeSinceView() {
             className="mt-2 font-cute text-[var(--lg-cocoa)]/50"
             style={{ fontSize: "0.85rem" }}
           >
-            saved on this device only
+            {featured.source === 'account' ? "saved to your account" : "saved on this device only"}
           </p>
           <div className="mt-3 flex items-center justify-center gap-3 flex-wrap">
             <button
@@ -145,7 +181,7 @@ export function TimeSinceView() {
               className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
               style={{ fontSize: "1rem" }}
             >
-              {pendingDeleteId === featured.id ? "remove this counter?" : "remove from this device"}
+              {pendingDeleteId === featured.id ? "remove this counter?" : (featured.source === 'account' ? "remove from account" : "remove from this device")}
             </button>
             {pendingDeleteId === featured.id && (
               <button
@@ -166,16 +202,16 @@ export function TimeSinceView() {
 
       {/* Other counters */}
       <div className="px-7 py-5 grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[180px]">
-        {list.length === 0 && !adding && (
+        {combinedList.length === 0 && !adding && (
           <div className="sm:col-span-2">
             <EmptyState
-              message="No counters on this device yet."
+              message={session?.user ? "No counters in your account yet." : "No counters on this device yet."}
               note="Add one to keep time here."
             />
           </div>
         )}
 
-        {list.slice(1).map((c, i) => (
+        {combinedList.slice(1).map((c, i) => (
           <div
             key={c.id || `${c.title}-${i}`}
             className="bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-2xl p-4 flex items-center gap-3 shadow-[0_8px_22px_-16px_rgba(120,80,70,0.4)]"
@@ -200,7 +236,7 @@ export function TimeSinceView() {
                 className="mt-2 font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
                 style={{ fontSize: "0.95rem" }}
               >
-                {pendingDeleteId === c.id ? "remove this counter?" : "remove from this device"}
+                {pendingDeleteId === c.id ? "remove this counter?" : (c.source === 'account' ? "remove from account" : "remove from this device")}
               </button>
             </div>
           </div>
@@ -280,7 +316,7 @@ export function TimeSinceView() {
 
       <div className="px-7 pt-2 pb-6 flex items-center justify-between border-t border-dashed border-[var(--lg-border)]">
         <span className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1.05rem" }}>
-          saved on this device only
+          {session?.user ? "Saved to your account." : "Saved on this device only."}
         </span>
         <img src={decor.timeClockHeart} alt="" aria-hidden="true" className="w-7 h-7 object-contain opacity-80" />
       </div>

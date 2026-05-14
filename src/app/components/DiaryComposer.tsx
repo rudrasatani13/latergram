@@ -10,6 +10,8 @@ import {
   writeLocalDraft,
 } from "../storage/localStorage";
 import type { LocalDestination, LocalDraft, LocalLategram } from "../storage/types";
+import { useAuth } from "../auth/useAuth";
+import { useAccountLategrams } from "../db/useAccountLategrams";
 
 const easeSoft = [0.22, 1, 0.36, 1] as const;
 
@@ -68,6 +70,8 @@ const today = new Date().toLocaleDateString("en-US", {
 });
 
 export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
+  const { session } = useAuth();
+  const { create: createAccountLategram } = useAccountLategrams();
   const [text, setText] = useState("");
   const [to, setTo] = useState("");
   const [subject, setSubject] = useState("");
@@ -206,6 +210,45 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
     setSaveState("saved on this device");
     setHasEdited(false);
     setNote("Saved on this device.");
+  };
+
+  const saveToAccount = async () => {
+    setClearNeedsConfirm(false);
+    setCopyFailed(false);
+
+    if (!text.trim()) {
+      setNote("Write a few words first.");
+      return;
+    }
+
+    setSaveState("saving...");
+    const { error } = await createAccountLategram({
+      body: text.trim(),
+      recipient_label: to.trim() || null,
+      subject: subject.trim() || null,
+      destination: destination,
+      mood: null,
+      flower_key: null,
+    });
+
+    if (error) {
+      setSaveState("not saved yet");
+      setNote("Could not save to your account. Your words are still on this page.");
+      return;
+    }
+
+    setSaveState("saved to your account");
+    setHasEdited(false);
+    
+    const noteText = destination === "private" 
+      ? "Saved to your account as private writing."
+      : destination === "later"
+      ? "Written as a future letter, saved privately to your account. Delivery is not connected yet."
+      : destination === "garden"
+      ? "Written for the Garden, saved privately to your account."
+      : "Written for a memory card, saved privately to your account. Export is not connected yet.";
+      
+    setNote(noteText);
   };
 
   const saveDraft = () => {
@@ -544,22 +587,51 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
 
       {/* Actions */}
       <div className="mt-8 flex items-center justify-center gap-6 flex-wrap">
-        <button
-          type="button"
-          onClick={saveOnDevice}
-          className="group inline-flex items-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700"
-        >
-          <span
-            style={{
-              fontSize: "0.78rem",
-              letterSpacing: "0.32em",
-              textTransform: "uppercase",
-            }}
+        {session?.user ? (
+          <>
+            <button
+              type="button"
+              onClick={saveToAccount}
+              className="group inline-flex items-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700"
+            >
+              <span
+                style={{
+                  fontSize: "0.78rem",
+                  letterSpacing: "0.32em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Save to account
+              </span>
+              <span className="block w-6 h-px bg-[var(--lg-cream)] transition-all duration-500 group-hover:w-10" />
+            </button>
+            <button
+              type="button"
+              onClick={saveOnDevice}
+              className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
+              style={{ fontSize: "1.2rem" }}
+            >
+              Save on this device
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            onClick={saveOnDevice}
+            className="group inline-flex items-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700"
           >
-            Save on this device
-          </span>
-          <span className="block w-6 h-px bg-[var(--lg-cream)] transition-all duration-500 group-hover:w-10" />
-        </button>
+            <span
+              style={{
+                fontSize: "0.78rem",
+                letterSpacing: "0.32em",
+                textTransform: "uppercase",
+              }}
+            >
+              Save on this device
+            </span>
+            <span className="block w-6 h-px bg-[var(--lg-cream)] transition-all duration-500 group-hover:w-10" />
+          </button>
+        )}
         <button
           type="button"
           onClick={copyWords}
@@ -595,8 +667,8 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
       </div>
 
       <FeatureUnavailableNote
-        message={note || "Save on this device before leaving. Clearing browser data may remove saved items."}
-        visible={Boolean(note) || hasEdited}
+        message={note || (session?.user ? "Save to your account, or keep saving on this device." : "Sign in to save to your account, or keep saving on this device. Clearing browser data may remove saved items.")}
+        visible={Boolean(note) || hasEdited || !session?.user}
       />
       {copyFailed && (
         <p

@@ -47,6 +47,13 @@ const destinationNotes: Record<LocalDestination, string> = {
   memory: "Written for a Memory Card, saved privately on this device. Card export is not connected yet.",
 };
 
+const accountDestinationNotes: Record<LocalDestination, string> = {
+  private: "Saved to your account.",
+  later: "Written as a late letter, saved privately to your account. Delivery is not connected yet.",
+  garden: "Written for the Garden, saved privately to your account.",
+  memory: "Written for a Memory Card, saved privately to your account. Card export is not connected yet.",
+};
+
 type KeepPrivateTab = (typeof tabs)[number]["id"];
 type DestinationFilter = (typeof destinationFilters)[number]["id"];
 
@@ -77,31 +84,25 @@ function readArchiveSnapshot() {
 
 function formatShortDate(iso: string) {
   const date = new Date(iso);
-
   if (Number.isNaN(date.getTime())) {
     return "saved locally";
   }
-
   return date.toLocaleDateString("en-US", { month: "short", day: "2-digit" }).toLowerCase();
 }
 
 function formatLongDate(iso: string) {
   const date = new Date(iso);
-
   if (Number.isNaN(date.getTime())) {
     return "a saved date";
   }
-
   return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 }
 
 function daysBetween(iso: string) {
   const d1 = new Date(iso);
-
   if (Number.isNaN(d1.getTime())) {
     return 0;
   }
-
   const d2 = new Date();
   const ms = d2.getTime() - d1.getTime();
   return Math.max(0, Math.floor(ms / (1000 * 60 * 60 * 24)));
@@ -109,23 +110,20 @@ function daysBetween(iso: string) {
 
 function excerpt(value: string, maxLength = 150) {
   const normalized = value.trim().replace(/\s+/g, " ");
-
   if (normalized.length <= maxLength) {
     return normalized;
   }
-
   return `${normalized.slice(0, maxLength).trim()}...`;
 }
 
-function lategramTitle(lategram: LocalLategram) {
+function lategramTitle(lategram: { subject?: string | null; to?: string | null; recipient_label?: string | null }) {
   if (lategram.subject?.trim()) {
     return lategram.subject;
   }
-
-  if (lategram.to?.trim()) {
-    return `to ${lategram.to}`;
+  const to = lategram.to || lategram.recipient_label;
+  if (to?.trim()) {
+    return `to ${to}`;
   }
-
   return "Saved Lategram";
 }
 
@@ -133,16 +131,19 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
   const { authAvailable, session } = useAuth();
   const { data: accountLategrams, refresh: refreshAccountLategrams, remove: removeAccountLategram, create: createAccountLategram } = useAccountLategrams();
   const { data: accountCounters, refresh: refreshAccountCounters, remove: removeAccountCounter, create: createAccountCounter } = useAccountCounters();
+  
   const [tab, setTab] = useState<KeepPrivateTab>("lategrams");
   const [filter, setFilter] = useState<DestinationFilter>("all");
   const [lategrams, setLategrams] = useState<LocalLategram[]>(() => sortLategrams(readLocalLategrams()));
   const [counters, setCounters] = useState<LocalCounter[]>(() => sortCounters(readLocalCounters()));
   const [draft, setDraft] = useState<LocalDraft | null>(() => readLocalDraft());
+  
   const [selectedLategramId, setSelectedLategramId] = useState<string | null>(null);
   const [pendingLategramDeleteId, setPendingLategramDeleteId] = useState<string | null>(null);
   const [pendingCounterDeleteId, setPendingCounterDeleteId] = useState<string | null>(null);
   const [pendingDraftDelete, setPendingDraftDelete] = useState(false);
   const [status, setStatus] = useState("");
+  const [isImporting, setIsImporting] = useState(false);
 
   useEffect(() => {
     const snapshot = readArchiveSnapshot();
@@ -151,12 +152,35 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
     setDraft(snapshot.draft);
   }, []);
 
-  const filteredLategrams = useMemo(() => {
-    if (filter === "all") {
-      return lategrams;
+  const unifiedLategrams = useMemo(() => {
+    if (!session?.user) {
+      return lategrams.map(l => ({ ...l, source: 'local' as const }));
     }
+    
+    const accountMapped = accountLategrams.map(l => ({
+      id: l.id,
+      body: l.body || '',
+      to: l.recipient_label || undefined,
+      subject: l.subject || undefined,
+      destination: l.destination as LocalDestination,
+      createdAt: l.created_at,
+      updatedAt: l.updated_at,
+      wordCount: l.body ? l.body.split(/\s+/).length : 0,
+      source: 'account' as const
+    }));
+    
+    // Do not mix seamlessly, just keep account mapped here. Local will render in a separate section.
+    return accountMapped;
+  }, [session?.user, accountLategrams, lategrams]);
 
-    return lategrams.filter((lategram) => lategram.destination === filter);
+  const filteredUnified = useMemo(() => {
+    if (filter === "all") return unifiedLategrams;
+    return unifiedLategrams.filter(l => l.destination === filter);
+  }, [filter, unifiedLategrams]);
+
+  const filteredLocal = useMemo(() => {
+    if (filter === "all") return lategrams;
+    return lategrams.filter(l => l.destination === filter);
   }, [filter, lategrams]);
 
   const refreshArchive = async (message = "Archive refreshed.") => {
@@ -168,7 +192,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
     setPendingCounterDeleteId(null);
     setPendingDraftDelete(false);
 
-    if (selectedLategramId && !snapshot.lategrams.some((lategram) => lategram.id === selectedLategramId)) {
+    if (selectedLategramId && !snapshot.lategrams.some((l) => l.id === selectedLategramId) && !accountLategrams.some(l => l.id === selectedLategramId)) {
       setSelectedLategramId(null);
     }
     
@@ -180,7 +204,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
     setStatus(message);
   };
 
-  const copyLategram = async (lategram: LocalLategram) => {
+  const copyLategram = async (body: string) => {
     setPendingLategramDeleteId(null);
 
     if (!navigator.clipboard?.writeText) {
@@ -189,65 +213,78 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
     }
 
     try {
-      await navigator.clipboard.writeText(lategram.body);
-      setStatus("Copied from this device.");
+      await navigator.clipboard.writeText(body);
+      setStatus("Copied to clipboard.");
     } catch {
       setStatus("Copy did not work in this browser.");
     }
   };
 
-  const removeLategram = (lategram: LocalLategram) => {
-    if (pendingLategramDeleteId !== lategram.id) {
-      setPendingLategramDeleteId(lategram.id);
+  const doRemoveLategram = async (id: string, source: 'local' | 'account') => {
+    if (pendingLategramDeleteId !== id) {
+      setPendingLategramDeleteId(id);
       setPendingCounterDeleteId(null);
       setPendingDraftDelete(false);
-      setStatus("remove this saved Lategram?");
+      setStatus(source === 'account' ? "Remove from your account?" : "Remove this saved Lategram?");
       return;
     }
 
-    const result = removeLocalLategram(lategram.id);
-
-    if (!result.ok) {
-      setStatus("Could not remove this saved Lategram in this browser.");
-      return;
+    if (source === 'local') {
+      const result = removeLocalLategram(id);
+      if (!result.ok) {
+        setStatus("Could not remove this saved Lategram in this browser.");
+        return;
+      }
+      setLategrams((items) => items.filter((item) => item.id !== id));
+      setStatus("Removed from this device.");
+    } else {
+      setStatus("Removing...");
+      const { success } = await removeAccountLategram(id);
+      if (!success) {
+        setStatus("Could not remove from account right now.");
+        return;
+      }
+      setStatus("Removed from your account.");
     }
 
-    setLategrams((items) => items.filter((item) => item.id !== lategram.id));
     setPendingLategramDeleteId(null);
-
-    if (selectedLategramId === lategram.id) {
+    if (selectedLategramId === id) {
       setSelectedLategramId(null);
     }
-
-    setStatus("Removed from this device.");
   };
 
-  const removeCounter = (counter: LocalCounter) => {
-    if (pendingCounterDeleteId !== counter.id) {
-      setPendingCounterDeleteId(counter.id);
+  const doRemoveCounter = async (id: string, source: 'local' | 'account') => {
+    if (pendingCounterDeleteId !== id) {
+      setPendingCounterDeleteId(id);
       setPendingLategramDeleteId(null);
       setPendingDraftDelete(false);
       setStatus("remove this counter?");
       return;
     }
 
-    const result = removeLocalCounter(counter.id);
-
-    if (!result.ok) {
-      setStatus("Could not remove this counter in this browser.");
-      return;
+    if (source === 'local') {
+      const result = removeLocalCounter(id);
+      if (!result.ok) {
+        setStatus("Could not remove this counter in this browser.");
+        return;
+      }
+      setCounters((items) => items.filter((item) => item.id !== id));
+      setStatus("Counter removed from this device.");
+    } else {
+      setStatus("Removing...");
+      const { success } = await removeAccountCounter(id);
+      if (!success) {
+        setStatus("Could not remove from account right now.");
+        return;
+      }
+      setStatus("Removed from your account.");
     }
 
-    setCounters((items) => items.filter((item) => item.id !== counter.id));
     setPendingCounterDeleteId(null);
-    setStatus("Counter removed from this device.");
   };
 
   const clearDraft = () => {
-    if (!draft) {
-      return;
-    }
-
+    if (!draft) return;
     if (!pendingDraftDelete) {
       setPendingDraftDelete(true);
       setPendingLategramDeleteId(null);
@@ -255,14 +292,11 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
       setStatus("clear this draft from this device?");
       return;
     }
-
     const result = deleteLocalDraft();
-
     if (!result.ok) {
       setStatus("Could not clear draft in this browser.");
       return;
     }
-
     setDraft(null);
     setPendingDraftDelete(false);
     setStatus("Draft cleared from this device.");
@@ -271,12 +305,10 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
   const restoreDraftInWriter = () => {
     setPendingDraftDelete(false);
     setStatus("");
-
     if (onViewSection) {
       onViewSection("write");
       return;
     }
-
     setStatus("Open the writer to restore this draft.");
   };
 
@@ -297,11 +329,40 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
     }
   };
 
-  const renderDraftPanel = () => {
-    if (!draft) {
-      return null;
+  const importLocalSaves = async () => {
+    setIsImporting(true);
+    setStatus("Importing local saves...");
+    
+    let imported = 0;
+    for (const lg of lategrams) {
+      // Check if already imported
+      const exists = accountLategrams.some(al => 
+        al.body === lg.body && 
+        al.subject === (lg.subject || null) && 
+        al.destination === lg.destination
+      );
+      if (exists) continue;
+      
+      const { error } = await createAccountLategram({
+        body: lg.body,
+        recipient_label: lg.to || null,
+        subject: lg.subject || null,
+        destination: lg.destination,
+        mood: null,
+        flower_key: null,
+      });
+      if (!error) {
+        imported++;
+      }
     }
+    
+    await refreshAccountLategrams();
+    setIsImporting(false);
+    setStatus(`Imported ${imported} local saves to your account. Local copies remain unless you remove them.`);
+  };
 
+  const renderDraftPanel = () => {
+    if (!draft) return null;
     return (
       <div className="mb-5 rounded-[22px] border border-dashed border-[var(--lg-border)] bg-[var(--lg-paper)]/55 px-5 py-4">
         <div className="flex items-start gap-3">
@@ -357,7 +418,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
     );
   };
 
-  const renderLategramDetail = (lategram: LocalLategram) => (
+  const renderLategramDetail = (lategram: any, source: 'local' | 'account') => (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
@@ -376,7 +437,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
           </p>
         )}
         <p className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "0.98rem" }}>
-          destination: <span className="text-[var(--lg-ink)]">{destinationLabels[lategram.destination]}</span>
+          destination: <span className="text-[var(--lg-ink)]">{destinationLabels[lategram.destination as LocalDestination]}</span>
         </p>
         <p className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "0.98rem" }}>
           created: <span className="text-[var(--lg-ink)]">{formatLongDate(lategram.createdAt)}</span>
@@ -395,15 +456,107 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
         {lategram.body}
       </div>
       <p className="mt-3 font-cute text-[var(--lg-cocoa)]/65" style={{ fontSize: "0.95rem" }}>
-        {destinationNotes[lategram.destination]} Only available in this browser.
+        {source === 'account' ? accountDestinationNotes[lategram.destination as LocalDestination] : `${destinationNotes[lategram.destination as LocalDestination]} Only available in this browser.`}
       </p>
     </motion.div>
   );
 
+  const renderLategramList = (list: any[], source: 'local' | 'account') => {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {list.map((lategram) => {
+          const isSelected = selectedLategramId === lategram.id;
+          return (
+            <div
+              key={lategram.id}
+              className="group text-left bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-2xl p-4 shadow-[0_8px_22px_-16px_rgba(120,80,70,0.4)]"
+            >
+              <div className="flex items-start gap-3">
+                <img
+                  src={blooms.softPeony}
+                  alt=""
+                  aria-hidden="true"
+                  className="w-10 h-10 object-contain shrink-0"
+                />
+                <div className="flex-1 min-w-0">
+                  <h3
+                    className="text-[var(--lg-ink)] truncate"
+                    style={{ fontFamily: "'Fraunces', serif", fontWeight: 500, fontSize: "1.05rem" }}
+                  >
+                    {lategramTitle(lategram)}
+                  </h3>
+                  <p
+                    className="font-cute text-[var(--lg-cocoa)] mt-1 line-clamp-2"
+                    style={{ fontSize: "1.1rem", lineHeight: 1.3 }}
+                  >
+                    {excerpt(lategram.body, 170)}
+                  </p>
+                  <p
+                    className="text-[var(--lg-rose)] mt-2"
+                    style={{ fontSize: "0.78rem", letterSpacing: "0.18em", textTransform: "uppercase" }}
+                  >
+                    {formatShortDate(lategram.updatedAt)} · {destinationLabels[lategram.destination as LocalDestination]} · {lategram.wordCount} words
+                  </p>
+                  <p className="mt-2 font-cute text-[var(--lg-cocoa)]/65" style={{ fontSize: "0.92rem" }}>
+                    {source === 'account' ? accountDestinationNotes[lategram.destination as LocalDestination] : `${destinationNotes[lategram.destination as LocalDestination]} Only available in this browser.`}
+                  </p>
+                  <div className="mt-3 flex items-center gap-3 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedLategramId(isSelected ? null : lategram.id);
+                        setPendingLategramDeleteId(null);
+                        setStatus("");
+                      }}
+                      className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
+                      style={{ fontSize: "1rem" }}
+                    >
+                      {isSelected ? "Close" : "View"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => copyLategram(lategram.body)}
+                      className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
+                      style={{ fontSize: "1rem" }}
+                    >
+                      Copy
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => doRemoveLategram(lategram.id, source)}
+                      className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
+                      style={{ fontSize: "1rem" }}
+                    >
+                      {pendingLategramDeleteId === lategram.id ? (source === 'account' ? "remove from account?" : "remove from this device") : (source === 'account' ? "Remove from account" : "Remove from this device")}
+                    </button>
+                    {pendingLategramDeleteId === lategram.id && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPendingLategramDeleteId(null);
+                          setStatus("");
+                        }}
+                        className="font-cute text-[var(--lg-cocoa)]/70 hover:text-[var(--lg-ink)] transition-colors duration-500"
+                        style={{ fontSize: "1rem" }}
+                      >
+                        keep it
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+              {isSelected && renderLategramDetail(lategram, source)}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   const renderLategrams = () => (
     <>
       {renderDraftPanel()}
-      {lategrams.length > 0 && (
+      {(unifiedLategrams.length > 0 || (session?.user && lategrams.length > 0)) && (
         <div className="mb-5 flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-2 flex-wrap">
             {destinationFilters.map((item) => (
@@ -427,115 +580,64 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
         </div>
       )}
 
-      {lategrams.length === 0 && (
+      {!session?.user && lategrams.length === 0 && (
         <EmptyState
           message="No saved Lategrams on this device yet."
           note="Write and save one first."
         />
       )}
-
-      {lategrams.length > 0 && filteredLategrams.length === 0 && (
+      
+      {session?.user && unifiedLategrams.length === 0 && lategrams.length === 0 && (
         <EmptyState
-          message="No saved Lategrams here yet."
-          note="Saved writing in other destinations stays local to this browser."
+          message="No saved Lategrams in your account yet."
+          note="Write and save one first."
         />
       )}
 
-      {filteredLategrams.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {filteredLategrams.map((lategram) => {
-            const isSelected = selectedLategramId === lategram.id;
+      {session?.user && unifiedLategrams.length > 0 && filteredUnified.length > 0 && (
+        <div className="mb-8">
+          {renderLategramList(filteredUnified, 'account')}
+        </div>
+      )}
 
-            return (
-              <div
-                key={lategram.id}
-                className="group text-left bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-2xl p-4 shadow-[0_8px_22px_-16px_rgba(120,80,70,0.4)]"
-              >
-                <div className="flex items-start gap-3">
-                  <img
-                    src={blooms.softPeony}
-                    alt=""
-                    aria-hidden="true"
-                    className="w-10 h-10 object-contain shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <h3
-                      className="text-[var(--lg-ink)] truncate"
-                      style={{ fontFamily: "'Fraunces', serif", fontWeight: 500, fontSize: "1.05rem" }}
-                    >
-                      {lategramTitle(lategram)}
-                    </h3>
-                    <p
-                      className="font-cute text-[var(--lg-cocoa)] mt-1 line-clamp-2"
-                      style={{ fontSize: "1.1rem", lineHeight: 1.3 }}
-                    >
-                      {excerpt(lategram.body, 170)}
-                    </p>
-                    <p
-                      className="text-[var(--lg-rose)] mt-2"
-                      style={{ fontSize: "0.78rem", letterSpacing: "0.18em", textTransform: "uppercase" }}
-                    >
-                      {formatShortDate(lategram.updatedAt)} · {destinationLabels[lategram.destination]} · {lategram.wordCount} words
-                    </p>
-                    <p className="mt-2 font-cute text-[var(--lg-cocoa)]/65" style={{ fontSize: "0.92rem" }}>
-                      {destinationNotes[lategram.destination]} Only available in this browser.
-                    </p>
-                    <div className="mt-3 flex items-center gap-3 flex-wrap">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedLategramId(isSelected ? null : lategram.id);
-                          setPendingLategramDeleteId(null);
-                          setStatus("");
-                        }}
-                        className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
-                        style={{ fontSize: "1rem" }}
-                      >
-                        {isSelected ? "Close" : "View"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => copyLategram(lategram)}
-                        className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
-                        style={{ fontSize: "1rem" }}
-                      >
-                        Copy
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => removeLategram(lategram)}
-                        className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
-                        style={{ fontSize: "1rem" }}
-                      >
-                        {pendingLategramDeleteId === lategram.id ? "remove from this device" : "Remove from this device"}
-                      </button>
-                      {pendingLategramDeleteId === lategram.id && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setPendingLategramDeleteId(null);
-                            setStatus("");
-                          }}
-                          className="font-cute text-[var(--lg-cocoa)]/70 hover:text-[var(--lg-ink)] transition-colors duration-500"
-                          style={{ fontSize: "1rem" }}
-                        >
-                          keep it
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                {isSelected && renderLategramDetail(lategram)}
-              </div>
-            );
-          })}
+      {!session?.user && filteredLocal.length > 0 && (
+        <div className="mb-8">
+          {renderLategramList(filteredLocal, 'local')}
+        </div>
+      )}
+
+      {session?.user && lategrams.length > 0 && (
+        <div className="mt-8 pt-8 border-t border-dashed border-[var(--lg-border)]">
+          <div className="mb-4 flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <p className="font-cute text-[var(--lg-rose)]" style={{ fontSize: "1.1rem" }}>
+                You also have local saves on this browser.
+              </p>
+              <p className="font-cute text-[var(--lg-cocoa)]/70" style={{ fontSize: "0.95rem" }}>
+                These remain on this device unless you choose to import or remove them.
+              </p>
+            </div>
+            <button
+              onClick={importLocalSaves}
+              disabled={isImporting}
+              className="bg-[var(--lg-rose)] text-[var(--lg-cream)] px-4 py-2 rounded-full font-cute transition-colors hover:bg-[var(--lg-focus-rose)] disabled:opacity-50"
+              style={{ fontSize: "1rem" }}
+            >
+              {isImporting ? "Importing..." : "Import local saves to your account"}
+            </button>
+          </div>
+          {filteredLocal.length > 0 && renderLategramList(filteredLocal, 'local')}
         </div>
       )}
     </>
   );
 
   const renderCounters = () => {
-    if (counters.length === 0) {
+    const list = session?.user 
+      ? accountCounters.map(c => ({...c, source: 'account'}))
+      : counters.map(c => ({...c, source: 'local'}));
+
+    if (list.length === 0 && (!session?.user || counters.length === 0)) {
       return (
         <EmptyState
           message="No counters on this device yet."
@@ -546,14 +648,24 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
 
     return (
       <>
-        <p
-          className="font-cute text-[var(--lg-cocoa)]/60 text-center mb-4"
-          style={{ fontSize: "0.9rem" }}
-        >
-          Saved on this device only.
-        </p>
+        {session?.user && list.length > 0 && (
+          <p
+            className="font-cute text-[var(--lg-cocoa)]/60 text-center mb-4"
+            style={{ fontSize: "0.9rem" }}
+          >
+            Saved to your account.
+          </p>
+        )}
+        {!session?.user && list.length > 0 && (
+          <p
+            className="font-cute text-[var(--lg-cocoa)]/60 text-center mb-4"
+            style={{ fontSize: "0.9rem" }}
+          >
+            Saved on this device only.
+          </p>
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {counters.map((counter) => (
+          {list.map((counter: any) => (
             <div
               key={counter.id}
               className="bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-2xl p-4 flex items-start gap-3 shadow-[0_8px_22px_-16px_rgba(120,80,70,0.4)]"
@@ -567,10 +679,10 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                   {counter.title}
                 </p>
                 <p className="font-cute text-[var(--lg-rose)] mt-1" style={{ fontSize: "1.1rem" }}>
-                  {daysBetween(counter.start)} days
+                  {daysBetween(counter.start || counter.start_date)} days
                 </p>
                 <p className="font-cute text-[var(--lg-cocoa)] mt-1" style={{ fontSize: "0.98rem" }}>
-                  since {formatLongDate(counter.start)}
+                  since {formatLongDate(counter.start || counter.start_date)}
                 </p>
                 {counter.context && (
                   <p className="font-cute text-[var(--lg-cocoa)]/75 mt-2 line-clamp-2" style={{ fontSize: "0.98rem", lineHeight: 1.3 }}>
@@ -578,16 +690,16 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                   </p>
                 )}
                 <p className="mt-2 font-cute text-[var(--lg-cocoa)]/60" style={{ fontSize: "0.9rem" }}>
-                  Saved on this device. Only available in this browser.
+                  {counter.source === 'account' ? "Saved to your account." : "Saved on this device. Only available in this browser."}
                 </p>
                 <div className="mt-3 flex items-center gap-3 flex-wrap">
                   <button
                     type="button"
-                    onClick={() => removeCounter(counter)}
+                    onClick={() => doRemoveCounter(counter.id, counter.source)}
                     className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
                     style={{ fontSize: "1rem" }}
                   >
-                    {pendingCounterDeleteId === counter.id ? "remove from this device" : "Remove from this device"}
+                    {pendingCounterDeleteId === counter.id ? (counter.source === 'account' ? "remove from account" : "remove from this device") : (counter.source === 'account' ? "Remove from account" : "Remove from this device")}
                   </button>
                   {pendingCounterDeleteId === counter.id && (
                     <button
@@ -607,6 +719,53 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
             </div>
           ))}
         </div>
+        
+        {session?.user && counters.length > 0 && (
+          <div className="mt-8 pt-8 border-t border-dashed border-[var(--lg-border)]">
+             <div className="mb-4">
+              <p className="font-cute text-[var(--lg-rose)]" style={{ fontSize: "1.1rem" }}>
+                You also have local counters on this browser.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {counters.map((counter: any) => (
+                <div
+                  key={counter.id}
+                  className="bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-2xl p-4 flex items-start gap-3 shadow-[0_8px_22px_-16px_rgba(120,80,70,0.4)]"
+                >
+                  <img src={blooms.pinkDaisy} alt="" aria-hidden="true" className="w-10 h-10 object-contain shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className="text-[var(--lg-ink)] truncate"
+                      style={{ fontFamily: "'Fraunces', serif", fontWeight: 500, fontSize: "1rem" }}
+                    >
+                      {counter.title}
+                    </p>
+                    <p className="font-cute text-[var(--lg-rose)] mt-1" style={{ fontSize: "1.1rem" }}>
+                      {daysBetween(counter.start)} days
+                    </p>
+                    <p className="font-cute text-[var(--lg-cocoa)] mt-1" style={{ fontSize: "0.98rem" }}>
+                      since {formatLongDate(counter.start)}
+                    </p>
+                    <p className="mt-2 font-cute text-[var(--lg-cocoa)]/60" style={{ fontSize: "0.9rem" }}>
+                      Saved on this device.
+                    </p>
+                    <div className="mt-3 flex items-center gap-3 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => doRemoveCounter(counter.id, 'local')}
+                        className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
+                        style={{ fontSize: "1rem" }}
+                      >
+                        Remove from this device
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </>
     );
   };
@@ -643,7 +802,6 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
       caption="dear keepsake ✿"
       title={<span className="font-serif-italic text-[var(--lg-rose)]">keep it private</span>}
     >
-      {/* Tabs */}
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 px-7 pt-6 pb-3 border-b border-dashed border-[var(--lg-border)]">
         {tabs.map((t) => {
           const active = tab === t.id;
@@ -668,11 +826,10 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
         })}
       </div>
 
-      {/* List */}
       <div className="px-7 py-6 min-h-[280px]">
         <div className="mb-5 rounded-[22px] border border-dashed border-[var(--lg-border)] bg-[var(--lg-cream)]/50 px-5 py-4 flex items-center justify-between gap-4 flex-wrap">
           <p className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem" }}>
-            {authAvailable ? "Accounts are connected, but this archive is still stored only in this browser." : "Saved on this device only. Clearing browser data may remove these. Accounts are not connected yet."}
+            {session?.user ? "You are viewing your account archive." : (authAvailable ? "Accounts are connected, but this archive is still stored only in this browser." : "Saved on this device only. Clearing browser data may remove these. Accounts are not connected yet.")}
           </p>
           <button
             type="button"
@@ -704,19 +861,18 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
         </motion.div>
       </div>
 
-      {/* Footer */}
       <div className="px-7 pt-2 pb-6 flex items-center justify-between gap-4 flex-wrap border-t border-dashed border-[var(--lg-border)]">
         <span
           className="font-cute text-[var(--lg-cocoa)]"
           style={{ fontSize: "1.05rem" }}
         >
-          Private on this device for now.
+          {session?.user ? "Private account archive." : "Private on this device for now."}
         </span>
         <span
           className="font-cute text-[var(--lg-cocoa)]/50"
           style={{ fontSize: "1.1rem" }}
         >
-          Only available in this browser.
+          {session?.user ? "Available when you sign in." : "Only available in this browser."}
         </span>
       </div>
     </DiaryFrame>

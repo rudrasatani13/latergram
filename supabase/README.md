@@ -31,4 +31,5 @@ supabase db push
 - **Authentication:** Must be configured in the Supabase Dashboard.
 - **RLS (Row Level Security):** RLS is enabled across all sensitive tables.
 - **Service Role:** The Supabase Service Role key should **never** be used in the client application. The client must only interact with the database using the anon key and authenticated sessions, relying on RLS policies.
+- **Phase 9 Frontend Usage**: The frontend actively uses the `private_lategrams` and `time_since_counters` tables for signed-in users using the `anon` key. Local data import is strictly explicit. No automatic localStorage migration occurs.
 - **Public Garden Access:** Must use safe views (`public_garden_posts`, `public_garden_reaction_counts`) or RPCs, not raw base-table access. Do not expose `user_id` or reaction fingerprints from public Garden reads.

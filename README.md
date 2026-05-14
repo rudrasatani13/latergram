@@ -4,11 +4,11 @@ Some words arrive late. Latergram gives them a place.
 
 ## Current Status
 
-Phase 8 Database and Security Model complete.
+Phase 9 Account-Backed Private Storage V1 complete.
 
-The app now has a fully wired authentication foundation using Supabase Auth and a corresponding database/security schema structure prepared using PostgreSQL. It supports real account creation, sign in, sign out, password reset, and session persistence. The database schema has been created with all tables required for upcoming phases, protected by robust Row Level Security (RLS) policies.
+The app now has a fully wired authentication foundation using Supabase Auth and a true backend persistence model for "Keep Private" and "Time Since" counters. Real accounts are strictly segregated from local writing. Signed-in users save to their account archive, while signed-out users continue to save to their local device. No automatic migration occurs; local saves can be explicitly imported by the user.
 
-However, account-backed storage is not connected yet. Real accounts are strictly segregated from local writing. Saved data is stored only in this browser for now, is not synced, and may be removed if browser data is cleared. Migrations live under `supabase/migrations`. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
+Late Letters, the Garden, and Memory Cards remain simulated, and delivery/cloud sync for those features is not active. Migrations live under `supabase/migrations`. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
 
 ## Development Rule
 
@@ -117,7 +117,14 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 - [x] Enabled Row Level Security (RLS) and strict policies on all user and sensitive tables.
 - [x] Prepared safe public view for the future Garden.
 - [x] Added TypeScript definitions for database models.
-- [x] Kept storage safely disconnected: no UI changes, fake synced data, or local migration was added.
+
+### Phase 9: Account-Backed Private Storage V1
+- [x] Implemented typed database access layer for `private_lategrams`, `time_since_counters`, and `profiles`.
+- [x] Created database hooks `useAccountLategrams` and `useAccountCounters`.
+- [x] Updated DiaryComposer to seamlessly save to account when signed in, while preserving the device save option.
+- [x] Updated KeepPrivateView to separate account archive from local device archive.
+- [x] Added explicit "Import local saves" feature to explicitly move local storage to the account archive.
+- [x] Maintained strict live-only design rules (no generic UI destruction or fake sync).
 
 ## Run Locally
 
