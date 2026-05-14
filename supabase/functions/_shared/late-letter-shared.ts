@@ -98,7 +98,6 @@ export async function requestSecretMatches(
     : "";
   const providedSecret = req.headers.get("x-latergram-cron-secret")?.trim() ||
     bearerSecret ||
-    req.headers.get("apikey")?.trim() ||
     "";
 
   if (!providedSecret) {
