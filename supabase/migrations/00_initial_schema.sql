@@ -93,16 +93,16 @@ CREATE TABLE IF NOT EXISTS garden_posts (
 CREATE TRIGGER update_garden_posts_updated_at BEFORE UPDATE ON garden_posts FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Safe public view for Garden Posts (excluding user_id and sensitive fields)
--- This view uses security_invoker = true to respect RLS and follow security best practices.
-CREATE OR REPLACE VIEW public_garden_posts 
-WITH (security_invoker = true)
+-- This view uses security_invoker = on to respect RLS and follow security best practices.
+CREATE OR REPLACE VIEW public.public_garden_posts 
+WITH (security_invoker = on)
 AS
 SELECT id, body, category, anonymous_seed, created_at, updated_at
-FROM garden_posts
+FROM public.garden_posts
 WHERE moderation_state = 'approved' AND deleted_at IS NULL;
 
-GRANT SELECT ON public_garden_posts TO anon, authenticated;
-GRANT SELECT (id, body, category, anonymous_seed, created_at, updated_at, moderation_state, deleted_at) ON garden_posts TO anon, authenticated;
+GRANT SELECT ON public.public_garden_posts TO anon, authenticated;
+GRANT SELECT (id, body, category, anonymous_seed, created_at, updated_at, moderation_state, deleted_at) ON public.garden_posts TO anon, authenticated;
 
 -- 6. Garden Reactions
 CREATE TABLE IF NOT EXISTS garden_reactions (
@@ -115,18 +115,18 @@ CREATE TABLE IF NOT EXISTS garden_reactions (
 );
 
 -- Safe public view for Garden Reaction Counts
--- This view uses security_invoker = true to respect RLS and follow security best practices.
-CREATE OR REPLACE VIEW public_garden_reaction_counts 
-WITH (security_invoker = true)
+-- This view uses security_invoker = on to respect RLS and follow security best practices.
+CREATE OR REPLACE VIEW public.public_garden_reaction_counts 
+WITH (security_invoker = on)
 AS
 SELECT post_id, count(*) as reaction_count
-FROM garden_reactions gr
-JOIN garden_posts gp ON gr.post_id = gp.id
+FROM public.garden_reactions gr
+JOIN public.garden_posts gp ON gr.post_id = gp.id
 WHERE gp.moderation_state = 'approved' AND gp.deleted_at IS NULL
 GROUP BY post_id;
 
-GRANT SELECT ON public_garden_reaction_counts TO anon, authenticated;
-GRANT SELECT (post_id) ON garden_reactions TO anon, authenticated;
+GRANT SELECT ON public.public_garden_reaction_counts TO anon, authenticated;
+GRANT SELECT (post_id) ON public.garden_reactions TO anon, authenticated;
 
 -- 7. Garden Reports
 CREATE TABLE IF NOT EXISTS garden_reports (
