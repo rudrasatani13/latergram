@@ -63,17 +63,17 @@ Master plan: [`LATERGRAM_DETAILED_PHASE_PLAN.md`](../LATERGRAM_DETAILED_PHASE_PL
 - Phase 4: make the write flow complete without pretending unsupported outcomes work.
 - Phase 5: add device storage for real user-created content.
 - Phase 7 and later: add real accounts and backend-backed product behavior.
-- Phase 14/public launch preparation: migrate product assets away from raw GitHub URLs.
+- Phase 14/public launch preparation: audit product asset loading for performance and caching.
 
-## Raw GitHub Asset URL Note
+## Asset Hosting Note
 
-Current asset base URL in `src/app/components/BrandAssets.ts`:
+At the time of the Phase 1 audit, `src/app/components/BrandAssets.ts` pointed to raw GitHub asset URLs:
 
 ```text
 https://raw.githubusercontent.com/rudrasatani13/Lategram/main/assets
 ```
 
-This is temporary. Assets must move to a controlled CDN or self-hosted path before public launch or mobile polish. Phase 1 documents the issue but does not migrate assets.
+Current product assets are served from local `/assets` paths. Before public launch or mobile polish, asset loading should still be audited for performance and caching.
 
 ## Phase 1 Boundary Confirmation
 

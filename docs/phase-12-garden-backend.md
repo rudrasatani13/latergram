@@ -2,7 +2,7 @@
 
 ## Overview
 
-Phase 12 builds the real backend infrastructure for The Garden — Latergram's anonymous emotional sharing space. The Garden UI remains hidden from users until Phase 13 safety and moderation work is complete.
+Phase 12 builds the real backend infrastructure for The Garden — Latergram's anonymous emotional sharing space. The Garden product UI remains closed/unavailable until Phase 13 safety and moderation work is complete. The app may show a closed Garden placeholder, but it does not show public Garden posts or expose posting, reactions, or reports in the product UI.
 
 After this phase:
 - Garden backend exists and is real.
@@ -15,7 +15,9 @@ After this phase:
 
 ## Migration
 
-**File:** `supabase/migrations/0003_phase_12_garden_backend.sql`
+**Primary file:** `supabase/migrations/20260301000000_phase_12_garden_backend.sql`
+
+**Cleanup file:** `supabase/migrations/20260302000000_phase_12_garden_backend_cleanup.sql`
 
 ### What the migration does:
 
@@ -32,6 +34,12 @@ After this phase:
    - `report_garden_post(p_post_id, p_reason, p_details)` — Report creation
 
 4. **Adds indexes** for reaction lookups, duplicate report checks, and category filtering.
+
+The cleanup migration explicitly revokes the old column-level grants from the initial schema:
+- `garden_posts`: `id`, `body`, `category`, `anonymous_seed`, `created_at`, `updated_at`, `moderation_state`, `deleted_at`
+- `garden_reactions`: `post_id`
+
+It also repeats broad raw table revokes, drops the old broad public raw SELECT policies idempotently, and preserves grants for the safe views/RPC.
 
 ## Backend APIs / RPCs
 
@@ -165,8 +173,8 @@ After this phase:
 
 - Raw SELECT on `garden_posts` revoked from anon/authenticated
 - Raw SELECT on `garden_reactions` revoked from anon/authenticated
-- Authenticated users can SELECT their own garden_posts (for "my submissions")
-- Authenticated users can SELECT their own garden_reactions (for toggle state)
+- Own-row SELECT RLS policies for garden_posts and garden_reactions remain defined, but raw base-table SELECT grants are not restored
+- Own submission and reaction state reads should use the safe RPCs
 - Authenticated users can INSERT pending garden_posts (existing policy preserved)
 - Authenticated users can INSERT reactions on approved posts (existing policy preserved)
 - Authenticated users can INSERT reports (existing policy preserved)
@@ -176,16 +184,18 @@ After this phase:
 
 ## What Remains Not Live
 
-- The Garden UI is hidden from normal users
+- The Garden product UI is closed/unavailable
+- The app may show a closed Garden placeholder
 - No public Garden browsing experience exists
-- No Garden entry in main navigation
+- Garden posts are not shown in the product UI
+- No Garden posting, reactions, or reporting are visible in the product UI
 - No real Garden posts are shown in the product UI
 - Posts are never auto-approved
 - No moderation queue or admin UI exists yet
 
-## Why Garden UI Remains Hidden
+## Why Garden UI Remains Closed
 
-The Garden is a public anonymous emotional space. Public anonymous spaces attract abuse. The Garden will not be visible to users until Phase 13 safety and moderation infrastructure is complete. This is a deliberate product safety decision documented in the master plan.
+The Garden is a public anonymous emotional space. Public anonymous spaces attract abuse. The Garden will not launch until Phase 13 safety and moderation infrastructure is complete. This is a deliberate product safety decision documented in the master plan.
 
 ## Phase 13 Safety Dependencies
 

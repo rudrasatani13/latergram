@@ -8,8 +8,9 @@
  * - Report posts (authenticated)
  * - List own submissions (authenticated)
  *
- * IMPORTANT: The Garden UI is NOT live yet. These functions exist for
- * backend readiness only. The Garden remains hidden until Phase 13
+ * IMPORTANT: The Garden product UI is NOT live yet. These functions exist for
+ * backend readiness only. The app may show a closed Garden placeholder, but no
+ * public browsing, posting, reactions, or reports are visible until Phase 13
  * safety and moderation work is complete.
  *
  * No user_id, reporter_user_id, or anonymous_fingerprint_hash is

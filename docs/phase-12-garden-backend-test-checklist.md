@@ -1,6 +1,9 @@
 # Phase 12: Garden Backend — Security & SQL Test Checklist
 
-This checklist documents the security invariants that must hold for the Garden backend. These can be verified via SQL queries against a Supabase instance with the Phase 12 migration applied.
+This checklist documents the security invariants that must hold for the Garden backend. These can be verified via SQL queries against a Supabase instance with the Phase 12 migrations applied:
+
+- `supabase/migrations/20260301000000_phase_12_garden_backend.sql`
+- `supabase/migrations/20260302000000_phase_12_garden_backend_cleanup.sql`
 
 ## Access Control Tests
 
@@ -146,4 +149,30 @@ SELECT * FROM garden_posts;
 SELECT * FROM garden_reactions;
 -- Expected: ERROR (permission denied) or 0 rows
 RESET ROLE;
+```
+
+### Initial column-level Garden grants revoked
+```sql
+-- These should not exist for anon/authenticated after the cleanup migration:
+SELECT grantee, table_name, column_name, privilege_type
+FROM information_schema.column_privileges
+WHERE table_schema = 'public'
+  AND table_name IN ('garden_posts', 'garden_reactions')
+  AND grantee IN ('anon', 'authenticated')
+  AND privilege_type = 'SELECT'
+ORDER BY grantee, table_name, column_name;
+-- Expected: 0 rows
+```
+
+### Safe public read surface remains granted
+```sql
+SELECT has_function_privilege(
+  'anon',
+  'public.get_public_garden_posts(text, int, timestamptz)',
+  'EXECUTE'
+) AS anon_can_execute_public_posts_rpc;
+
+SELECT has_table_privilege('anon', 'public.public_garden_posts', 'SELECT') AS anon_can_select_safe_posts_view;
+SELECT has_table_privilege('anon', 'public.public_garden_reaction_counts', 'SELECT') AS anon_can_select_safe_reaction_counts_view;
+-- Expected: true for all three if the safe views are intentionally kept.
 ```

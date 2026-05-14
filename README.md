@@ -10,9 +10,9 @@ The app now has a fully wired authentication foundation using Supabase Auth and 
 
 Late Letters can now be delivered through Resend when the Supabase Edge Function secrets and delivery job are configured. Scheduled letters are sent server-side, receive real Resend message IDs, and open through secure recipient links. Sender status labels are backed by database/provider/page-open state. Recipient email remains masked in the saved-letter UI after saving.
 
-The Garden backend is ready. Authenticated users can submit Garden posts (which start as pending moderation). Approved posts can be read through safe RPCs that do not expose user identity. "Felt this" reactions and reports are real and backed by the database. The Garden UI remains hidden from users — no public Garden browsing, posting, or reactions are visible in the product until Phase 13 safety and moderation work is complete.
+The Garden backend is ready. Authenticated users can submit Garden posts (which start as pending moderation). Approved posts can be read through safe RPCs/views that do not expose user identity. "Felt this" reactions and reports are real backend surfaces. The Garden product UI remains closed/unavailable; the app may show a closed Garden placeholder, but no public Garden browsing, posting, reactions, or reporting are visible in the product until Phase 13 safety and moderation work is complete.
 
-Memory Cards are not connected yet, and delivery/cloud sync for those features is not active. Migrations live under `supabase/migrations`. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
+Memory Cards are not connected yet; no Memory Card generation, export, sharing, or cloud sync is active. Migrations live under `supabase/migrations`. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
 
 ## Development Rule
 
@@ -26,7 +26,7 @@ Latergram is live-only product development:
 - No fake Memory Card sources.
 - No fake account-backed behavior.
 - No UI that makes a non-live feature look complete.
-- Local saved content must be described as device/browser-only until account storage exists.
+- Local saved content must be described as device/browser-only when it has not been explicitly saved or imported into an account.
 
 If a feature is not working end-to-end with real data, the UI must say so clearly or stay disabled.
 
@@ -45,6 +45,7 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 - Recipient opt-out hashing and send-time opt-out checks.
 - Recipient email masking in saved Late Letter UI.
 - Late Letter cancellation before sending.
+- Garden backend RPCs/views for safe approved-post reads, pending submissions, reactions, and reports.
 - Local browser/device saving for signed-out users.
 - Explicit local-to-account import.
 - Account/device archive separation.
@@ -65,8 +66,8 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 
 ## What Is Not Live Yet
 
-- Public Garden browsing, posting, reactions, or reporting in the product UI (backend is ready but UI remains hidden until safety/moderation is complete).
-- Garden moderation queue, admin review, or content filtering.
+- Public Garden browsing, posting, reactions, or reporting in the product UI (backend is ready, but the product UI remains closed/unavailable until safety/moderation is complete).
+- Garden moderation queue, admin review, content filtering, and full safety workflow.
 - Memory Card generation, download, sharing, or export.
 - Received letters.
 - Guaranteed delivery or guaranteed read receipts.
@@ -160,7 +161,8 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 - [x] Preserved cancellation before send and masked recipient email display.
 
 ### Phase 12: Garden Backend V1
-- [x] Created Phase 12 migration (`supabase/migrations/0003_phase_12_garden_backend.sql`).
+- [x] Created Phase 12 migration (`supabase/migrations/20260301000000_phase_12_garden_backend.sql`).
+- [x] Added Phase 12 cleanup migration (`supabase/migrations/20260302000000_phase_12_garden_backend_cleanup.sql`) to explicitly revoke old column-level raw table grants.
 - [x] Hardened raw Garden table access — revoked direct SELECT from anon/authenticated on base tables.
 - [x] Recreated safe public views with `security_barrier`.
 - [x] Built `get_public_garden_posts` RPC for safe approved-post reads with category filter and pagination.
@@ -173,7 +175,7 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 - [x] Added performance indexes for reactions, reports, and category filtering.
 - [x] Created typed frontend data layer (`src/app/db/garden.ts`) using RPC calls only.
 - [x] Confirmed no user_id, reporter_user_id, or anonymous_fingerprint_hash exposed publicly.
-- [x] Garden UI remains hidden — "The Garden is not open yet."
+- [x] Garden product UI remains closed/unavailable — "The Garden is not open yet."
 - [x] No fake posts, reactions, reports, or moderation added.
 - [x] Documented Phase 13 safety dependencies.
 
@@ -192,10 +194,4 @@ npm run build
 
 ## Asset Hosting Note
 
-`src/app/components/BrandAssets.ts` currently points to raw GitHub asset URLs:
-
-```text
-https://raw.githubusercontent.com/rudrasatani13/Lategram/main/assets
-```
-
-This is temporary. Before public launch or mobile polish, product assets must move to a controlled CDN or self-hosted path. This is documented as future Phase 14/public-launch work and was not migrated in Phase 1.
+Product assets are currently served from local `/assets` paths. Before public launch, asset loading should be audited for performance and caching.

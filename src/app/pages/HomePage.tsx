@@ -49,7 +49,7 @@ const quickAreas = [
   },
   {
     title: "Late Letters",
-    desc: "letters can be saved for future delivery while delivery stays disconnected.",
+    desc: "letters can be scheduled, sent, and opened through secure links when delivery is configured.",
     cta: "view letters space",
     glyph: "❁",
     target: "later" as Section,
@@ -83,6 +83,13 @@ export function HomePage() {
   const active = resolveSection(searchParams.get("section"));
   const todayLabel = formatTodayLabel();
   const { session } = useAuth();
+  const isSignedIn = Boolean(session?.user);
+  const heroStorageCopy = isSignedIn
+    ? "Signed in. Private saves can live in your account, and device-only saves are still available when you choose them."
+    : "You can write locally without an account. Saved words stay only in this browser until you sign in.";
+  const keepsakeCopy = isSignedIn
+    ? "a place for the things you choose to keep. account saves stay with your sign-in, and device-only saves remain separate."
+    : "a place for the things you choose to keep. local saves stay on this device unless you sign in and import them.";
 
   const setActive = useCallback(
     (section: Section) => {
@@ -140,7 +147,7 @@ export function HomePage() {
                 className="text-[var(--lg-cocoa)] leading-[1.8] max-w-xl mx-auto"
                 style={{ fontSize: "1.02rem" }}
               >
-                {session ? "Signed in. Saved writing is still local to this browser." : "You can write locally without an account. Saved words stay only in this browser for now."}
+                {heroStorageCopy}
               </p>
             </motion.div>
 
@@ -308,8 +315,7 @@ export function HomePage() {
                 className="mt-5 text-[var(--lg-cocoa)] leading-[1.7]"
                 style={{ fontSize: "1rem" }}
               >
-                a place for the things you choose to keep. saved writing stays on this device only.
-                clearing browser data may remove it.
+                {keepsakeCopy}
               </p>
               <button
                 onClick={() => setActive("private")}

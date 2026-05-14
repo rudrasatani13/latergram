@@ -131,7 +131,12 @@ The webhook handler verifies the raw body with `RESEND_WEBHOOK_SECRET`, dedupes 
 
 ## Garden Backend (Phase 12)
 
-Phase 12 adds the real Garden backend infrastructure. The Garden UI remains hidden until Phase 13 safety and moderation work is complete.
+Phase 12 adds the real Garden backend infrastructure. The Garden product UI remains closed/unavailable until Phase 13 safety and moderation work is complete. The app may show a closed Garden placeholder, but no public Garden browsing, posting, reactions, or reporting are visible in the product UI.
+
+Migration files:
+
+- `migrations/20260301000000_phase_12_garden_backend.sql`
+- `migrations/20260302000000_phase_12_garden_backend_cleanup.sql`
 
 ### Garden RPCs
 
@@ -152,15 +157,16 @@ Phase 12 adds the real Garden backend infrastructure. The Garden UI remains hidd
 
 ### Raw Table Access Rules
 
-- Direct SELECT on `garden_posts` is revoked from anon/authenticated (except own rows for authenticated users).
-- Direct SELECT on `garden_reactions` is revoked from anon/authenticated (except own rows for authenticated users).
+- Direct SELECT grants on `garden_posts` are revoked from anon/authenticated.
+- Direct SELECT grants on `garden_reactions` are revoked from anon/authenticated.
+- The cleanup migration explicitly revokes the initial schema's column-level raw SELECT grants on `garden_posts` and `garden_reactions`.
 - `garden_reports` has no public SELECT policy. Reports are private.
 - All public Garden reads go through safe views or SECURITY DEFINER RPCs.
 
 ### Garden RLS Notes
 
 - Authenticated users can INSERT pending posts (user_id = auth.uid()).
-- Authenticated users can SELECT their own posts and reactions.
+- Own-row SELECT policies for posts and reactions remain defined, but the frontend should use the safe RPCs for own submissions and reaction state.
 - Authenticated users can INSERT reactions on approved posts.
 - Authenticated users can INSERT reports.
 - No user can approve/reject/remove posts through RLS policies.
@@ -171,7 +177,10 @@ Phase 12 adds the real Garden backend infrastructure. The Garden UI remains hidd
 - Garden backend is ready.
 - Garden posts are submitted for review (pending moderation).
 - Approved posts are available through safe backend APIs.
-- The Garden remains hidden until safety and moderation are complete (Phase 13).
+- The Garden product UI remains closed/unavailable until safety and moderation are complete (Phase 13).
+- The app may show a closed Garden placeholder.
+- Garden posts are not shown in the product UI.
+- No public Garden browsing, posting, reactions, or reporting are live in the product UI.
 
 ## Security Requirements
 
@@ -181,5 +190,5 @@ Phase 12 adds the real Garden backend infrastructure. The Garden UI remains hidd
 - **Edge Functions:** The service-role key is allowed only inside Supabase Edge Function secrets for delivery jobs, recipient token validation, webhook processing, and recipient opt-out hashing. Never import it into frontend code.
 - **Phase 9 Frontend Usage**: The frontend actively uses the `private_lategrams` and `time_since_counters` tables for signed-in users using the `anon` key. Local data import is strictly explicit. No automatic localStorage migration occurs.
 - **Phase 11 Frontend Usage:** The frontend reads Late Letter sender rows through the anon client and RLS, but it only selects masked recipient email and real status timestamps. Recipient `/letter/:token` pages call `open-letter` and do not query private tables directly.
-- **Phase 12 Garden Backend:** Public Garden reads use safe RPCs (`get_public_garden_posts`) or views (`public_garden_posts`, `public_garden_reaction_counts`). Raw base-table SELECT is revoked from anon/authenticated. No `user_id`, `reporter_user_id`, or `anonymous_fingerprint_hash` is exposed through any public surface. The Garden UI is not live.
+- **Phase 12 Garden Backend:** Public Garden reads use safe RPCs (`get_public_garden_posts`) or views (`public_garden_posts`, `public_garden_reaction_counts`). Raw base-table SELECT is revoked from anon/authenticated, including the initial schema's old column-level grants. No `user_id`, `reporter_user_id`, or `anonymous_fingerprint_hash` is exposed through any public surface. The Garden product UI is closed/unavailable.
 - **Webhook Events:** `resend_webhook_events` has RLS enabled and no public policies. Webhook payloads must not be exposed through frontend reads.
