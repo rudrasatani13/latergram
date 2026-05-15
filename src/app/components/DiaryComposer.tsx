@@ -105,6 +105,15 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
     const hasContent = Boolean(text.trim() || to.trim() || subject.trim());
 
     if (!hasContent) {
+      const result = deleteLocalDraft();
+      setStoredDraft(null);
+      setAutoSaveStatus(result.ok ? "Local draft cleared." : "Unable to clear local draft.");
+      setSaveState("not saved yet");
+      if (!result.ok) {
+        setNote("Unable to clear local draft in this browser.");
+      } else {
+        setNote("");
+      }
       return;
     }
 

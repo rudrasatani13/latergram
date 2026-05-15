@@ -7,10 +7,10 @@ import "./styles/index.css";
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
-    <AuthProvider>
-      <AppErrorBoundary>
+    <AppErrorBoundary>
+      <AuthProvider>
         <App />
-      </AppErrorBoundary>
-    </AuthProvider>
+      </AuthProvider>
+    </AppErrorBoundary>
   </BrowserRouter>
 );
