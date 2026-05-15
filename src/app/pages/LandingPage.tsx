@@ -20,7 +20,7 @@ const fates = [
   { title: "Late Letters", desc: "schedule words to arrive later.", glyph: "❁" },
   { title: "The Garden", desc: "closed in the product UI until it is intentionally opened.", glyph: "✾" },
   { title: "Time Since", desc: "a soft counter for what mattered.", glyph: "❃" },
-  { title: "Memory Cards", desc: "not connected yet; no card output is active.", glyph: "❀" },
+  { title: "Memory Cards", desc: "export a PNG from saved writing or a saved counter.", glyph: "❀" },
 ];
 
 const ritual = [

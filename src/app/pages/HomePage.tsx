@@ -36,7 +36,7 @@ const categories = [
   { id: "later" as Section, label: "Late Letters", glyph: "❁" },
   { id: "time" as Section, label: "Time Since", glyph: "❃" },
   { id: "garden" as Section, label: "The Garden", glyph: "✾", status: "closed" },
-  { id: "memory" as Section, label: "Memory Cards", glyph: "❀", status: "unavailable" },
+  { id: "memory" as Section, label: "Memory Cards", glyph: "❀" },
 ];
 
 const mobileNavItems = [
@@ -70,8 +70,8 @@ const quickAreas = [
   },
   {
     title: "Memory Cards",
-    desc: "Memory Cards are not connected yet. no card generation, export, or sharing is active.",
-    cta: "view card status",
+    desc: "export a real PNG from one saved Lategram or Time Since counter you choose.",
+    cta: "make a card",
     glyph: "❀",
     target: "memory" as Section,
   },

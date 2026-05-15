@@ -59,7 +59,7 @@ const destinations: Array<{
   {
     id: "memory",
     label: "memory card",
-    guidance: "Cards need saved memories first. Save locally or copy before leaving.",
+    guidance: "Save first, then choose it in Memory Cards to export a PNG.",
     viewLabel: "view Card space",
   },
 ];
@@ -151,7 +151,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
       if (id === "private") return "Save privately to your account, or keep a device copy.";
       if (id === "later") return "Use Late Letters to schedule delivery. Save privately to your account for now.";
       if (id === "garden") return "The Garden is closed for now. Save privately to your account for now.";
-      if (id === "memory") return "Export is not connected yet. Save privately to your account for now.";
+      if (id === "memory") return "Save privately first, then choose it in Memory Cards to export a PNG.";
     }
     
     // Default/Signed-out guidance
@@ -331,7 +331,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
       ? "Written as a future letter, saved privately to your account. Use Late Letters to schedule delivery."
       : destination === "garden"
       ? "Written for the Garden, saved privately to your account."
-      : "Written for a memory card, saved privately to your account. Export is not connected yet.";
+      : "Written for a memory card, saved privately to your account. Open Memory Cards to export it if you choose.";
       
     setNote(noteText);
   };

@@ -45,7 +45,7 @@ const destinationNotes: Record<LocalDestination, string> = {
   private: "Saved on this device.",
   later: "Written as a late letter, saved privately on this device. Use Late Letters to schedule delivery.",
   garden: "Written for the Garden, saved privately on this device.",
-  memory: "Written for a Memory Card, saved privately on this device. Card export is not connected yet.",
+  memory: "Written for a Memory Card, saved privately on this device. Open Memory Cards to export it if you choose.",
 };
 
 type KeepPrivateTab = (typeof tabs)[number]["id"];
@@ -1034,7 +1034,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
       return (
         <EmptyState
           message="No saved cards on this device yet."
-          note="Card export is not connected yet."
+          note="Saved card history is not connected yet. Memory Cards can export PNGs without saving a card history."
         />
       );
     }

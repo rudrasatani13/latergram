@@ -4,9 +4,9 @@ Some words arrive late. Latergram gives them a place.
 
 ## Current Status
 
-Phase 15 Performance and Error Handling implemented in the repo.
+Phase 16 Memory Card Export implemented in the repo.
 
-The app now has reliability hardening for launch preparation: async loading/disabled states, honest account/network error copy, recipient token error handling, local draft auto-save and restore, app-level crash fallback, large Keepsake list limiting, and route-level bundle splitting. This does not mean public launch readiness is complete.
+The app now has real export-only Memory Cards: users can explicitly choose one saved Lategram or one saved Time Since counter from either their device archive or, when signed in, their account archive, preview the privacy-safe card text, and download a real PNG in square, story, or phone wallpaper format. This does not mean public launch readiness is complete.
 
 The app has a fully wired authentication foundation using Supabase Auth and a true backend persistence model for "Keep Private", "Time Since" counters, and scheduled Late Letter records. Real accounts are strictly segregated from local writing. Signed-in users save private Lategrams and Time Since counters to their account archive, while signed-out users continue to save supported local records to their local device. No automatic migration occurs; local saves can be explicitly imported by the user.
 
@@ -14,7 +14,7 @@ Late Letters can now be delivered through Resend when the Supabase Edge Function
 
 The Garden backend now has a real safety foundation: moderator/admin membership, moderator-only queue/review RPCs, server-side content filtering, per-user submission rate limiting, and real report handling. The Garden product UI remains closed/unavailable. Anonymous public Garden execution remains locked. Authenticated Garden RPCs are safety-hardened for future opening and internal testing only after the Phase 13 migration is applied.
 
-Memory Cards are not connected yet; no Memory Card generation, export, sharing, preview source selection, or cloud sync is active. Phase 13 migrations and cleanup migrations live under `supabase/migrations`. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
+Memory Card export is live only for real saved Lategrams and real saved Time Since counters. Saved card history/metadata, sharing, auto-upload, and cloud sync are not active. Phase 13 migrations and cleanup migrations live under `supabase/migrations`. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
 
 ## Development Rule
 
@@ -57,6 +57,9 @@ After the current migrations and Edge Functions are applied:
 - Local browser/device saving for signed-out users.
 - Explicit local-to-account import.
 - Account/device archive separation.
+- Real Memory Card PNG export from explicitly selected saved Lategrams or Time Since counters.
+- Memory Card formats: square 1080 x 1080, story 1080 x 1920, and phone wallpaper 1170 x 2532.
+- Memory Card export is client-side Canvas-based and does not upload, share, or auto-save card output.
 - A Vite React app shell with real route-based navigation (React Router v7).
 - A soft landing page that describes the product vision (`/`).
 - An account access page (`/auth`).
@@ -68,8 +71,8 @@ After the current migrations and Edge Functions are applied:
 - Recipient, subject, and intended-destination context inside the write flow.
 - Clear/reset behavior that asks before removing current words.
 - Visible guidance that saved writing is only available in this browser/device for signed-out users.
-- Honest empty/unavailable states for The Garden and Memory Cards.
-- Mobile-friendly closed/unavailable states for The Garden and Memory Cards.
+- Honest empty/unavailable states for The Garden and for saved card history.
+- Mobile-friendly closed Garden and Memory Card export states.
 - A soft Latergram-style 404 page for unknown routes.
 - Stable design system with shared components (Phase 2).
 - Browser back/forward navigation and direct URL access.
@@ -80,7 +83,8 @@ After the current migrations and Edge Functions are applied:
 - Anonymous public Garden browsing via `anon` execution.
 - A moderator web UI. Phase 13 moderation is DB/RPC-based.
 - Garden submission IP-based rate limiting. Current enforced limit is per authenticated user only.
-- Memory Card generation, download, sharing, or export.
+- Saved Memory Card history/metadata.
+- Memory Card sharing, auto-upload, or cloud sync.
 - Received letters.
 - Guaranteed delivery or guaranteed read receipts.
 - Analytics, payments, AI, or public launch infrastructure.
@@ -213,7 +217,7 @@ After the current migrations and Edge Functions are applied:
 - [x] Confirmed no new Supabase migrations, dependency upgrades, or production config changes were needed.
 
 ### Phase 15: Performance and Error Handling
-- [x] Audited auth, account storage, Time Since, Late Letters, recipient letter, Garden closed, and Memory Card unavailable async flows.
+- [x] Audited auth, account storage, Time Since, Late Letters, recipient letter, Garden closed, and then-unavailable Memory Card async flows.
 - [x] Added calmer offline/network/account error handling without exposing raw technical details in user UI.
 - [x] Added local draft auto-save and refresh restore without automatic account migration, scheduling, or sending.
 - [x] Added app-level render error fallback with a safe recovery path back to writing.
@@ -221,8 +225,17 @@ After the current migrations and Edge Functions are applied:
 - [x] Improved Late Letter schedule/cancel/report loading states and kept status labels database-backed.
 - [x] Improved recipient token loading/unavailable/retry states and report/block/opt-out submission handling.
 - [x] Split route/vendor bundles and lazy-loaded route pages to reduce initial app chunk pressure.
-- [x] Confirmed Garden remains closed/unavailable and Memory Cards remain unavailable.
+- [x] Confirmed Garden remained closed/unavailable and Memory Cards stayed unavailable during Phase 15.
 - [x] Documented Phase 15 in [`docs/phase-15-performance-error-handling.md`](./docs/phase-15-performance-error-handling.md).
+
+### Phase 16: Memory Card Export
+- [x] Replaced the unavailable Memory Cards section with real export-only card generation.
+- [x] Source selection is explicit and uses only real saved Lategrams or real saved Time Since counters from device storage or, when signed in, account storage.
+- [x] Added square, story, and phone wallpaper PNG export through native browser Canvas APIs.
+- [x] Added privacy-safe previews, disabled/missing-source/exporting/error states, and safe non-sensitive filenames.
+- [x] Kept saved card history/metadata deferred and did not add sharing, cloud sync, analytics, AI, or fake card sources.
+- [x] Confirmed Garden remains closed/unavailable and no Garden cards or Garden RPC changes were added.
+- [x] Documented Phase 16 in [`docs/phase-16-memory-card-export.md`](./docs/phase-16-memory-card-export.md).
 
 ## Run Locally
 
