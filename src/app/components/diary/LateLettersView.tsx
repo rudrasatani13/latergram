@@ -310,7 +310,7 @@ export function LateLettersView() {
       caption="dear future ❀"
       title={<span className="font-serif-italic text-[var(--lg-rose)]">late letters</span>}
     >
-      <div className="flex items-center justify-between px-7 pt-6 pb-3 border-b border-dashed border-[var(--lg-border)]">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 sm:px-7 pt-6 pb-3 border-b border-dashed border-[var(--lg-border)]">
         <span className="font-cute text-[var(--lg-rose)]" style={{ fontSize: "1.15rem" }}>
           letters written with love
         </span>
@@ -324,7 +324,7 @@ export function LateLettersView() {
               setPendingCancelId(null);
               setReportStatus("");
             }}
-            className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-300"
+            className="min-h-11 min-w-11 inline-flex items-center justify-center px-2 font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-300"
             style={{ fontSize: "1.1rem" }}
           >
             {composing ? "← back to letters" : "+ write a letter"}
@@ -332,7 +332,7 @@ export function LateLettersView() {
         ) : (
           <a
             href="/auth"
-            className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-300"
+            className="min-h-11 inline-flex items-center font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-300"
             style={{ fontSize: "1.1rem" }}
           >
             sign in
@@ -341,20 +341,20 @@ export function LateLettersView() {
       </div>
 
       {authLoading ? (
-        <div className="px-7 py-6 min-h-[280px]">
+        <div className="px-4 sm:px-7 py-6 min-h-[280px]">
           <EmptyState message="Checking your account." note="Late Letters need a signed-in account." />
         </div>
       ) : !authAvailable ? (
-        <div className="px-7 py-6 min-h-[280px]">
+        <div className="px-4 sm:px-7 py-6 min-h-[280px]">
           <EmptyState message="Accounts are not connected right now." note="Sign in is needed to schedule a Late Letter." />
         </div>
       ) : !signedIn ? (
-        <div className="px-7 py-6 space-y-4 min-h-[280px]">
+        <div className="px-4 sm:px-7 py-6 space-y-4 min-h-[280px]">
           <EmptyState message="Sign in to schedule a Late Letter." note="Recipient email is hidden after saving." />
           <div className="text-center">
             <a
               href="/auth"
-              className="inline-flex items-center gap-2 bg-[var(--lg-rose)] text-white py-3 px-6 rounded-full hover:bg-[var(--lg-focus-rose)] transition-colors duration-300 shadow-[0_8px_22px_-12px_rgba(200,110,124,0.5)]"
+              className="min-h-12 inline-flex items-center gap-2 bg-[var(--lg-rose)] text-white py-3 px-6 rounded-full hover:bg-[var(--lg-focus-rose)] transition-colors duration-300 shadow-[0_8px_22px_-12px_rgba(200,110,124,0.5)]"
               style={{ fontSize: "0.95rem", fontWeight: 600 }}
             >
               <img src={decor.envelopeMini} alt="" aria-hidden="true" className="w-4 h-4 object-contain" />
@@ -363,7 +363,7 @@ export function LateLettersView() {
           </div>
         </div>
       ) : composing ? (
-        <form onSubmit={saveLetter} className="px-7 py-6 space-y-4 min-h-[280px]">
+        <form onSubmit={saveLetter} className="px-4 sm:px-7 py-6 space-y-4 min-h-[280px]">
           <div className="bg-[var(--lg-cream)] border border-dashed border-[var(--lg-rose-soft)] rounded-2xl px-4 py-3">
             <p className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem" }}>
               Recipient email is hidden after saving. You can cancel before a letter is sent. After a letter is sent, it cannot be recalled.
@@ -405,19 +405,19 @@ export function LateLettersView() {
 
           <Row label="save for">
             <FieldBlock error={fieldErrors.scheduledFor}>
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
                 <input
                   value={draft.date}
                   onChange={(event) => updateDraft("date", event.target.value)}
                   type="date"
-                  className="bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-2 focus:outline-none focus:border-[var(--lg-rose)] text-[var(--lg-ink)]"
+                  className="min-h-11 w-full sm:w-auto bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-2 focus:outline-none focus:border-[var(--lg-rose)] text-[var(--lg-ink)]"
                   style={{ fontSize: "1.05rem" }}
                 />
                 <input
                   value={draft.time}
                   onChange={(event) => updateDraft("time", event.target.value)}
                   type="time"
-                  className="bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-2 focus:outline-none focus:border-[var(--lg-rose)] text-[var(--lg-ink)]"
+                  className="min-h-11 w-full sm:w-auto bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-2 focus:outline-none focus:border-[var(--lg-rose)] text-[var(--lg-ink)]"
                   style={{ fontSize: "1.05rem" }}
                 />
               </div>
@@ -437,7 +437,7 @@ export function LateLettersView() {
             </FieldBlock>
           </Row>
 
-          <div className="pt-2 flex items-center justify-end gap-4">
+          <div className="pt-2 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 sm:gap-4">
             <button
               type="button"
               onClick={() => {
@@ -445,7 +445,7 @@ export function LateLettersView() {
                 setFieldErrors({});
                 setStatus("");
               }}
-              className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)]"
+              className="min-h-11 inline-flex items-center justify-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)]"
               style={{ fontSize: "1.1rem" }}
             >
               close
@@ -453,7 +453,7 @@ export function LateLettersView() {
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 bg-[var(--lg-rose)] text-white py-3 px-6 rounded-full hover:bg-[var(--lg-focus-rose)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-300 shadow-[0_8px_22px_-12px_rgba(200,110,124,0.5)]"
+              className="min-h-12 w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[var(--lg-rose)] text-white py-3 px-6 rounded-full hover:bg-[var(--lg-focus-rose)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-300 shadow-[0_8px_22px_-12px_rgba(200,110,124,0.5)]"
               style={{ fontSize: "0.95rem", fontWeight: 600 }}
             >
               <img src={decor.envelopeMini} alt="" aria-hidden="true" className="w-4 h-4 object-contain" />
@@ -462,7 +462,7 @@ export function LateLettersView() {
           </div>
         </form>
       ) : (
-        <div className="px-7 py-6 space-y-4 min-h-[280px]">
+        <div className="px-4 sm:px-7 py-6 space-y-4 min-h-[280px]">
           <div className="bg-[var(--lg-cream)] border border-dashed border-[var(--lg-rose-soft)] rounded-2xl px-4 py-3">
             <p className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem" }}>
               Recipient email is hidden after saving. You can cancel before a letter is sent. After a letter is sent, it cannot be recalled.
@@ -534,12 +534,12 @@ export function LateLettersView() {
       )}
 
       {status && (
-        <p className="px-7 pb-4 text-center font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem" }}>
+        <p className="px-4 sm:px-7 pb-4 text-center font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem" }}>
           {status}
         </p>
       )}
 
-      <div className="px-7 pt-2 pb-6 flex items-center justify-between border-t border-dashed border-[var(--lg-border)]">
+      <div className="px-4 sm:px-7 pt-2 pb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-dashed border-[var(--lg-border)]">
         <span className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1.05rem" }}>
           {signedIn ? "Stored in your account. Delivery uses the configured server job." : "Late Letters need a signed-in account."}
         </span>
@@ -566,9 +566,9 @@ function LetterCard({
 }) {
   return (
     <article className="bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-2xl p-4 shadow-[0_8px_22px_-16px_rgba(120,80,70,0.4)]">
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h3 className="text-[var(--lg-ink)] truncate" style={{ fontFamily: "'Fraunces', serif", fontWeight: 500, fontSize: "1.05rem" }}>
+          <h3 className="text-[var(--lg-ink)] break-words" style={{ fontFamily: "'Fraunces', serif", fontWeight: 500, fontSize: "1.05rem" }}>
             {letterTitle(letter)}
           </h3>
           <p className="font-cute text-[var(--lg-rose)]" style={{ fontSize: "1.05rem" }}>
@@ -577,7 +577,7 @@ function LetterCard({
           </p>
         </div>
         <span
-          className="shrink-0 rounded-full border border-[var(--lg-rose-soft)] px-3 py-1 text-[var(--lg-rose)]"
+          className="w-fit shrink-0 rounded-full border border-[var(--lg-rose-soft)] px-3 py-1 text-[var(--lg-rose)]"
           style={{ fontSize: "0.72rem", letterSpacing: "0.12em", textTransform: "uppercase" }}
         >
           {statusLabel(letter.status)}
@@ -599,7 +599,7 @@ function LetterCard({
         <button
           type="button"
           onClick={onView}
-          className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] transition-colors duration-500"
+          className="min-h-11 inline-flex items-center font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] transition-colors duration-500"
           style={{ fontSize: "1rem" }}
         >
           {selected ? "hide" : "view"}
@@ -608,7 +608,7 @@ function LetterCard({
           <button
             type="button"
             onClick={onCancel}
-            className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
+            className="min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
             style={{ fontSize: "1rem" }}
           >
             {pendingCancel ? "confirm cancel" : "cancel before it is sent"}
@@ -618,7 +618,7 @@ function LetterCard({
           <button
             type="button"
             onClick={onKeep}
-            className="font-cute text-[var(--lg-cocoa)]/70 hover:text-[var(--lg-ink)] transition-colors duration-500"
+            className="min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)]/70 hover:text-[var(--lg-ink)] transition-colors duration-500"
             style={{ fontSize: "1rem" }}
           >
             keep it
@@ -632,9 +632,9 @@ function LetterCard({
 function LetterDetail({ letter }: { letter: LateLetterRecord }) {
   return (
     <section className="bg-[var(--lg-cream)] border border-dashed border-[var(--lg-rose-soft)] rounded-2xl p-5">
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h3 className="text-[var(--lg-ink)]" style={{ fontFamily: "'Fraunces', serif", fontWeight: 500, fontSize: "1.25rem" }}>
+          <h3 className="text-[var(--lg-ink)] break-words" style={{ fontFamily: "'Fraunces', serif", fontWeight: 500, fontSize: "1.25rem" }}>
             {letterTitle(letter)}
           </h3>
           <p className="font-cute text-[var(--lg-rose)]" style={{ fontSize: "1.05rem" }}>
@@ -643,7 +643,7 @@ function LetterDetail({ letter }: { letter: LateLetterRecord }) {
           </p>
         </div>
         <span
-          className="shrink-0 rounded-full border border-[var(--lg-rose-soft)] px-3 py-1 text-[var(--lg-rose)]"
+          className="w-fit shrink-0 rounded-full border border-[var(--lg-rose-soft)] px-3 py-1 text-[var(--lg-rose)]"
           style={{ fontSize: "0.72rem", letterSpacing: "0.12em", textTransform: "uppercase" }}
         >
           {statusLabel(letter.status)}
@@ -733,7 +733,7 @@ function SenderSafetyPanel({
           type="button"
           onClick={onSubmit}
           disabled={submitting}
-          className="inline-flex justify-center bg-[var(--lg-ink)] text-[var(--lg-cream)] py-3 px-5 rounded-full hover:bg-[var(--lg-rose)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-500"
+          className="min-h-11 w-full sm:w-auto inline-flex justify-center bg-[var(--lg-ink)] text-[var(--lg-cream)] py-3 px-5 rounded-full hover:bg-[var(--lg-rose)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-500"
           style={{ fontSize: "0.78rem", textTransform: "uppercase" }}
         >
           {submitting ? "Saving" : "Report this letter"}

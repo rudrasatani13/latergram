@@ -4,15 +4,17 @@ Some words arrive late. Latergram gives them a place.
 
 ## Current Status
 
-Phase 13 Safety and Moderation implemented in the repo.
+Phase 14 Mobile Polish implemented in the repo.
 
-The app now has a fully wired authentication foundation using Supabase Auth and a true backend persistence model for "Keep Private", "Time Since" counters, and scheduled Late Letter records. Real accounts are strictly segregated from local writing. Signed-in users save private Lategrams and Time Since counters to their account archive, while signed-out users continue to save supported local records to their local device. No automatic migration occurs; local saves can be explicitly imported by the user.
+The app now has a mobile-polished shell for launch preparation: small-screen navigation, writer spacing, sticky writer actions, auth form layout, Keepsake Box browsing, Late Letter forms/cards, recipient letter safety forms, Garden closed state, and Memory Cards unavailable state have been audited and tightened for 320px through 768px widths.
+
+The app has a fully wired authentication foundation using Supabase Auth and a true backend persistence model for "Keep Private", "Time Since" counters, and scheduled Late Letter records. Real accounts are strictly segregated from local writing. Signed-in users save private Lategrams and Time Since counters to their account archive, while signed-out users continue to save supported local records to their local device. No automatic migration occurs; local saves can be explicitly imported by the user.
 
 Late Letters can now be delivered through Resend when the Supabase Edge Function secrets and delivery job are configured. Scheduled letters are sent server-side, receive real Resend message IDs, and open through secure recipient links. Sender status labels are backed by database/provider/page-open state. Recipient email remains masked in the saved-letter UI after saving. Sender cancellation still works before send. After send, the letter cannot be recalled. Recipients can now report a letter and block future letters from the same sender without exposing sender identity.
 
 The Garden backend now has a real safety foundation: moderator/admin membership, moderator-only queue/review RPCs, server-side content filtering, per-user submission rate limiting, and real report handling. The Garden product UI remains closed/unavailable. Anonymous public Garden execution remains locked. Authenticated Garden RPCs are safety-hardened for future opening and internal testing only after the Phase 13 migration is applied.
 
-Memory Cards are not connected yet; no Memory Card generation, export, sharing, or cloud sync is active. Migrations live under `supabase/migrations`. Apply `supabase/migrations/20260515121701_phase_13_safety_moderation.sql` and deploy `supabase/functions/report-letter` before treating Phase 13 safety features as live in a real Supabase project. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
+Memory Cards are not connected yet; no Memory Card generation, export, sharing, preview source selection, or cloud sync is active. Phase 13 migrations and cleanup migrations live under `supabase/migrations`. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
 
 ## Development Rule
 
@@ -59,6 +61,7 @@ After the current migrations and Edge Functions are applied:
 - A soft landing page that describes the product vision (`/`).
 - An account access page (`/auth`).
 - A main app shell with section navigation via URL query params (`/app`).
+- Mobile app navigation for the live core app sections.
 - A writing surface for drafting text on screen.
 - One local draft that can be saved, restored, and cleared on this device.
 - A real copy action for the write flow using the browser clipboard.
@@ -66,6 +69,7 @@ After the current migrations and Edge Functions are applied:
 - Clear/reset behavior that asks before removing current words.
 - Visible guidance that saved writing is only available in this browser/device for signed-out users.
 - Honest empty/unavailable states for The Garden and Memory Cards.
+- Mobile-friendly closed/unavailable states for The Garden and Memory Cards.
 - A soft Latergram-style 404 page for unknown routes.
 - Stable design system with shared components (Phase 2).
 - Browser back/forward navigation and direct URL access.
@@ -199,6 +203,15 @@ After the current migrations and Edge Functions are applied:
 - [x] Kept the Garden product UI closed and anonymous public Garden execution locked.
 - [x] Added Phase 13 safety documentation and test checklist.
 
+### Phase 14: Mobile Polish
+- [x] Added mobile app navigation for live core sections while preserving query-param section URLs.
+- [x] Improved mobile writer layout, textarea spacing, sticky writer actions, safe-area spacing, and tap targets.
+- [x] Improved auth, Keepsake Box, Late Letters, Time Since, and recipient letter layouts for small screens.
+- [x] Kept the Garden closed/unavailable in the product UI and removed inactive search/filter controls from the closed state.
+- [x] Replaced Memory Card preview sources with an honest unavailable state.
+- [x] Confirmed no fake Garden posts, fake card sources, fake counters, fake letters, or fake analytics were added.
+- [x] Confirmed no new Supabase migrations, dependency upgrades, or production config changes were needed.
+
 ## Run Locally
 
 ```bash
@@ -214,4 +227,4 @@ npm run build
 
 ## Asset Hosting Note
 
-Product assets are currently served from local `/assets` paths. Before public launch, asset loading should be audited for performance and caching.
+Product assets are currently served from local `/assets` paths. Phase 14 confirmed no runtime raw GitHub asset dependency is used.

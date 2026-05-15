@@ -33,17 +33,24 @@ function resolveSection(raw: string | null): Section {
 const categories = [
   { id: "write" as Section, label: "Write", glyph: "✿" },
   { id: "private" as Section, label: "Keep Private", glyph: "❀" },
-  { id: "garden" as Section, label: "The Garden", glyph: "✾" },
   { id: "later" as Section, label: "Late Letters", glyph: "❁" },
   { id: "time" as Section, label: "Time Since", glyph: "❃" },
-  { id: "memory" as Section, label: "Memory Cards", glyph: "❀" },
+  { id: "garden" as Section, label: "The Garden", glyph: "✾", status: "closed" },
+  { id: "memory" as Section, label: "Memory Cards", glyph: "❀", status: "unavailable" },
+];
+
+const mobileNavItems = [
+  { id: "write" as Section, label: "Write", glyph: "✿" },
+  { id: "private" as Section, label: "Keep", glyph: "❀" },
+  { id: "later" as Section, label: "Letters", glyph: "❁" },
+  { id: "time" as Section, label: "Time", glyph: "❃" },
 ];
 
 const quickAreas = [
   {
     title: "The Garden",
     desc: "a quiet anonymous space where posts are reviewed before they are shown. it is still closed for now.",
-    cta: "view Garden space",
+    cta: "view closed Garden",
     glyph: "✾",
     target: "garden" as Section,
   },
@@ -63,8 +70,8 @@ const quickAreas = [
   },
   {
     title: "Memory Cards",
-    desc: "turn a message into a small card you can keep softly.",
-    cta: "view cards space",
+    desc: "Memory Cards are not connected yet. no card generation, export, or sharing is active.",
+    cta: "view card status",
     glyph: "❀",
     target: "memory" as Section,
   },
@@ -110,7 +117,7 @@ export function HomePage() {
       <div className="relative z-10">
         <Header current="home" variant="minimal" />
 
-        <main className="px-6 md:px-12 pb-24">
+        <main className="px-4 sm:px-6 md:px-12 pb-36 md:pb-24">
           <div className="max-w-[960px] mx-auto pt-8">
             {/* Hero */}
             <motion.div {...reveal} className="text-center pt-6 pb-14">
@@ -156,7 +163,7 @@ export function HomePage() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: easeSoft, delay: 0.2 }}
-              className="flex flex-wrap items-center justify-center gap-x-7 gap-y-3 border-y border-[var(--lg-border)] py-6 mb-14"
+              className="grid grid-cols-2 sm:grid-cols-3 gap-2 border-y border-[var(--lg-border)] py-4 sm:py-6 mb-10 sm:mb-14"
             >
               {categories.map((c) => {
                 const isActive = active === c.id;
@@ -164,14 +171,15 @@ export function HomePage() {
                   <button
                     key={c.id}
                     onClick={() => setActive(c.id)}
-                    className={`group relative pb-1 transition-colors duration-500 inline-flex items-baseline gap-1.5 ${
+                    aria-current={isActive ? "page" : undefined}
+                    className={`group min-h-11 rounded-full border px-3 py-2 transition-colors duration-500 inline-flex items-center justify-center gap-1.5 text-center ${
                       isActive
-                        ? "text-[var(--lg-ink)]"
-                        : "text-[var(--lg-cocoa)] hover:text-[var(--lg-ink)]"
+                        ? "border-[var(--lg-rose-soft)] bg-[var(--lg-paper)] text-[var(--lg-ink)]"
+                        : "border-transparent text-[var(--lg-cocoa)] hover:border-[var(--lg-border)] hover:text-[var(--lg-ink)]"
                     }`}
                     style={{
                       fontSize: "0.74rem",
-                      letterSpacing: "0.28em",
+                      letterSpacing: "0.08em",
                       textTransform: "uppercase",
                     }}
                   >
@@ -184,11 +192,9 @@ export function HomePage() {
                     >
                       {c.glyph}
                     </span>
-                    <span
-                      className={`absolute -bottom-px left-0 h-px bg-[var(--lg-ink)] transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                        isActive ? "w-full" : "w-0 group-hover:w-full"
-                      }`}
-                    />
+                    {"status" in c && (
+                      <span className="sr-only">{c.status}</span>
+                    )}
                   </button>
                 );
               })}
@@ -275,7 +281,7 @@ export function HomePage() {
                   <div className="col-span-12 md:col-span-2 md:col-start-11 md:text-right">
                     <button
                       onClick={() => setActive(q.target)}
-                      className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
+                      className="min-h-11 inline-flex items-center font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
                       style={{ fontSize: "1.1rem" }}
                     >
                       {q.cta} →
@@ -319,7 +325,7 @@ export function HomePage() {
               </p>
               <button
                 onClick={() => setActive("private")}
-                className="group mt-8 inline-flex items-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700"
+                className="group mt-8 min-h-12 inline-flex items-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700"
               >
                 <span
                   style={{
@@ -342,6 +348,34 @@ export function HomePage() {
           </div>
         </main>
       </div>
+      <nav
+        className="fixed inset-x-0 bottom-0 z-30 md:hidden border-t border-[var(--lg-border)] bg-[var(--lg-cream)]/95 px-3 pt-2 pb-[calc(0.65rem+env(safe-area-inset-bottom))] shadow-[0_-14px_34px_-28px_rgba(92,61,48,0.45)] backdrop-blur"
+        aria-label="Main app sections"
+      >
+        <div className="mx-auto grid max-w-[420px] grid-cols-4 gap-1">
+          {mobileNavItems.map((item) => {
+            const isActive = active === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setActive(item.id)}
+                aria-current={isActive ? "page" : undefined}
+                className={`min-h-14 rounded-2xl border px-2 py-2 text-center transition-colors duration-300 ${
+                  isActive
+                    ? "border-[var(--lg-border)] bg-[var(--lg-paper)] text-[var(--lg-ink)]"
+                    : "border-transparent text-[var(--lg-cocoa)] hover:bg-[var(--lg-paper)]/70"
+                }`}
+              >
+                <span className="block text-[var(--lg-rose)]" aria-hidden="true">
+                  {item.glyph}
+                </span>
+                <span className="block text-[0.72rem] font-semibold leading-tight">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 }

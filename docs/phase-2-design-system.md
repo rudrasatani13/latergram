@@ -126,9 +126,11 @@ Product UI uses soft, honest, user-friendly wording:
 
 ## Design-Preview Fixture Data
 
-Fixture data is centralized in `src/app/fixtures/designPreviewData.ts`.
+Phase 2 originally centralized design-preview fixture data in `src/app/fixtures/designPreviewData.ts`.
 
-### What remains and why
+Phase 14 removed that fixture file from runtime source. The current product uses real saved data, empty states, or honest unavailable states instead.
+
+### What remained at Phase 2 and why
 
 | Fixture | Component | Why kept | Replacement phase |
 |---------|-----------|----------|------------------|
@@ -150,11 +152,10 @@ Fixture data is centralized in `src/app/fixtures/designPreviewData.ts`.
 
 ### Fixture data rules
 
-- All fixtures are clearly labeled with `designPreview` prefix
-- Code comments state "Design preview only. Do not treat as real user data."
-- No fixture data is wired into fake success flows
-- No new fixture data may be added
-- Each fixture entry documents which phase will replace it
+- Historical fixtures were labeled with the `designPreview` prefix.
+- No fixture data should be wired into product success flows.
+- No new fixture data may be added.
+- Runtime product UI should prefer real data, empty states, or honest unavailable states.
 
 ---
 

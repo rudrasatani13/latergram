@@ -82,7 +82,7 @@ export function AuthPage() {
         <Grain />
         <div className="relative z-10">
           <Header current="auth" variant="minimal" />
-          <main className="px-6 md:px-12 pb-24 pt-12">
+          <main className="px-4 sm:px-6 md:px-12 pb-24 pt-8 sm:pt-12">
             <div className="max-w-[560px] mx-auto text-center">
               <motion.p
                 initial={{ opacity: 0, y: 8 }}
@@ -123,10 +123,10 @@ export function AuthPage() {
               <p className="text-[var(--lg-cocoa)] mb-8">
                 {user?.email || "signed in"}
               </p>
-              <div className="flex justify-center gap-4">
+              <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
                 <button
                   onClick={() => navigate("/app")}
-                  className="bg-[var(--lg-ink)] text-[var(--lg-cream)] py-3 px-6 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-500 font-cute"
+                  className="min-h-12 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-3 px-6 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-500 font-cute"
                 >
                   Go to app
                 </button>
@@ -135,7 +135,7 @@ export function AuthPage() {
                     await signOut();
                     navigate("/");
                   }}
-                  className="bg-transparent border border-[var(--lg-rose-soft)] text-[var(--lg-rose)] py-3 px-6 rounded-full hover:bg-[var(--lg-rose-soft)] hover:text-white transition-colors duration-500 font-cute"
+                  className="min-h-12 bg-transparent border border-[var(--lg-rose-soft)] text-[var(--lg-rose)] py-3 px-6 rounded-full hover:bg-[var(--lg-rose-soft)] hover:text-white transition-colors duration-500 font-cute"
                 >
                   Sign out
                 </button>
@@ -154,7 +154,7 @@ export function AuthPage() {
       <div className="relative z-10">
         <Header current="auth" variant="minimal" />
 
-        <main className="px-6 md:px-12 pb-24 pt-12">
+        <main className="px-4 sm:px-6 md:px-12 pb-24 pt-8 sm:pt-12">
           <div className="max-w-[560px] mx-auto text-center">
             <motion.p
               initial={{ opacity: 0, y: 8 }}
@@ -229,7 +229,7 @@ export function AuthPage() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.95, ease: easeSoft, delay: 0.5 }}
-              className="mt-12 text-left"
+              className="mt-8 sm:mt-12 text-left"
               onSubmit={handleSubmit}
             >
               <AnimatePresence>
@@ -271,14 +271,14 @@ export function AuthPage() {
                 required
               />
 
-              <div className="flex items-center justify-between mt-7">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mt-7">
                 {mode === "signin" ? (
                   <>
                     <button
                       type="button"
                       onClick={handleResetPassword}
                       disabled={!authAvailable || isSubmitting}
-                      className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500 disabled:opacity-50"
+                      className="min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500 disabled:opacity-50"
                       style={{ fontSize: "1.2rem" }}
                     >
                       reset password
@@ -290,7 +290,7 @@ export function AuthPage() {
                         setStatusMsg("");
                         setIsError(false);
                       }}
-                      className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
+                      className="min-h-11 inline-flex items-center font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
                       style={{ fontSize: "1.2rem" }}
                     >
                       create account →
@@ -304,7 +304,7 @@ export function AuthPage() {
                       setStatusMsg("");
                       setIsError(false);
                     }}
-                    className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500 ml-auto"
+                    className="min-h-11 inline-flex items-center font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500 sm:ml-auto"
                     style={{ fontSize: "1.2rem" }}
                   >
                     ← sign in instead
@@ -315,7 +315,7 @@ export function AuthPage() {
               <button
                 type="submit"
                 disabled={!authAvailable || isSubmitting}
-                className="group mt-8 w-full inline-flex items-center justify-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700 disabled:opacity-50"
+                className="group mt-8 min-h-12 w-full inline-flex items-center justify-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700 disabled:opacity-50"
               >
                 <span style={{ fontSize: "0.78rem", letterSpacing: "0.32em", textTransform: "uppercase" }}>
                   {isSubmitting ? "wait softly..." : mode === "signin" ? "Enter softly" : "Create my place"}

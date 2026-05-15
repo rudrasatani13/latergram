@@ -143,14 +143,14 @@ export function RecipientLetterPage() {
       <BackgroundPetals />
       <Grain />
 
-      <main className="relative z-10 px-6 py-12 md:px-12 md:py-16">
+      <main className="relative z-10 px-4 py-8 sm:px-6 md:px-12 md:py-16">
         <motion.section
           initial={{ opacity: 0, y: 14, filter: "blur(8px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{ duration: 0.9, ease: easeSoft }}
           className="max-w-[680px] mx-auto bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-2xl shadow-[0_18px_70px_-42px_rgba(120,80,70,0.55)] overflow-hidden"
         >
-          <div className="px-7 py-5 border-b border-dashed border-[var(--lg-border)] flex items-center justify-between gap-4">
+          <div className="px-4 sm:px-7 py-5 border-b border-dashed border-[var(--lg-border)] flex items-start justify-between gap-4">
             <div>
               <p className="font-cute text-[var(--lg-rose)]" style={{ fontSize: "1.25rem" }}>
                 A Late Letter arrived for you.
@@ -164,7 +164,7 @@ export function RecipientLetterPage() {
             <img src={decor.envelopeMini} alt="" aria-hidden="true" className="w-9 h-9 object-contain opacity-85" />
           </div>
 
-          <div className="px-7 py-8 md:px-9 md:py-10">
+          <div className="px-4 sm:px-7 py-7 md:px-9 md:py-10">
             {!result ? (
               <p className="font-cute text-[var(--lg-cocoa)] animate-pulse" style={{ fontSize: "1.2rem" }}>
                 Opening softly...
@@ -182,7 +182,7 @@ export function RecipientLetterPage() {
                     for {letter.recipient_name}
                   </p>
                 )}
-                <p className="mt-7 whitespace-pre-wrap font-cute text-[var(--lg-ink)]" style={{ fontSize: "1.35rem", lineHeight: "34px" }}>
+                <p className="mt-7 whitespace-pre-wrap break-words font-cute text-[var(--lg-ink)]" style={{ fontSize: "1.35rem", lineHeight: "34px" }}>
                   {letter.body}
                 </p>
                 {openedAt && (
@@ -206,11 +206,11 @@ export function RecipientLetterPage() {
             )}
           </div>
 
-          <div className="px-7 py-6 md:px-9 bg-[var(--lg-cream)] border-t border-dashed border-[var(--lg-rose-soft)] space-y-6">
+          <div className="px-4 sm:px-7 py-6 md:px-9 bg-[var(--lg-cream)] border-t border-dashed border-[var(--lg-rose-soft)] space-y-6">
             {letter && (
               <div className="rounded-2xl border border-dashed border-[var(--lg-border)] bg-[var(--lg-paper)]/70 p-4">
                 <p className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem" }}>
-                  If this feels unwanted, you can report this letter. Posts are reviewed before they are shown, and letters can be reviewed too.
+                  If this feels unwanted, you can report this letter. Reports are reviewed, and future letters from this sender can be blocked.
                 </p>
                 <form onSubmit={submitReport} className="mt-4 space-y-3">
                   <select
@@ -219,7 +219,7 @@ export function RecipientLetterPage() {
                       setReportReason(event.target.value);
                       setReportStatus("");
                     }}
-                    className="w-full bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-2xl px-4 py-3 text-[var(--lg-ink)] focus:outline-none focus:border-[var(--lg-rose)]"
+                    className="min-h-11 w-full bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-2xl px-4 py-3 text-[var(--lg-ink)] focus:outline-none focus:border-[var(--lg-rose)]"
                     style={{ fontSize: "0.95rem" }}
                   >
                     {reportReasons.map((reason) => (
@@ -247,14 +247,14 @@ export function RecipientLetterPage() {
                         setBlockSender(event.target.checked);
                         setReportStatus("");
                       }}
-                      className="mt-1 h-4 w-4 accent-[var(--lg-rose)]"
+                      className="mt-1 h-5 w-5 accent-[var(--lg-rose)]"
                     />
                     <span>You can opt out of future letters from this sender.</span>
                   </label>
                   <button
                     type="submit"
                     disabled={reporting}
-                    className="inline-flex justify-center bg-[var(--lg-ink)] text-[var(--lg-cream)] py-3 px-5 rounded-full hover:bg-[var(--lg-rose)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-500"
+                    className="min-h-11 w-full sm:w-auto inline-flex justify-center bg-[var(--lg-ink)] text-[var(--lg-cream)] py-3 px-5 rounded-full hover:bg-[var(--lg-rose)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-500"
                     style={{ fontSize: "0.78rem", textTransform: "uppercase" }}
                   >
                     {reporting ? "Saving" : "Report this letter"}
@@ -281,13 +281,13 @@ export function RecipientLetterPage() {
                   }}
                   type="email"
                   placeholder="your email"
-                  className="min-w-0 flex-1 bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-full px-4 py-3 text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/55 focus:outline-none focus:border-[var(--lg-rose)]"
+                  className="min-h-12 min-w-0 flex-1 bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-full px-4 py-3 text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/55 focus:outline-none focus:border-[var(--lg-rose)]"
                   style={{ fontSize: "0.95rem" }}
                 />
                 <button
                   type="submit"
                   disabled={optingOut}
-                  className="inline-flex justify-center bg-[var(--lg-ink)] text-[var(--lg-cream)] py-3 px-5 rounded-full hover:bg-[var(--lg-rose)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-500"
+                  className="min-h-12 w-full sm:w-auto inline-flex justify-center bg-[var(--lg-ink)] text-[var(--lg-cream)] py-3 px-5 rounded-full hover:bg-[var(--lg-rose)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-500"
                   style={{ fontSize: "0.78rem", textTransform: "uppercase" }}
                 >
                   {optingOut ? "Saving" : "Block all future letters"}

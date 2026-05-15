@@ -32,7 +32,7 @@ export function SoftField({
         onChange={onChange}
         disabled={disabled}
         required={required}
-        className="w-full bg-transparent border-0 border-b border-[var(--lg-border)] py-3 text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/50 focus:outline-none focus:border-[var(--lg-rose)] transition-colors duration-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="min-h-12 w-full bg-transparent border-0 border-b border-[var(--lg-border)] py-3 text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/50 focus:outline-none focus:border-[var(--lg-rose)] transition-colors duration-500 disabled:opacity-50 disabled:cursor-not-allowed"
         style={{ fontSize: "1rem" }}
       />
     </div>

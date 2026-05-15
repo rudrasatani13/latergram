@@ -19,7 +19,7 @@ export function DiaryFrame({ caption, title, children, ribbon = true, seal = tru
         {caption}
       </p>
       <h2
-        className="text-center text-[var(--lg-ink)] mb-8"
+        className="text-center text-[var(--lg-ink)] mb-6 sm:mb-8"
         style={{
           fontFamily: "'Fraunces', serif",
           fontWeight: 300,
@@ -31,7 +31,7 @@ export function DiaryFrame({ caption, title, children, ribbon = true, seal = tru
       </h2>
 
       <div
-        className="relative rounded-[28px] p-6 md:p-8"
+        className="relative rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 md:p-8"
         style={{
           background:
             "linear-gradient(180deg, var(--lg-blush) 0%, var(--lg-paper) 60%, var(--lg-linen) 100%)",
@@ -44,7 +44,7 @@ export function DiaryFrame({ caption, title, children, ribbon = true, seal = tru
             src={decor.pinkRibbonBow}
             alt=""
             aria-hidden
-            className="pointer-events-none absolute -top-6 left-8 w-14 h-14 object-contain rotate-[-8deg]"
+            className="pointer-events-none absolute -top-5 left-5 sm:-top-6 sm:left-8 w-12 h-12 sm:w-14 sm:h-14 object-contain rotate-[-8deg]"
           />
         )}
         {seal && (
@@ -52,7 +52,7 @@ export function DiaryFrame({ caption, title, children, ribbon = true, seal = tru
             src={decor.heartWaxSeal}
             alt=""
             aria-hidden
-            className="pointer-events-none absolute -top-5 -right-3 w-14 h-14 object-contain rotate-[10deg]"
+            className="pointer-events-none absolute -top-4 -right-2 sm:-top-5 sm:-right-3 w-12 h-12 sm:w-14 sm:h-14 object-contain rotate-[10deg]"
           />
         )}
 

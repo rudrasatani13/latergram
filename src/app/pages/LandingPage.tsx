@@ -18,9 +18,9 @@ const fates = [
   { title: "Write", desc: "open with the feeling, not the form.", glyph: "✿" },
   { title: "Keep Private", desc: "stay close to yourself, only.", glyph: "❀" },
   { title: "Late Letters", desc: "schedule words to arrive later.", glyph: "❁" },
-  { title: "The Garden", desc: "write what might belong there when it opens.", glyph: "✾" },
+  { title: "The Garden", desc: "closed in the product UI until it is intentionally opened.", glyph: "✾" },
   { title: "Time Since", desc: "a soft counter for what mattered.", glyph: "❃" },
-  { title: "Memory Cards", desc: "turn a message into a tiny keepsake.", glyph: "❀" },
+  { title: "Memory Cards", desc: "not connected yet; no card output is active.", glyph: "❀" },
 ];
 
 const ritual = [
@@ -45,8 +45,8 @@ export function LandingPage() {
       <div className="relative z-10">
         <Header current="landing" variant="full" />
 
-        <main className="px-6 md:px-12">
-          <section className="max-w-[960px] mx-auto pt-16 pb-28 text-center">
+        <main className="px-4 sm:px-6 md:px-12">
+          <section className="max-w-[960px] mx-auto pt-14 sm:pt-16 pb-24 sm:pb-28 text-center">
             <motion.p
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -105,7 +105,7 @@ export function LandingPage() {
             >
               <button
                 onClick={() => navigate("/auth")}
-                className="group inline-flex items-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700"
+                className="group min-h-12 inline-flex items-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700"
               >
                 <span style={{ fontSize: "0.78rem", letterSpacing: "0.32em", textTransform: "uppercase" }}>
                   Begin softly
@@ -114,7 +114,7 @@ export function LandingPage() {
               </button>
               <button
                 onClick={() => navigate("/app")}
-                className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
+                className="min-h-11 inline-flex items-center font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
                 style={{ fontSize: "1.25rem" }}
               >
                 or wander in →
@@ -295,7 +295,7 @@ export function LandingPage() {
             </h2>
             <button
               onClick={() => navigate("/auth")}
-              className="group mt-10 inline-flex items-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700"
+              className="group mt-10 min-h-12 inline-flex items-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700"
             >
               <span style={{ fontSize: "0.78rem", letterSpacing: "0.32em", textTransform: "uppercase" }}>
                 Begin softly

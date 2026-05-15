@@ -339,7 +339,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
         dear diary ✿
       </p>
       <h2
-        className="text-center text-[var(--lg-ink)] mb-8"
+        className="text-center text-[var(--lg-ink)] mb-6 sm:mb-8"
         style={{
           fontFamily: "'Fraunces', serif",
           fontWeight: 300,
@@ -352,7 +352,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
 
       {/* Diary book */}
       <div
-        className="relative rounded-[28px] p-6 md:p-8"
+        className="relative rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 md:p-8"
         style={{
           background:
             "linear-gradient(180deg, var(--lg-blush) 0%, var(--lg-paper) 60%, var(--lg-linen) 100%)",
@@ -365,14 +365,14 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
           src={decor.pinkRibbonBow}
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute -top-6 left-8 w-14 h-14 object-contain rotate-[-8deg]"
+          className="pointer-events-none absolute -top-5 left-5 sm:-top-6 sm:left-8 w-12 h-12 sm:w-14 sm:h-14 object-contain rotate-[-8deg]"
         />
         {/* Wax seal */}
         <img
           src={decor.heartWaxSeal}
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute -top-5 -right-3 w-14 h-14 object-contain rotate-[10deg]"
+          className="pointer-events-none absolute -top-4 -right-2 sm:-top-5 sm:-right-3 w-12 h-12 sm:w-14 sm:h-14 object-contain rotate-[10deg]"
         />
 
         {/* Inner paper */}
@@ -384,7 +384,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
           }}
         >
           {/* Header strip */}
-          <div className="flex items-center justify-between px-7 pt-6 pb-3 border-b border-dashed border-[var(--lg-border)]">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 sm:px-7 pt-6 pb-3 border-b border-dashed border-[var(--lg-border)]">
             <div className="flex items-center gap-2">
               <span
                 className="font-cute text-[var(--lg-rose)]"
@@ -393,7 +393,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
                 {today}
               </span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex min-w-0 items-center gap-2">
               <input
                 value={to}
                 onChange={(e) => {
@@ -402,8 +402,8 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
                 }}
                 placeholder="to: someone, or me"
                 aria-label="recipient"
-                className="bg-transparent border-0 text-right text-[var(--lg-cocoa)] placeholder:text-[var(--lg-cocoa)]/40 focus:outline-none font-cute"
-                style={{ fontSize: "1.15rem", width: "12rem" }}
+                className="min-h-11 w-full sm:w-48 bg-transparent border-0 text-left sm:text-right text-[var(--lg-cocoa)] placeholder:text-[var(--lg-cocoa)]/40 focus:outline-none font-cute"
+                style={{ fontSize: "1.15rem" }}
               />
               <img
                 src={decor.softHeart}
@@ -414,7 +414,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
             </div>
           </div>
 
-          <div className="px-7 py-3 border-b border-dashed border-[var(--lg-border)] flex items-center gap-3">
+          <div className="px-4 sm:px-7 py-3 border-b border-dashed border-[var(--lg-border)] flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
             <span className="font-cute text-[var(--lg-rose)]" style={{ fontSize: "1.05rem" }}>
               about:
             </span>
@@ -426,7 +426,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
               }}
               placeholder="a title, if it helps"
               aria-label="title or subject"
-              className="flex-1 min-w-0 bg-transparent border-0 text-[var(--lg-cocoa)] placeholder:text-[var(--lg-cocoa)]/40 focus:outline-none font-cute"
+                className="min-h-11 flex-1 min-w-0 bg-transparent border-0 text-[var(--lg-cocoa)] placeholder:text-[var(--lg-cocoa)]/40 focus:outline-none font-cute"
               style={{ fontSize: "1.05rem" }}
             />
           </div>
@@ -436,7 +436,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
             {/* Pink left margin line */}
             <span
               aria-hidden="true"
-              className="pointer-events-none absolute left-12 top-0 bottom-0 w-px"
+              className="pointer-events-none absolute left-6 sm:left-12 top-0 bottom-0 w-px"
               style={{ background: "var(--lg-rose-soft)" }}
             />
             {/* Ruled lines */}
@@ -459,21 +459,17 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
               }}
               placeholder={`dear ${to || "you"},\nstart with the feeling, not the form…`}
               rows={12}
-              className="relative w-full bg-transparent border-0 focus:outline-none resize-none text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/45"
+              className="relative min-h-[360px] w-full bg-transparent border-0 focus:outline-none resize-y text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/45 pl-10 pr-4 pt-3 pb-6 sm:pl-[4.2rem] sm:pr-7"
               style={{
                 fontFamily: "'Caveat', 'Segoe Print', cursive",
                 fontSize: "1.55rem",
                 lineHeight: "34px",
-                paddingLeft: "4.2rem",
-                paddingRight: "1.75rem",
-                paddingTop: "10px",
-                paddingBottom: "20px",
               }}
             />
           </div>
 
           {/* Footer */}
-          <div className="px-7 pt-2 pb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 border-t border-dashed border-[var(--lg-border)]">
+          <div className="px-4 sm:px-7 pt-2 pb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 border-t border-dashed border-[var(--lg-border)]">
             <span
               className="font-cute text-[var(--lg-cocoa)]"
               style={{ fontSize: "1.05rem" }}
@@ -514,7 +510,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
           />
         </div>
 
-        <div className="mt-5 rounded-[22px] border border-dashed border-[var(--lg-border)] bg-[var(--lg-cream)]/45 px-5 py-4">
+        <div className="mt-5 rounded-[22px] border border-dashed border-[var(--lg-border)] bg-[var(--lg-cream)]/45 px-4 sm:px-5 py-4">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <p className="font-cute text-[var(--lg-rose)]" style={{ fontSize: "1.08rem" }}>
               choose where this might belong
@@ -536,7 +532,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
                     setNote(item.guidance);
                   }}
                   aria-pressed={isSelected}
-                  className={`rounded-full border px-4 py-2 font-cute transition-colors duration-500 ${
+                  className={`min-h-11 rounded-full border px-4 py-2 font-cute transition-colors duration-500 ${
                     isSelected
                       ? "border-[var(--lg-rose)] bg-[var(--lg-blush)] text-[var(--lg-ink)]"
                       : "border-[var(--lg-border)] bg-[var(--lg-paper)]/70 text-[var(--lg-cocoa)] hover:border-[var(--lg-rose-soft)] hover:text-[var(--lg-ink)]"
@@ -556,7 +552,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
               <button
                 type="button"
                 onClick={() => onViewSection(selectedDestination.id)}
-                className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
+                className="min-h-11 inline-flex items-center font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
                 style={{ fontSize: "1.02rem" }}
               >
                 {selectedDestination.viewLabel} →
@@ -565,7 +561,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
           </div>
         </div>
         {storedDraft && (
-          <div className="mt-5 rounded-[22px] border border-dashed border-[var(--lg-border)] bg-[var(--lg-paper)]/55 px-5 py-4">
+          <div className="mt-5 rounded-[22px] border border-dashed border-[var(--lg-border)] bg-[var(--lg-paper)]/55 px-4 sm:px-5 py-4">
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div>
                 <p className="font-cute text-[var(--lg-rose)]" style={{ fontSize: "1.08rem" }}>
@@ -579,7 +575,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
                 <button
                   type="button"
                   onClick={restoreDraft}
-                  className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
+                  className="min-h-11 inline-flex items-center font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
                   style={{ fontSize: "1.05rem" }}
                 >
                   Restore draft
@@ -587,7 +583,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
                 <button
                   type="button"
                   onClick={clearDraft}
-                  className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
+                  className="min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
                   style={{ fontSize: "1.05rem" }}
                 >
                   Clear draft
@@ -599,13 +595,13 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
       </div>
 
       {/* Actions */}
-      <div className="mt-8 flex items-center justify-center gap-6 flex-wrap">
+      <div className="sticky bottom-[calc(4.9rem+env(safe-area-inset-bottom))] z-20 mt-8 flex items-center justify-center gap-3 rounded-[24px] border border-[var(--lg-border)] bg-[var(--lg-cream)]/92 p-3 shadow-[0_16px_34px_-26px_rgba(92,61,48,0.45)] backdrop-blur sm:static sm:gap-6 sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none sm:backdrop-blur-none flex-wrap">
         {session?.user ? (
           <>
             <button
               type="button"
               onClick={saveToAccount}
-              className="group inline-flex items-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700"
+              className="group min-h-12 w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700"
             >
               <span
                 style={{
@@ -621,7 +617,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
             <button
               type="button"
               onClick={saveOnDevice}
-              className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
+              className="min-h-11 inline-flex items-center justify-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
               style={{ fontSize: "1.2rem" }}
             >
               Save on this device
@@ -631,7 +627,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
           <button
             type="button"
             onClick={saveOnDevice}
-            className="group inline-flex items-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700"
+            className="group min-h-12 w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700"
           >
             <span
               style={{
@@ -648,7 +644,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
         <button
           type="button"
           onClick={copyWords}
-          className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
+          className="min-h-11 inline-flex items-center justify-center font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
           style={{ fontSize: "1.2rem" }}
         >
           Copy words
@@ -656,7 +652,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
         <button
           type="button"
           onClick={saveDraft}
-          className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
+          className="min-h-11 inline-flex items-center justify-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
           style={{ fontSize: "1.2rem" }}
         >
           Save draft
@@ -664,7 +660,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
         <button
           type="button"
           onClick={clearPage}
-          className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
+          className="min-h-11 inline-flex items-center justify-center font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
           style={{ fontSize: "1.2rem" }}
         >
           {clearNeedsConfirm ? "yes, clear page" : "clear page"}
@@ -672,7 +668,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
         <button
           type="button"
           onClick={continueShaping}
-          className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
+          className="min-h-11 inline-flex items-center justify-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
           style={{ fontSize: "1.2rem" }}
         >
           continue shaping

@@ -24,10 +24,13 @@ export function Header({ current, variant = "full" }: HeaderProps) {
       initial={{ y: -8, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.8, ease: easeSoft }}
-      className="px-6 md:px-10 py-5 relative z-20"
+      className="px-4 sm:px-6 md:px-10 py-5 relative z-20"
     >
       <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-4">
-        <button onClick={() => navigate((session || user) ? "/app" : "/")} className="flex items-center">
+        <button
+          onClick={() => navigate((session || user) ? "/app" : "/")}
+          className="min-h-11 flex items-center rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--lg-rose-soft)] focus:ring-offset-2 focus:ring-offset-[var(--lg-cream)]"
+        >
           <Logo />
         </button>
 
@@ -38,7 +41,7 @@ export function Header({ current, variant = "full" }: HeaderProps) {
                 <button
                   key={l.label}
                   onClick={() => navigate(l.path)}
-                  className="text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-300"
+                  className="min-h-11 min-w-11 inline-flex items-center justify-center px-2 text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-300"
                   style={{ fontSize: "0.98rem", fontWeight: 500 }}
                 >
                   {l.label}
@@ -55,7 +58,7 @@ export function Header({ current, variant = "full" }: HeaderProps) {
                     await signOut();
                     navigate("/");
                   }}
-                  className="px-4 py-2 rounded-full border border-[var(--lg-rose-soft)] text-[var(--lg-rose)] hover:bg-[var(--lg-rose-soft)] hover:text-white transition-colors duration-300"
+                  className="min-h-11 px-4 py-2 rounded-full border border-[var(--lg-rose-soft)] text-[var(--lg-rose)] hover:bg-[var(--lg-rose-soft)] hover:text-white transition-colors duration-300"
                   style={{ fontSize: "0.9rem", fontWeight: 500 }}
                 >
                   Sign out
@@ -64,7 +67,7 @@ export function Header({ current, variant = "full" }: HeaderProps) {
             ) : (
               <button
                 onClick={() => navigate("/auth")}
-                className={`px-5 py-2.5 rounded-full bg-[var(--lg-rose)] text-white hover:bg-[var(--lg-focus-rose)] transition-colors duration-300 shadow-[0_8px_22px_-12px_rgba(200,110,124,0.5)] ${
+                className={`min-h-11 px-5 py-2.5 rounded-full bg-[var(--lg-rose)] text-white hover:bg-[var(--lg-focus-rose)] transition-colors duration-300 shadow-[0_8px_22px_-12px_rgba(200,110,124,0.5)] ${
                   current === "auth" ? "ring-2 ring-[var(--lg-rose-soft)]/60" : ""
                 }`}
                 style={{ fontSize: "0.95rem", fontWeight: 600 }}
@@ -85,7 +88,7 @@ export function Header({ current, variant = "full" }: HeaderProps) {
                     await signOut();
                     navigate("/");
                   }}
-                  className="px-4 py-2 rounded-full border border-[var(--lg-rose-soft)] text-[var(--lg-rose)] hover:bg-[var(--lg-rose-soft)] hover:text-white transition-colors duration-300"
+                  className="min-h-11 px-4 py-2 rounded-full border border-[var(--lg-rose-soft)] text-[var(--lg-rose)] hover:bg-[var(--lg-rose-soft)] hover:text-white transition-colors duration-300"
                   style={{ fontSize: "0.9rem", fontWeight: 500 }}
                 >
                   Sign out
@@ -94,7 +97,7 @@ export function Header({ current, variant = "full" }: HeaderProps) {
             ) : current !== "home" ? (
               <button
                 onClick={() => navigate("/app")}
-                className="text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-300"
+                className="min-h-11 inline-flex items-center text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-300"
                 style={{ fontSize: "0.95rem", fontWeight: 500 }}
               >
                 ← Back to app
@@ -102,7 +105,7 @@ export function Header({ current, variant = "full" }: HeaderProps) {
             ) : (
               <button
                 onClick={() => navigate("/auth")}
-                className={`px-5 py-2.5 rounded-full bg-[var(--lg-rose)] text-white hover:bg-[var(--lg-focus-rose)] transition-colors duration-300 shadow-[0_8px_22px_-12px_rgba(200,110,124,0.5)]`}
+                className={`min-h-11 px-5 py-2.5 rounded-full bg-[var(--lg-rose)] text-white hover:bg-[var(--lg-focus-rose)] transition-colors duration-300 shadow-[0_8px_22px_-12px_rgba(200,110,124,0.5)]`}
                 style={{ fontSize: "0.95rem", fontWeight: 600 }}
               >
                 Sign in

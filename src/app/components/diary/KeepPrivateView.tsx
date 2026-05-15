@@ -476,7 +476,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
     if (!session?.user || lategrams.length === 0) return null;
 
     return (
-      <div className="mb-6 rounded-[22px] border border-dashed border-[var(--lg-rose-soft)] bg-[var(--lg-blush)]/40 px-5 py-4">
+      <div className="mb-6 rounded-[22px] border border-dashed border-[var(--lg-rose-soft)] bg-[var(--lg-blush)]/40 px-4 sm:px-5 py-4">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <p className="font-cute text-[var(--lg-rose)]" style={{ fontSize: "1.08rem" }}>
@@ -490,7 +490,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
             type="button"
             onClick={importLocalToAccount}
             disabled={isImporting}
-            className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500 disabled:opacity-50"
+            className="min-h-11 inline-flex items-center font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500 disabled:opacity-50"
             style={{ fontSize: "1.02rem" }}
           >
             {isImporting ? "Importing..." : (importStatus?.includes("?") ? "Yes, import" : "Import to account")}
@@ -506,8 +506,8 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
     }
 
     return (
-      <div className="mb-5 rounded-[22px] border border-dashed border-[var(--lg-border)] bg-[var(--lg-paper)]/55 px-5 py-4">
-        <div className="flex items-start gap-3">
+      <div className="mb-5 rounded-[22px] border border-dashed border-[var(--lg-border)] bg-[var(--lg-paper)]/55 px-4 sm:px-5 py-4">
+        <div className="flex flex-col sm:flex-row sm:items-start gap-3">
           <img src={blooms.coralCarnation} alt="" aria-hidden="true" className="w-9 h-9 object-contain shrink-0" />
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -519,11 +519,11 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                   Updated {formatLongDate(draft.updatedAt)}. Only available in this browser.
                 </p>
               </div>
-              <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-3 flex-wrap">
                 <button
                   type="button"
                   onClick={restoreDraftInWriter}
-                  className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
+                  className="min-h-11 inline-flex items-center font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
                   style={{ fontSize: "1.02rem" }}
                 >
                   Restore in writer
@@ -531,7 +531,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                 <button
                   type="button"
                   onClick={clearDraft}
-                  className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
+                  className="min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
                   style={{ fontSize: "1.02rem" }}
                 >
                   {pendingDraftDelete ? "clear draft from this device" : "Clear draft"}
@@ -543,7 +543,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                       setPendingDraftDelete(false);
                       setStatus("");
                     }}
-                    className="font-cute text-[var(--lg-cocoa)]/70 hover:text-[var(--lg-ink)] transition-colors duration-500"
+                    className="min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)]/70 hover:text-[var(--lg-ink)] transition-colors duration-500"
                     style={{ fontSize: "1.02rem" }}
                   >
                     keep draft
@@ -576,12 +576,12 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2">
           {to && (
-            <p className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "0.98rem" }}>
+            <p className="font-cute text-[var(--lg-cocoa)] break-words" style={{ fontSize: "0.98rem" }}>
               recipient: <span className="text-[var(--lg-ink)]">{to}</span>
             </p>
           )}
           {lategram.subject && (
-            <p className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "0.98rem" }}>
+            <p className="font-cute text-[var(--lg-cocoa)] break-words" style={{ fontSize: "0.98rem" }}>
               subject: <span className="text-[var(--lg-ink)]">{lategram.subject}</span>
             </p>
           )}
@@ -623,7 +623,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
         {viewType === "account" && renderImportPanel()}
 
         {session?.user && (
-          <div className="mb-6 flex items-center gap-2 border-b border-dashed border-[var(--lg-border)] pb-4">
+          <div className="mb-6 flex flex-wrap items-center gap-2 border-b border-dashed border-[var(--lg-border)] pb-4">
             <button
               onClick={() => {
                 setViewType("account");
@@ -631,14 +631,13 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                 setSelectedLategramId(null);
                 setStatus("");
               }}
-              className={`font-cute transition-colors duration-300 ${
-                viewType === "account" ? "text-[var(--lg-rose)]" : "text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)]"
+              className={`min-h-11 rounded-full border px-4 py-2 font-cute transition-colors duration-300 ${
+                viewType === "account" ? "border-[var(--lg-rose-soft)] bg-[var(--lg-paper)] text-[var(--lg-rose)]" : "border-[var(--lg-border)] text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)]"
               }`}
               style={{ fontSize: "1.1rem" }}
             >
               Account archive
             </button>
-            <span className="text-[var(--lg-border)]">|</span>
             <button
               onClick={() => {
                 setViewType("device");
@@ -646,8 +645,8 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                 setSelectedLategramId(null);
                 setStatus("");
               }}
-              className={`font-cute transition-colors duration-300 ${
-                viewType === "device" ? "text-[var(--lg-rose)]" : "text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)]"
+              className={`min-h-11 rounded-full border px-4 py-2 font-cute transition-colors duration-300 ${
+                viewType === "device" ? "border-[var(--lg-rose-soft)] bg-[var(--lg-paper)] text-[var(--lg-rose)]" : "border-[var(--lg-border)] text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)]"
               }`}
               style={{ fontSize: "1.1rem" }}
             >
@@ -731,7 +730,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                         />
                         <div className="flex-1 min-w-0">
                           <h3
-                            className="text-[var(--lg-ink)] truncate"
+                            className="text-[var(--lg-ink)] break-words"
                             style={{ fontFamily: "'Fraunces', serif", fontWeight: 500, fontSize: "1.05rem" }}
                           >
                             {isAccount ? accountLategramTitle(lategram as DbPrivateLategram) : lategramTitle(lategram as LocalLategram)}
@@ -743,7 +742,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                             {excerpt(lategram.body, 170)}
                           </p>
                           <p
-                            className="text-[var(--lg-rose)] mt-2"
+                            className="text-[var(--lg-rose)] mt-2 break-words"
                             style={{ fontSize: "0.78rem", letterSpacing: "0.18em", textTransform: "uppercase" }}
                           >
                             {formatShortDate(updatedAt)} · {destinationLabels[lategram.destination]} · {wordCount} words
@@ -759,7 +758,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                                 setPendingLategramDeleteId(null);
                                 setStatus("");
                               }}
-                              className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
+                              className="min-h-11 inline-flex items-center font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
                               style={{ fontSize: "1rem" }}
                             >
                               {isSelected ? "Close" : "View"}
@@ -767,7 +766,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                             <button
                               type="button"
                               onClick={() => isAccount ? copyAccountLategram(lategram as DbPrivateLategram) : copyLategram(lategram as LocalLategram)}
-                              className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
+                              className="min-h-11 inline-flex items-center font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
                               style={{ fontSize: "1rem" }}
                             >
                               Copy
@@ -775,7 +774,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                             <button
                               type="button"
                               onClick={() => isAccount ? removeAccountLategramAction(lategram as DbPrivateLategram) : removeLategram(lategram as LocalLategram)}
-                              className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
+                              className="min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
                               style={{ fontSize: "1rem" }}
                             >
                               {pendingLategramDeleteId === lategram.id 
@@ -789,7 +788,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                                   setPendingLategramDeleteId(null);
                                   setStatus("");
                                 }}
-                                className="font-cute text-[var(--lg-cocoa)]/70 hover:text-[var(--lg-ink)] transition-colors duration-500"
+                                className="min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)]/70 hover:text-[var(--lg-ink)] transition-colors duration-500"
                                 style={{ fontSize: "1rem" }}
                               >
                                 keep it
@@ -819,29 +818,28 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
     return (
       <>
         {session?.user && (
-          <div className="mb-6 flex items-center gap-2 border-b border-dashed border-[var(--lg-border)] pb-4">
+          <div className="mb-6 flex flex-wrap items-center gap-2 border-b border-dashed border-[var(--lg-border)] pb-4">
             <button
               onClick={() => {
                 setViewType("account");
                 setPendingCounterDeleteId(null);
                 setStatus("");
               }}
-              className={`font-cute transition-colors duration-300 ${
-                viewType === "account" ? "text-[var(--lg-rose)]" : "text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)]"
+              className={`min-h-11 rounded-full border px-4 py-2 font-cute transition-colors duration-300 ${
+                viewType === "account" ? "border-[var(--lg-rose-soft)] bg-[var(--lg-paper)] text-[var(--lg-rose)]" : "border-[var(--lg-border)] text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)]"
               }`}
               style={{ fontSize: "1.1rem" }}
             >
               Account archive
             </button>
-            <span className="text-[var(--lg-border)]">|</span>
             <button
               onClick={() => {
                 setViewType("device");
                 setPendingCounterDeleteId(null);
                 setStatus("");
               }}
-              className={`font-cute transition-colors duration-300 ${
-                viewType === "device" ? "text-[var(--lg-rose)]" : "text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)]"
+              className={`min-h-11 rounded-full border px-4 py-2 font-cute transition-colors duration-300 ${
+                viewType === "device" ? "border-[var(--lg-rose-soft)] bg-[var(--lg-paper)] text-[var(--lg-rose)]" : "border-[var(--lg-border)] text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)]"
               }`}
               style={{ fontSize: "1.1rem" }}
             >
@@ -897,7 +895,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                       <img src={blooms.pinkDaisy} alt="" aria-hidden="true" className="w-10 h-10 object-contain shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p
-                          className="text-[var(--lg-ink)] truncate"
+                          className="text-[var(--lg-ink)] break-words"
                           style={{ fontFamily: "'Fraunces', serif", fontWeight: 500, fontSize: "1rem" }}
                         >
                           {title}
@@ -920,7 +918,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                           <button
                             type="button"
                             onClick={() => isAccount ? removeAccountCounterAction(counter as DbTimeSinceCounter) : removeCounter(counter as LocalCounter)}
-                            className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
+                            className="min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
                             style={{ fontSize: "1rem" }}
                           >
                             {pendingCounterDeleteId === counter.id 
@@ -934,7 +932,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                                 setPendingCounterDeleteId(null);
                                 setStatus("");
                               }}
-                              className="font-cute text-[var(--lg-cocoa)]/70 hover:text-[var(--lg-ink)] transition-colors duration-500"
+                              className="min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)]/70 hover:text-[var(--lg-ink)] transition-colors duration-500"
                               style={{ fontSize: "1rem" }}
                             >
                               keep it
@@ -986,15 +984,15 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
       title={<span className="font-serif-italic text-[var(--lg-rose)]">keep it private</span>}
     >
       {/* Tabs */}
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 px-7 pt-6 pb-3 border-b border-dashed border-[var(--lg-border)]">
+      <div className="flex flex-nowrap sm:flex-wrap items-center gap-2 overflow-x-auto px-4 sm:px-7 pt-6 pb-3 border-b border-dashed border-[var(--lg-border)]">
         {tabs.map((t) => {
           const active = tab === t.id;
           return (
             <button
               key={t.id}
               onClick={() => selectTab(t.id)}
-              className={`relative font-cute transition-colors duration-300 ${
-                active ? "text-[var(--lg-rose)]" : "text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)]"
+              className={`relative min-h-11 shrink-0 rounded-full border px-4 py-2 font-cute transition-colors duration-300 ${
+                active ? "border-[var(--lg-rose-soft)] bg-[var(--lg-paper)] text-[var(--lg-rose)]" : "border-[var(--lg-border)] text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)]"
               }`}
               style={{ fontSize: "1.2rem" }}
             >
@@ -1002,7 +1000,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
               {active && (
                 <motion.span
                   layoutId="kp-underline"
-                  className="absolute -bottom-1 left-0 right-0 h-px bg-[var(--lg-rose)]"
+                  className="absolute bottom-1 left-4 right-4 h-px bg-[var(--lg-rose)]"
                 />
               )}
             </button>
@@ -1011,15 +1009,15 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
       </div>
 
       {/* List */}
-      <div className="px-7 py-6 min-h-[280px]">
-        <div className="mb-5 rounded-[22px] border border-dashed border-[var(--lg-border)] bg-[var(--lg-cream)]/50 px-5 py-4 flex items-center justify-between gap-4 flex-wrap">
+      <div className="px-4 sm:px-7 py-6 min-h-[280px]">
+        <div className="mb-5 rounded-[22px] border border-dashed border-[var(--lg-border)] bg-[var(--lg-cream)]/50 px-4 sm:px-5 py-4 flex items-center justify-between gap-4 flex-wrap">
           <p className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem" }}>
             {authAvailable ? "Accounts are connected, but this archive is still stored only in this browser." : "Saved on this device only. Clearing browser data may remove these. Accounts are not connected yet."}
           </p>
           <button
             type="button"
             onClick={() => refreshArchive()}
-            className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
+            className="min-h-11 inline-flex items-center font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
             style={{ fontSize: "1rem" }}
           >
             Refresh archive
@@ -1047,7 +1045,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
       </div>
 
       {/* Footer */}
-      <div className="px-7 pt-2 pb-6 flex items-center justify-between gap-4 flex-wrap border-t border-dashed border-[var(--lg-border)]">
+      <div className="px-4 sm:px-7 pt-2 pb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 border-t border-dashed border-[var(--lg-border)]">
         <span
           className="font-cute text-[var(--lg-cocoa)]"
           style={{ fontSize: "1.05rem" }}

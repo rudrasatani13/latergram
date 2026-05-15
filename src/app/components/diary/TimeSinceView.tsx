@@ -131,7 +131,7 @@ export function TimeSinceView() {
     >
       {/* Featured counter */}
       {featured && (
-        <div className="relative px-7 pt-7 pb-6 border-b border-dashed border-[var(--lg-border)] text-center">
+        <div className="relative px-4 sm:px-7 pt-7 pb-6 border-b border-dashed border-[var(--lg-border)] text-center">
           <img
             src={blooms.pinkDaisy}
             alt=""
@@ -178,7 +178,7 @@ export function TimeSinceView() {
             <button
               type="button"
               onClick={() => removeCounter(featured)}
-              className="font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
+              className="min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
               style={{ fontSize: "1rem" }}
             >
               {pendingDeleteId === featured.id ? "remove this counter?" : (featured.source === 'account' ? "remove from account" : "remove from this device")}
@@ -190,7 +190,7 @@ export function TimeSinceView() {
                   setPendingDeleteId(null);
                   setStatus("");
                 }}
-                className="font-cute text-[var(--lg-cocoa)]/70 hover:text-[var(--lg-ink)] transition-colors duration-500"
+                className="min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)]/70 hover:text-[var(--lg-ink)] transition-colors duration-500"
                 style={{ fontSize: "1rem" }}
               >
                 keep it
@@ -201,7 +201,7 @@ export function TimeSinceView() {
       )}
 
       {/* Other counters */}
-      <div className="px-7 py-5 grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[180px]">
+      <div className="px-4 sm:px-7 py-5 grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[180px]">
         {combinedList.length === 0 && !adding && (
           <div className="sm:col-span-2">
             <EmptyState
@@ -219,7 +219,7 @@ export function TimeSinceView() {
             <img src={blooms.softPeony} alt="" aria-hidden="true" className="w-10 h-10 object-contain shrink-0" />
             <div className="flex-1 min-w-0">
               <p
-                className="text-[var(--lg-ink)] truncate"
+                className="text-[var(--lg-ink)] break-words"
                 style={{ fontFamily: "'Fraunces', serif", fontWeight: 500, fontSize: "1rem" }}
               >
                 {c.title}
@@ -233,7 +233,7 @@ export function TimeSinceView() {
               <button
                 type="button"
                 onClick={() => removeCounter(c)}
-                className="mt-2 font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
+                className="mt-2 min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
                 style={{ fontSize: "0.95rem" }}
               >
                 {pendingDeleteId === c.id ? "remove this counter?" : (c.source === 'account' ? "remove from account" : "remove from this device")}
@@ -250,7 +250,7 @@ export function TimeSinceView() {
               setPendingDeleteId(null);
               setStatus("");
             }}
-            className="bg-[var(--lg-cream)] border border-dashed border-[var(--lg-rose-soft)] rounded-2xl p-4 flex items-center justify-center gap-2 hover:bg-[var(--lg-paper)] transition-colors duration-300"
+            className="min-h-14 bg-[var(--lg-cream)] border border-dashed border-[var(--lg-rose-soft)] rounded-2xl p-4 flex items-center justify-center gap-2 hover:bg-[var(--lg-paper)] transition-colors duration-300"
           >
             <img src={decor.timeClockHeart} alt="" aria-hidden="true" className="w-6 h-6 object-contain" />
             <span className="font-cute text-[var(--lg-rose)]" style={{ fontSize: "1.15rem" }}>
@@ -266,36 +266,36 @@ export function TimeSinceView() {
               className="w-full bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-1.5 focus:outline-none focus:border-[var(--lg-rose)] font-cute text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/45"
               style={{ fontSize: "1.2rem" }}
             />
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <input
                 value={draft.start}
                 onChange={(e) => setDraft({ ...draft, start: e.target.value })}
                 type="date"
-                className="bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-1.5 focus:outline-none focus:border-[var(--lg-rose)] text-[var(--lg-ink)]"
+                className="min-h-11 w-full sm:w-auto bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-1.5 focus:outline-none focus:border-[var(--lg-rose)] text-[var(--lg-ink)]"
                 style={{ fontSize: "0.95rem" }}
               />
               <input
                 value={draft.context}
                 onChange={(e) => setDraft({ ...draft, context: e.target.value })}
                 placeholder="a small note…"
-                className="flex-1 bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-1.5 focus:outline-none focus:border-[var(--lg-rose)] font-cute text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/45"
+                className="min-h-11 flex-1 bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-1.5 focus:outline-none focus:border-[var(--lg-rose)] font-cute text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/45"
                 style={{ fontSize: "1.1rem" }}
               />
             </div>
-            <div className="flex justify-end gap-3 pt-1">
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-1">
               <button
                 onClick={() => {
                   setAdding(false);
                   setStatus("");
                 }}
-                className="font-cute text-[var(--lg-cocoa)]"
+                className="min-h-11 inline-flex items-center justify-center font-cute text-[var(--lg-cocoa)]"
                 style={{ fontSize: "1rem" }}
               >
                 cancel
               </button>
               <button
                 onClick={saveCounter}
-                className="bg-[var(--lg-rose)] text-white px-4 py-1.5 rounded-full"
+                className="min-h-11 bg-[var(--lg-rose)] text-white px-4 py-2 rounded-full"
                 style={{ fontSize: "0.85rem", fontWeight: 600 }}
               >
                 save counter
@@ -307,14 +307,14 @@ export function TimeSinceView() {
 
       {status && (
         <p
-          className="px-7 pb-4 text-center font-cute text-[var(--lg-cocoa)]"
+          className="px-4 sm:px-7 pb-4 text-center font-cute text-[var(--lg-cocoa)]"
           style={{ fontSize: "1rem" }}
         >
           {status}
         </p>
       )}
 
-      <div className="px-7 pt-2 pb-6 flex items-center justify-between border-t border-dashed border-[var(--lg-border)]">
+      <div className="px-4 sm:px-7 pt-2 pb-6 flex items-center justify-between gap-3 border-t border-dashed border-[var(--lg-border)]">
         <span className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1.05rem" }}>
           {session?.user ? "Saved to your account." : "Saved on this device only."}
         </span>
