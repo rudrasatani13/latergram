@@ -27,6 +27,14 @@ const emptyDraft: ComposeDraft = {
   time: "",
 };
 
+const senderReportReasons = [
+  { value: "delivery_issue", label: "Delivery issue" },
+  { value: "unwanted_delivery", label: "Unwanted delivery" },
+  { value: "privacy", label: "Privacy" },
+  { value: "harassment", label: "Harassment" },
+  { value: "other", label: "Other" },
+];
+
 function buildScheduledDate(dateValue: string, timeValue: string) {
   const [year, month, day] = dateValue.split("-").map(Number);
   const [hours, minutes] = timeValue.split(":").map(Number);
@@ -137,6 +145,7 @@ function statusNote(letter: LateLetterRecord) {
 function safeFailureNote(reason: string | null) {
   const safeReasons = new Set([
     "Recipient opted out.",
+    "Recipient blocked future letters from this sender.",
     "Recipient email bounced.",
     "Recipient email could not be used.",
     "Delivery safety check failed.",
@@ -164,6 +173,7 @@ export function LateLettersView() {
     refresh,
     create,
     cancel,
+    report,
   } = useLateLetters();
   const [composing, setComposing] = useState(false);
   const [draft, setDraft] = useState<ComposeDraft>(emptyDraft);
@@ -172,6 +182,10 @@ export function LateLettersView() {
   const [saving, setSaving] = useState(false);
   const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
   const [selectedLetterId, setSelectedLetterId] = useState<string | null>(null);
+  const [reportReason, setReportReason] = useState("delivery_issue");
+  const [reportDetails, setReportDetails] = useState("");
+  const [reportStatus, setReportStatus] = useState("");
+  const [submittingReport, setSubmittingReport] = useState(false);
 
   const selectedLetter = useMemo(
     () => letters.find((letter) => letter.id === selectedLetterId) || null,
@@ -268,6 +282,27 @@ export function LateLettersView() {
     setStatus("Cancelled.");
   };
 
+  const submitLetterReport = async (letter: LateLetterRecord) => {
+    setReportStatus("");
+    setSubmittingReport(true);
+
+    const { error } = await report({
+      late_letter_id: letter.id,
+      reason: reportReason,
+      details: reportDetails,
+    });
+
+    setSubmittingReport(false);
+
+    if (error) {
+      setReportStatus(error);
+      return;
+    }
+
+    setReportDetails("");
+    setReportStatus("This letter has been reported.");
+  };
+
   const signedIn = Boolean(session?.user);
 
   return (
@@ -287,6 +322,7 @@ export function LateLettersView() {
               setFieldErrors({});
               setStatus("");
               setPendingCancelId(null);
+              setReportStatus("");
             }}
             className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-300"
             style={{ fontSize: "1.1rem" }}
@@ -330,7 +366,7 @@ export function LateLettersView() {
         <form onSubmit={saveLetter} className="px-7 py-6 space-y-4 min-h-[280px]">
           <div className="bg-[var(--lg-cream)] border border-dashed border-[var(--lg-rose-soft)] rounded-2xl px-4 py-3">
             <p className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem" }}>
-              Recipient email is hidden after saving. Cancel before it is sent.
+              Recipient email is hidden after saving. You can cancel before a letter is sent. After a letter is sent, it cannot be recalled.
             </p>
           </div>
 
@@ -429,7 +465,7 @@ export function LateLettersView() {
         <div className="px-7 py-6 space-y-4 min-h-[280px]">
           <div className="bg-[var(--lg-cream)] border border-dashed border-[var(--lg-rose-soft)] rounded-2xl px-4 py-3">
             <p className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem" }}>
-              Recipient email is hidden after saving. Delivery uses the configured server job.
+              Recipient email is hidden after saving. You can cancel before a letter is sent. After a letter is sent, it cannot be recalled.
             </p>
           </div>
 
@@ -465,6 +501,8 @@ export function LateLettersView() {
                     setSelectedLetterId((current) => (current === letter.id ? null : letter.id));
                     setPendingCancelId(null);
                     setStatus("");
+                    setReportDetails("");
+                    setReportStatus("");
                   }}
                   onCancel={() => cancelLetter(letter)}
                   onKeep={() => {
@@ -476,7 +514,22 @@ export function LateLettersView() {
             </div>
           )}
 
-          {selectedLetter && <LetterDetail letter={selectedLetter} />}
+          {selectedLetter && (
+            <>
+              <LetterDetail letter={selectedLetter} />
+              {selectedLetter.status !== "draft" && (
+                <SenderSafetyPanel
+                  reason={reportReason}
+                  details={reportDetails}
+                  status={reportStatus}
+                  submitting={submittingReport}
+                  onReasonChange={setReportReason}
+                  onDetailsChange={setReportDetails}
+                  onSubmit={() => submitLetterReport(selectedLetter)}
+                />
+              )}
+            </>
+          )}
         </div>
       )}
 
@@ -614,6 +667,9 @@ function LetterStatusDetails({ letter }: { letter: LateLetterRecord }) {
       <p className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem" }}>
         {statusNote(letter)}
       </p>
+      <p className="font-cute text-[var(--lg-cocoa)]/75" style={{ fontSize: "0.96rem" }}>
+        You can cancel before a letter is sent. After a letter is sent, it cannot be recalled.
+      </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {letter.sent_at && <Meta label="sent" value={formatDateTime(letter.sent_at)} />}
         {letter.opened_at && <Meta label="opened" value={formatDateTime(letter.opened_at)} />}
@@ -621,6 +677,74 @@ function LetterStatusDetails({ letter }: { letter: LateLetterRecord }) {
         {letter.cancelled_at && <Meta label="cancelled" value={formatDateTime(letter.cancelled_at)} />}
       </div>
     </div>
+  );
+}
+
+function SenderSafetyPanel({
+  reason,
+  details,
+  status,
+  submitting,
+  onReasonChange,
+  onDetailsChange,
+  onSubmit,
+}: {
+  reason: string;
+  details: string;
+  status: string;
+  submitting: boolean;
+  onReasonChange: (value: string) => void;
+  onDetailsChange: (value: string) => void;
+  onSubmit: () => void;
+}) {
+  return (
+    <section className="bg-[var(--lg-cream)] border border-dashed border-[var(--lg-rose-soft)] rounded-2xl p-5">
+      <h3
+        className="text-[var(--lg-ink)]"
+        style={{ fontFamily: "'Fraunces', serif", fontWeight: 500, fontSize: "1.15rem" }}
+      >
+        safety
+      </h3>
+      <p className="mt-2 font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem" }}>
+        If something about this letter needs review, you can report it here.
+      </p>
+      <div className="mt-4 space-y-3">
+        <select
+          value={reason}
+          onChange={(event) => onReasonChange(event.target.value)}
+          className="w-full bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-2xl px-4 py-3 text-[var(--lg-ink)] focus:outline-none focus:border-[var(--lg-rose)]"
+          style={{ fontSize: "0.95rem" }}
+        >
+          {senderReportReasons.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <textarea
+          value={details}
+          onChange={(event) => onDetailsChange(event.target.value)}
+          rows={4}
+          placeholder="Share a little more if you want."
+          className="w-full resize-y min-h-[120px] bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-2xl px-4 py-3 text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/55 focus:outline-none focus:border-[var(--lg-rose)]"
+          style={{ fontSize: "0.95rem", lineHeight: "1.6" }}
+        />
+        <button
+          type="button"
+          onClick={onSubmit}
+          disabled={submitting}
+          className="inline-flex justify-center bg-[var(--lg-ink)] text-[var(--lg-cream)] py-3 px-5 rounded-full hover:bg-[var(--lg-rose)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-500"
+          style={{ fontSize: "0.78rem", textTransform: "uppercase" }}
+        >
+          {submitting ? "Saving" : "Report this letter"}
+        </button>
+      </div>
+      {status && (
+        <p className="mt-3 font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "0.98rem" }}>
+          {status}
+        </p>
+      )}
+    </section>
   );
 }
 

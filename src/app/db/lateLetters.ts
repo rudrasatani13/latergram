@@ -33,6 +33,18 @@ export interface CreateLateLetterInput {
   scheduled_for: string;
 }
 
+export interface ReportLateLetterInput {
+  late_letter_id: string;
+  reason: string;
+  details?: string | null;
+}
+
+export interface LateLetterReportResult {
+  id: string;
+  status: string;
+  created_at: string;
+}
+
 type DataResult<T> = Promise<{ data: T; error: string | null }>;
 
 const lateLetterSelectColumns = [
@@ -184,6 +196,44 @@ export async function cancelLateLetter(id: string): DataResult<LateLetterRecord 
     return { data: data as unknown as LateLetterRecord, error: null };
   } catch (error) {
     safeLog("cancelLateLetter exception:", error);
+    return { data: null, error: "Could not connect to your account right now." };
+  }
+}
+
+export async function reportLateLetter(
+  input: ReportLateLetterInput,
+): DataResult<LateLetterReportResult | null> {
+  try {
+    const { userId, error: sessionError } = await getSignedInUserId();
+
+    if (!userId) {
+      return { data: null, error: sessionError };
+    }
+
+    const { data, error } = await supabase!.rpc("report_my_late_letter", {
+      p_late_letter_id: input.late_letter_id,
+      p_reason: input.reason,
+      p_details: input.details?.trim() || null,
+    });
+
+    if (error) {
+      safeLog("reportLateLetter error:", error);
+
+      if (error.message?.includes("already reported")) {
+        return { data: null, error: "This letter has already been reported." };
+      }
+
+      if (error.message?.includes("Reason is required")) {
+        return { data: null, error: "Choose a reason first." };
+      }
+
+      return { data: null, error: "Could not submit that report right now." };
+    }
+
+    const result = Array.isArray(data) ? data[0] : data;
+    return { data: result as LateLetterReportResult, error: null };
+  } catch (error) {
+    safeLog("reportLateLetter exception:", error);
     return { data: null, error: "Could not connect to your account right now." };
   }
 }

@@ -59,7 +59,7 @@ export function GardenView() {
       <div className="px-7 py-6 min-h-[280px]">
         <EmptyState
           message="The Garden is not open yet."
-          note="Safety and moderation are being prepared before posts are shown."
+          note="Posts are reviewed before they are shown."
         />
       </div>
 

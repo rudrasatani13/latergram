@@ -17,6 +17,7 @@ import {
 
 interface LateLetterDeliveryRow {
   id: string;
+  user_id: string;
   recipient_name: string | null;
   recipient_email: string;
   subject: string | null;
@@ -66,7 +67,9 @@ Deno.serve(async (req) => {
 
   const { data: dueLetters, error: dueError } = await supabase
     .from("late_letters")
-    .select("id, recipient_name, recipient_email, subject, scheduled_for")
+    .select(
+      "id, user_id, recipient_name, recipient_email, subject, scheduled_for",
+    )
     .eq("status", "scheduled")
     .lte("scheduled_for", now)
     .is("deleted_at", null)
@@ -122,6 +125,39 @@ Deno.serve(async (req) => {
 
     if (optOutRow) {
       await markFailed(supabase, letter.id, "Recipient opted out.", now);
+      summary.failed += 1;
+      continue;
+    }
+
+    const { data: senderBlockRow, error: senderBlockError } = await supabase
+      .from("recipient_sender_blocks")
+      .select("id")
+      .eq("sender_user_id", letter.user_id)
+      .eq("recipient_email_hash", recipientEmailHash)
+      .maybeSingle();
+
+    if (senderBlockError) {
+      console.error("send-due-late-letters sender-block lookup failed", {
+        letter_id: letter.id,
+        code: senderBlockError.code,
+      });
+      await markFailed(
+        supabase,
+        letter.id,
+        "Delivery safety check failed.",
+        now,
+      );
+      summary.failed += 1;
+      continue;
+    }
+
+    if (senderBlockRow) {
+      await markFailed(
+        supabase,
+        letter.id,
+        "Recipient blocked future letters from this sender.",
+        now,
+      );
       summary.failed += 1;
       continue;
     }

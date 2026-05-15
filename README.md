@@ -4,15 +4,15 @@ Some words arrive late. Latergram gives them a place.
 
 ## Current Status
 
-Phase 12 Garden Backend complete.
+Phase 13 Safety and Moderation implemented in the repo.
 
 The app now has a fully wired authentication foundation using Supabase Auth and a true backend persistence model for "Keep Private", "Time Since" counters, and scheduled Late Letter records. Real accounts are strictly segregated from local writing. Signed-in users save private Lategrams and Time Since counters to their account archive, while signed-out users continue to save supported local records to their local device. No automatic migration occurs; local saves can be explicitly imported by the user.
 
-Late Letters can now be delivered through Resend when the Supabase Edge Function secrets and delivery job are configured. Scheduled letters are sent server-side, receive real Resend message IDs, and open through secure recipient links. Sender status labels are backed by database/provider/page-open state. Recipient email remains masked in the saved-letter UI after saving.
+Late Letters can now be delivered through Resend when the Supabase Edge Function secrets and delivery job are configured. Scheduled letters are sent server-side, receive real Resend message IDs, and open through secure recipient links. Sender status labels are backed by database/provider/page-open state. Recipient email remains masked in the saved-letter UI after saving. Sender cancellation still works before send. After send, the letter cannot be recalled. Recipients can now report a letter and block future letters from the same sender without exposing sender identity.
 
-The Garden backend is ready. Authenticated users can submit Garden posts (which start as pending moderation). Approved posts can be read through the safe `get_public_garden_posts` RPC that does not expose user identity. "Felt this" reactions and reports are real backend surfaces. The Garden product UI remains closed/unavailable; the app may show a closed Garden placeholder, but no public Garden browsing, posting, reactions, or reporting are visible in the product until Phase 13 safety and moderation work is complete.
+The Garden backend now has a real safety foundation: moderator/admin membership, moderator-only queue/review RPCs, server-side content filtering, per-user submission rate limiting, and real report handling. The Garden product UI remains closed/unavailable. Anonymous public Garden execution remains locked. Authenticated Garden RPCs are safety-hardened for future opening and internal testing only after the Phase 13 migration is applied.
 
-Memory Cards are not connected yet; no Memory Card generation, export, sharing, or cloud sync is active. Migrations live under `supabase/migrations`. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
+Memory Cards are not connected yet; no Memory Card generation, export, sharing, or cloud sync is active. Migrations live under `supabase/migrations`. Apply `supabase/migrations/20260515121701_phase_13_safety_moderation.sql` and deploy `supabase/functions/report-letter` before treating Phase 13 safety features as live in a real Supabase project. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
 
 ## Development Rule
 
@@ -32,6 +32,8 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 
 ## What Is Currently Live
 
+After the current migrations and Edge Functions are applied:
+
 - Real Supabase Auth.
 - Real account sessions.
 - Sign up / sign in / sign out / password reset.
@@ -43,8 +45,12 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 - Secure recipient open links at `/letter/:token`.
 - Real sender statuses for scheduled, sending, sent, opened, failed, and cancelled Late Letters.
 - Recipient opt-out hashing and send-time opt-out checks.
+- Recipient letter reporting and per-sender future-send blocking.
 - Recipient email masking in saved Late Letter UI.
 - Late Letter cancellation before sending.
+- Moderator/admin membership stored in `public.moderators`.
+- Moderator-only Garden moderation queue and Garden report queue RPCs.
+- Server-side Garden content filtering and per-user submission rate limiting.
 - Garden backend RPCs for safe approved-post reads, pending submissions, reactions, and reports.
 - Local browser/device saving for signed-out users.
 - Explicit local-to-account import.
@@ -66,8 +72,10 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 
 ## What Is Not Live Yet
 
-- Public Garden browsing, posting, reactions, or reporting in the product UI (backend is ready, but the product UI remains closed/unavailable until safety/moderation is complete).
-- Garden moderation queue, admin review, content filtering, and full safety workflow.
+- Public Garden browsing, posting, reactions, or reporting in the product UI.
+- Anonymous public Garden browsing via `anon` execution.
+- A moderator web UI. Phase 13 moderation is DB/RPC-based.
+- Garden submission IP-based rate limiting. Current enforced limit is per authenticated user only.
 - Memory Card generation, download, sharing, or export.
 - Received letters.
 - Guaranteed delivery or guaranteed read receipts.
@@ -179,6 +187,17 @@ If a feature is not working end-to-end with real data, the UI must say so clearl
 - [x] Garden product UI remains closed/unavailable — "The Garden is not open yet."
 - [x] No fake posts, reactions, reports, or moderation added.
 - [x] Documented Phase 13 safety dependencies.
+
+### Phase 13: Safety and Moderation
+- [x] Added `supabase/migrations/20260515121701_phase_13_safety_moderation.sql`.
+- [x] Added `public.moderators`, `public.content_filter_terms`, `public.action_rate_limits`, `public.letter_safety_reports`, and `public.recipient_sender_blocks`.
+- [x] Added moderator-only Garden queue/review RPCs and manual SQL role assignment.
+- [x] Hardened `submit_garden_post` with server-side filtering and per-user rate limiting.
+- [x] Added recipient letter reporting via `supabase/functions/report-letter`.
+- [x] Added sender-specific future-send blocking for recipients.
+- [x] Added authenticated sender report RPC for Late Letters.
+- [x] Kept the Garden product UI closed and anonymous public Garden execution locked.
+- [x] Added Phase 13 safety documentation and test checklist.
 
 ## Run Locally
 

@@ -102,8 +102,63 @@ export interface DbGardenReport {
   details: string | null;
   status: 'open' | 'reviewing' | 'resolved' | 'dismissed';
   created_at: string;
+  reviewer_user_id: string | null; // UUID
+  reviewed_at: string | null;
+  resolution_notes: string | null;
+  resolved_at: string | null;
+}
+
+export interface DbModerator {
+  user_id: string; // UUID
+  role: 'moderator' | 'admin';
+  created_at: string;
+  created_by: string | null; // UUID
+}
+
+export interface DbContentFilterTerm {
+  id: string; // UUID
+  term: string;
+  category: string;
+  severity: 'low' | 'medium' | 'high';
+  action: 'flag' | 'block';
+  enabled: boolean;
+  created_at: string;
+}
+
+export interface DbActionRateLimit {
+  id: string; // UUID
+  action: string;
+  user_id: string | null; // UUID
+  ip_hash: string | null;
+  window_start: string;
+  count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DbLetterSafetyReport {
+  id: string; // UUID
+  late_letter_id: string | null; // UUID
+  sender_user_id: string | null; // UUID
+  reporter_user_id: string | null; // UUID
+  reporter_role: 'sender' | 'recipient';
+  recipient_email_hash: string | null;
+  reason: string;
+  details: string | null;
+  status: 'open' | 'reviewing' | 'resolved' | 'dismissed';
+  reviewer_user_id: string | null; // UUID
+  resolution_notes: string | null;
+  created_at: string;
   reviewed_at: string | null;
   resolved_at: string | null;
+}
+
+export interface DbRecipientSenderBlock {
+  id: string; // UUID
+  sender_user_id: string; // UUID
+  recipient_email_hash: string;
+  reason: string | null;
+  created_at: string;
 }
 
 export interface DbMemoryCard {

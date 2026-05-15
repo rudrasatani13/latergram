@@ -4,7 +4,9 @@ import {
   cancelLateLetter,
   createLateLetter,
   listLateLetters,
+  reportLateLetter,
   type CreateLateLetterInput,
+  type ReportLateLetterInput,
   type LateLetterRecord,
 } from "./lateLetters";
 
@@ -61,5 +63,15 @@ export function useLateLetters() {
     return { data: cancelledLetter, error: err };
   };
 
-  return { data, loading, error, refresh, create, cancel };
+  const report = async (input: ReportLateLetterInput) => {
+    const { data: reportResult, error: err } = await reportLateLetter(input);
+
+    if (!err && reportResult) {
+      setError(null);
+    }
+
+    return { data: reportResult, error: err };
+  };
+
+  return { data, loading, error, refresh, create, cancel, report };
 }

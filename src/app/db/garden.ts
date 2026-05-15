@@ -1,5 +1,5 @@
 /**
- * Garden Backend Data Layer (Phase 12)
+ * Garden Backend Data Layer (Phase 13)
  *
  * Provides typed functions for Garden backend operations:
  * - Submit posts (authenticated, pending moderation)
@@ -8,10 +8,10 @@
  * - Report posts (authenticated)
  * - List own submissions (authenticated)
  *
- * IMPORTANT: The Garden product UI is NOT live yet. These functions exist for
- * backend readiness only. The app may show a closed Garden placeholder, but no
- * public browsing, posting, reactions, or reports are visible until Phase 13
- * safety and moderation work is complete.
+ * IMPORTANT: The Garden product UI is still closed. These functions exist for
+ * backend readiness and internal authenticated safety checks only. The app may
+ * show a closed Garden placeholder, but no public browsing, posting, reactions,
+ * or reports are visible in product UI.
  *
  * No user_id, reporter_user_id, or anonymous_fingerprint_hash is
  * exposed through any of these functions.
@@ -134,6 +134,15 @@ export async function submitGardenPost(input: {
       }
       if (error.message?.includes("exceeds maximum length")) {
         return { data: null, error: "Message is too long (max 1200 characters)." };
+      }
+      if (error.message?.includes("cannot include contact information or obvious safety violations")) {
+        return {
+          data: null,
+          error: "This post could not be submitted. Garden posts cannot include contact details or obvious safety violations.",
+        };
+      }
+      if (error.message?.includes("current Garden submission limit")) {
+        return { data: null, error: "You have reached the current Garden submission limit. Please try again later." };
       }
       return { data: null, error: "Could not submit post right now." };
     }

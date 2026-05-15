@@ -76,6 +76,50 @@ export async function optOutRecipientEmail(email: string): Promise<{ error: stri
   return { error: null };
 }
 
+export async function reportRecipientLetter(input: {
+  token: string;
+  reason: string;
+  details?: string | null;
+  blockSender?: boolean;
+}): Promise<{ error: string | null }> {
+  if (!authConfigAvailable || !supabase) {
+    return { error: "Latergram is not connected right now." };
+  }
+
+  const { error } = await supabase.functions.invoke("report-letter", {
+    body: {
+      token: input.token,
+      reason: input.reason,
+      details: input.details ?? null,
+      block_sender: Boolean(input.blockSender),
+    },
+  });
+
+  if (error) {
+    const status = (error as { context?: { status?: number } }).context?.status;
+
+    if (status === 400) {
+      return { error: "Choose a reason first." };
+    }
+
+    if (status === 404) {
+      return { error: "This letter link is not available." };
+    }
+
+    if (status === 409) {
+      return { error: "This letter has already been reported." };
+    }
+
+    if (status === 410) {
+      return { error: "This letter is unavailable." };
+    }
+
+    return { error: "Could not submit that report right now." };
+  }
+
+  return { error: null };
+}
+
 function toUnavailableReason(value: unknown): UnavailableReason {
   if (value === "invalid" || value === "not_available" || value === "not_ready" || value === "server_error") {
     return value;

@@ -9,3 +9,6 @@ verify_jwt = false
 
 [functions.recipient-opt-out]
 verify_jwt = false
+
+[functions.report-letter]
+verify_jwt = false

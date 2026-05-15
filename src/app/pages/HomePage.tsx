@@ -42,7 +42,7 @@ const categories = [
 const quickAreas = [
   {
     title: "The Garden",
-    desc: "a quiet anonymous space that stays closed until safety tools are ready.",
+    desc: "a quiet anonymous space where posts are reviewed before they are shown. it is still closed for now.",
     cta: "view Garden space",
     glyph: "✾",
     target: "garden" as Section,

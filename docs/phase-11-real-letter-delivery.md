@@ -259,7 +259,7 @@ If this feels unwanted, you can ignore it.
 
 The recipient page includes a real opt-out form. The recipient enters an email, `recipient-opt-out` hashes the normalized address server-side, and future delivery checks block sends to that hash.
 
-Current opt-out scope is global by recipient email hash. Per-sender blocking and reporting remain Phase 13 safety work before public launch.
+Current opt-out scope is still global by recipient email hash. Phase 13 adds sender-specific blocking and recipient reporting; see `docs/phase-13-safety-moderation.md`.
 
 ## What Remains Not Live
 

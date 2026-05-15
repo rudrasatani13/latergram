@@ -4,9 +4,21 @@ import { motion } from "motion/react";
 import { BackgroundPetals } from "../components/BackgroundPetals";
 import { Grain } from "../components/Grain";
 import { decor } from "../components/BrandAssets";
-import { openRecipientLetter, optOutRecipientEmail, type OpenLetterResult } from "../db/recipientLetters";
+import {
+  openRecipientLetter,
+  optOutRecipientEmail,
+  reportRecipientLetter,
+  type OpenLetterResult,
+} from "../db/recipientLetters";
 
 const easeSoft = [0.22, 1, 0.36, 1] as const;
+const reportReasons = [
+  { value: "unwanted", label: "Unwanted" },
+  { value: "harassment", label: "Harassment" },
+  { value: "spam", label: "Spam" },
+  { value: "privacy", label: "Privacy" },
+  { value: "other", label: "Other" },
+];
 
 function formatDateTime(iso: string | null) {
   if (!iso) {
@@ -59,6 +71,11 @@ export function RecipientLetterPage() {
   const [optOutEmail, setOptOutEmail] = useState("");
   const [optOutStatus, setOptOutStatus] = useState("");
   const [optingOut, setOptingOut] = useState(false);
+  const [reportReason, setReportReason] = useState("unwanted");
+  const [reportDetails, setReportDetails] = useState("");
+  const [reportStatus, setReportStatus] = useState("");
+  const [blockSender, setBlockSender] = useState(true);
+  const [reporting, setReporting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -89,6 +106,31 @@ export function RecipientLetterPage() {
 
     setOptOutEmail("");
     setOptOutStatus("Future Late Letters to this email will be blocked.");
+  };
+
+  const submitReport = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setReportStatus("");
+    setReporting(true);
+    const { error } = await reportRecipientLetter({
+      token,
+      reason: reportReason,
+      details: reportDetails,
+      blockSender,
+    });
+    setReporting(false);
+
+    if (error) {
+      setReportStatus(error);
+      return;
+    }
+
+    setReportDetails("");
+    setReportStatus(
+      blockSender
+        ? "This letter has been reported. Future letters from this sender will be blocked."
+        : "This letter has been reported.",
+    );
   };
 
   const unavailable = result?.status === "unavailable" ? unavailableCopy(result.reason) : null;
@@ -164,36 +206,99 @@ export function RecipientLetterPage() {
             )}
           </div>
 
-          <div className="px-7 py-6 md:px-9 bg-[var(--lg-cream)] border-t border-dashed border-[var(--lg-rose-soft)]">
-            <p className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem" }}>
-              If this feels unwanted, you can ignore it.
-            </p>
-            <form onSubmit={submitOptOut} className="mt-4 flex flex-col sm:flex-row gap-3">
-              <input
-                value={optOutEmail}
-                onChange={(event) => {
-                  setOptOutEmail(event.target.value);
-                  setOptOutStatus("");
-                }}
-                type="email"
-                placeholder="your email"
-                className="min-w-0 flex-1 bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-full px-4 py-3 text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/55 focus:outline-none focus:border-[var(--lg-rose)]"
-                style={{ fontSize: "0.95rem" }}
-              />
-              <button
-                type="submit"
-                disabled={optingOut}
-                className="inline-flex justify-center bg-[var(--lg-ink)] text-[var(--lg-cream)] py-3 px-5 rounded-full hover:bg-[var(--lg-rose)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-500"
-                style={{ fontSize: "0.78rem", textTransform: "uppercase" }}
-              >
-                {optingOut ? "Saving" : "Block future letters"}
-              </button>
-            </form>
-            {optOutStatus && (
-              <p className="mt-3 font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "0.98rem" }}>
-                {optOutStatus}
-              </p>
+          <div className="px-7 py-6 md:px-9 bg-[var(--lg-cream)] border-t border-dashed border-[var(--lg-rose-soft)] space-y-6">
+            {letter && (
+              <div className="rounded-2xl border border-dashed border-[var(--lg-border)] bg-[var(--lg-paper)]/70 p-4">
+                <p className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem" }}>
+                  If this feels unwanted, you can report this letter. Posts are reviewed before they are shown, and letters can be reviewed too.
+                </p>
+                <form onSubmit={submitReport} className="mt-4 space-y-3">
+                  <select
+                    value={reportReason}
+                    onChange={(event) => {
+                      setReportReason(event.target.value);
+                      setReportStatus("");
+                    }}
+                    className="w-full bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-2xl px-4 py-3 text-[var(--lg-ink)] focus:outline-none focus:border-[var(--lg-rose)]"
+                    style={{ fontSize: "0.95rem" }}
+                  >
+                    {reportReasons.map((reason) => (
+                      <option key={reason.value} value={reason.value}>
+                        {reason.label}
+                      </option>
+                    ))}
+                  </select>
+                  <textarea
+                    value={reportDetails}
+                    onChange={(event) => {
+                      setReportDetails(event.target.value);
+                      setReportStatus("");
+                    }}
+                    rows={4}
+                    placeholder="Share a little more if you want."
+                    className="w-full resize-y min-h-[120px] bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-2xl px-4 py-3 text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/55 focus:outline-none focus:border-[var(--lg-rose)]"
+                    style={{ fontSize: "0.95rem", lineHeight: "1.6" }}
+                  />
+                  <label className="flex items-start gap-3 text-[var(--lg-cocoa)]" style={{ fontSize: "0.95rem" }}>
+                    <input
+                      type="checkbox"
+                      checked={blockSender}
+                      onChange={(event) => {
+                        setBlockSender(event.target.checked);
+                        setReportStatus("");
+                      }}
+                      className="mt-1 h-4 w-4 accent-[var(--lg-rose)]"
+                    />
+                    <span>You can opt out of future letters from this sender.</span>
+                  </label>
+                  <button
+                    type="submit"
+                    disabled={reporting}
+                    className="inline-flex justify-center bg-[var(--lg-ink)] text-[var(--lg-cream)] py-3 px-5 rounded-full hover:bg-[var(--lg-rose)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-500"
+                    style={{ fontSize: "0.78rem", textTransform: "uppercase" }}
+                  >
+                    {reporting ? "Saving" : "Report this letter"}
+                  </button>
+                </form>
+                {reportStatus && (
+                  <p className="mt-3 font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "0.98rem" }}>
+                    {reportStatus}
+                  </p>
+                )}
+              </div>
             )}
+
+            <div>
+              <p className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem" }}>
+                You can opt out of future letters to this email too.
+              </p>
+              <form onSubmit={submitOptOut} className="mt-4 flex flex-col sm:flex-row gap-3">
+                <input
+                  value={optOutEmail}
+                  onChange={(event) => {
+                    setOptOutEmail(event.target.value);
+                    setOptOutStatus("");
+                  }}
+                  type="email"
+                  placeholder="your email"
+                  className="min-w-0 flex-1 bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-full px-4 py-3 text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/55 focus:outline-none focus:border-[var(--lg-rose)]"
+                  style={{ fontSize: "0.95rem" }}
+                />
+                <button
+                  type="submit"
+                  disabled={optingOut}
+                  className="inline-flex justify-center bg-[var(--lg-ink)] text-[var(--lg-cream)] py-3 px-5 rounded-full hover:bg-[var(--lg-rose)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-500"
+                  style={{ fontSize: "0.78rem", textTransform: "uppercase" }}
+                >
+                  {optingOut ? "Saving" : "Block all future letters"}
+                </button>
+              </form>
+              {optOutStatus && (
+                <p className="mt-3 font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "0.98rem" }}>
+                  {optOutStatus}
+                </p>
+              )}
+            </div>
           </div>
         </motion.section>
       </main>
