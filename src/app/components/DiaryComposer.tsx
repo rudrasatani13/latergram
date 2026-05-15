@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { decor } from "./BrandAssets";
 import { FeatureUnavailableNote } from "./shared/FeatureUnavailableNote";
@@ -11,7 +11,8 @@ import {
 } from "../storage/localStorage";
 import type { LocalDestination, LocalDraft, LocalLategram } from "../storage/types";
 import { useAuth } from "../auth/useAuth";
-import { useAccountLategrams } from "../db/useAccountLategrams";
+import { createAccountLategram } from "../db/privateLategrams";
+import { accountSaveErrorMessage } from "../utils/reliability";
 
 const easeSoft = [0.22, 1, 0.36, 1] as const;
 
@@ -71,22 +72,70 @@ const today = new Date().toLocaleDateString("en-US", {
 
 export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
   const { session } = useAuth();
-  const { create: createAccountLategram } = useAccountLategrams();
-  const [text, setText] = useState("");
-  const [to, setTo] = useState("");
-  const [subject, setSubject] = useState("");
-  const [destination, setDestination] = useState<DestinationId>("private");
-  const [note, setNote] = useState("");
-  const [saveState, setSaveState] = useState("not saved yet");
-  const [storedDraft, setStoredDraft] = useState<LocalDraft | null>(() => readLocalDraft());
+  const [initialDraft] = useState<LocalDraft | null>(() => readLocalDraft());
+  const [text, setText] = useState(initialDraft?.body ?? "");
+  const [to, setTo] = useState(initialDraft?.to ?? "");
+  const [subject, setSubject] = useState(initialDraft?.subject ?? "");
+  const [destination, setDestination] = useState<DestinationId>(initialDraft?.destination ?? "private");
+  const [note, setNote] = useState(initialDraft ? "Draft restored from this device. It is not saved to an account unless you choose that." : "");
+  const [saveState, setSaveState] = useState(initialDraft ? "draft restored from this device" : "not saved yet");
+  const [storedDraft, setStoredDraft] = useState<LocalDraft | null>(initialDraft);
   const [copyFailed, setCopyFailed] = useState(false);
   const [clearNeedsConfirm, setClearNeedsConfirm] = useState(false);
-  const [hasEdited, setHasEdited] = useState(false);
+  const [hasEdited, setHasEdited] = useState(Boolean(initialDraft));
+  const [savingAccount, setSavingAccount] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState(initialDraft ? "Draft restored from this device." : "");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const skipFirstAutoSave = useRef(true);
 
   const selectedDestination = destinations.find((item) => item.id === destination) ?? destinations[0];
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
   const characterCount = text.trim().length;
+
+  useEffect(() => {
+    if (skipFirstAutoSave.current) {
+      skipFirstAutoSave.current = false;
+      return;
+    }
+
+    if (!hasEdited) {
+      return;
+    }
+
+    const hasContent = Boolean(text.trim() || to.trim() || subject.trim());
+
+    if (!hasContent) {
+      return;
+    }
+
+    setAutoSaveStatus("Saving draft locally...");
+
+    const timer = window.setTimeout(() => {
+      const draft: LocalDraft = {
+        body: text,
+        to: to.trim() || undefined,
+        subject: subject.trim() || undefined,
+        destination,
+        updatedAt: new Date().toISOString(),
+      };
+
+      const result = writeLocalDraft(draft);
+
+      if (!result.ok) {
+        setAutoSaveStatus("Unable to save draft locally.");
+        setNote("Unable to save draft locally in this browser. Copy your words before leaving.");
+        return;
+      }
+
+      setStoredDraft(draft);
+      setAutoSaveStatus("Draft saved locally on this device.");
+      setSaveState((current) => (
+        current === "saving to account..." || current === "saved to your account" ? current : "draft saved locally"
+      ));
+    }, 800);
+
+    return () => window.clearTimeout(timer);
+  }, [destination, hasEdited, subject, text, to]);
 
   const getDestinationGuidance = (id: LocalDestination) => {
     if (session?.user) {
@@ -105,7 +154,8 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
     setHasEdited(true);
     setClearNeedsConfirm(false);
     setCopyFailed(false);
-    setSaveState("not saved yet");
+    setSaveState("saving draft locally");
+    setAutoSaveStatus("Saving draft locally...");
     setNote("");
   };
 
@@ -162,6 +212,8 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
       return;
     }
 
+    const clearDraftResult = deleteLocalDraft();
+
     setText("");
     setTo("");
     setSubject("");
@@ -170,7 +222,9 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
     setHasEdited(false);
     setClearNeedsConfirm(false);
     setCopyFailed(false);
-    setNote("Cleared. The page is empty now.");
+    setStoredDraft(null);
+    setAutoSaveStatus("");
+    setNote(clearDraftResult.ok ? "Cleared. The page and local draft are empty now." : "Cleared the page. Could not clear the saved local draft in this browser.");
   };
 
   const continueShaping = () => {
@@ -229,12 +283,17 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
     setClearNeedsConfirm(false);
     setCopyFailed(false);
 
+    if (savingAccount) {
+      return;
+    }
+
     if (!text.trim()) {
       setNote("Write a few words first.");
       return;
     }
 
-    setSaveState("saving...");
+    setSavingAccount(true);
+    setSaveState("saving to account...");
     const { error } = await createAccountLategram({
       body: text.trim(),
       recipient_label: to.trim() || null,
@@ -243,15 +302,19 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
       mood: null,
       flower_key: null,
     });
+    setSavingAccount(false);
 
     if (error) {
-      setSaveState("not saved yet");
-      setNote("Could not save to your account. Your words are still on this page.");
+      setSaveState(autoSaveStatus === "Draft saved locally on this device." ? "draft saved locally" : "not saved yet");
+      setNote(error || accountSaveErrorMessage("Your words are still on this page."));
       return;
     }
 
     setSaveState("saved to your account");
     setHasEdited(false);
+    if (storedDraft) {
+      setAutoSaveStatus("Draft also remains locally until you clear it.");
+    }
     
     const noteText = destination === "private" 
       ? "Saved to your account as private writing."
@@ -285,12 +348,14 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
 
     if (!result.ok) {
       setNote("Could not save a draft in this browser. Copy your words before leaving.");
+      setAutoSaveStatus("Unable to save draft locally.");
       return;
     }
 
     setStoredDraft(draft);
     setSaveState("draft saved on this device");
     setHasEdited(false);
+    setAutoSaveStatus("Draft saved locally on this device.");
     setNote("Draft saved on this device.");
   };
 
@@ -307,7 +372,8 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
     setHasEdited(true);
     setClearNeedsConfirm(false);
     setCopyFailed(false);
-    setNote("Draft restored. Only available in this browser.");
+    setAutoSaveStatus("Draft restored from this device.");
+    setNote("Draft restored. Only available in this browser unless you save to your account.");
     textareaRef.current?.focus();
   };
 
@@ -322,6 +388,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
     setStoredDraft(null);
     setClearNeedsConfirm(false);
     setCopyFailed(false);
+    setAutoSaveStatus("");
     setNote("Draft cleared from this device.");
   };
 
@@ -601,7 +668,8 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
             <button
               type="button"
               onClick={saveToAccount}
-              className="group min-h-12 w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] transition-colors duration-700"
+              disabled={savingAccount}
+              className="group min-h-12 w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-[var(--lg-ink)] text-[var(--lg-cream)] py-4 px-7 rounded-full hover:bg-[var(--lg-rose)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-700"
             >
               <span
                 style={{
@@ -610,7 +678,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
                   textTransform: "uppercase",
                 }}
               >
-                Save to account
+                {savingAccount ? "Saving to account..." : "Save to account"}
               </span>
               <span className="block w-6 h-px bg-[var(--lg-cream)] transition-all duration-500 group-hover:w-10" />
             </button>
@@ -676,8 +744,8 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
       </div>
 
       <FeatureUnavailableNote
-        message={note || (session?.user ? "Save to your account, or keep saving on this device." : "Sign in to save to your account, or keep saving on this device. Clearing browser data may remove saved items.")}
-        visible={Boolean(note) || hasEdited || !session?.user}
+        message={note || autoSaveStatus || (session?.user ? "Save to your account, or keep saving on this device." : "Sign in to save to your account, or keep saving on this device. Clearing browser data may remove saved items.")}
+        visible={Boolean(note) || Boolean(autoSaveStatus) || hasEdited || !session?.user}
       />
       {copyFailed && (
         <p

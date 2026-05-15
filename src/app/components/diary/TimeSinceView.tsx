@@ -25,15 +25,32 @@ function prettyDate(iso: string) {
   return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 }
 
+type TimeSinceItem = {
+  id: string;
+  title: string;
+  start: string;
+  context?: string | null;
+  source: "account" | "local";
+};
+
 export function TimeSinceView() {
   const { session } = useAuth();
-  const { data: accountCounters, create: createAccountCounter, remove: removeAccountCounter } = useAccountCounters();
+  const {
+    data: accountCounters,
+    loading: accountCountersLoading,
+    error: accountCountersError,
+    refresh: refreshAccountCounters,
+    create: createAccountCounter,
+    remove: removeAccountCounter,
+  } = useAccountCounters();
   
   const [list, setList] = useState<LocalCounter[]>(() => readLocalCounters());
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState({ title: "", start: "", context: "" });
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [status, setStatus] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [removingId, setRemovingId] = useState<string | null>(null);
 
   const combinedList = useMemo(() => {
     if (session?.user) {
@@ -52,12 +69,18 @@ export function TimeSinceView() {
   const featuredDays = featured ? daysBetween(featured.start) : 0;
 
   const saveCounter = async () => {
+    if (saving) {
+      return;
+    }
+
     const title = draft.title.trim();
 
     if (!title || !draft.start) {
       setStatus("Add a title and date first.");
       return;
     }
+
+    setSaving(true);
 
     if (session?.user) {
       const { error } = await createAccountCounter({
@@ -68,7 +91,8 @@ export function TimeSinceView() {
       });
 
       if (error) {
-        setStatus("Could not save to your account.");
+        setStatus(error);
+        setSaving(false);
         return;
       }
       setStatus("Counter saved to your account.");
@@ -86,28 +110,37 @@ export function TimeSinceView() {
       const result = addLocalCounter(counter);
       if (!result.ok) {
         setStatus("Could not save this counter in this browser.");
+        setSaving(false);
         return;
       }
       setList((items) => [counter, ...items]);
       setStatus("Counter saved on this device.");
     }
 
+    setSaving(false);
     setDraft({ title: "", start: "", context: "" });
     setAdding(false);
     setPendingDeleteId(null);
   };
 
-  const removeCounter = async (item: any) => {
+  const removeCounter = async (item: TimeSinceItem) => {
+    if (removingId) {
+      return;
+    }
+
     if (pendingDeleteId !== item.id) {
       setPendingDeleteId(item.id);
       setStatus("remove this counter?");
       return;
     }
 
+    setRemovingId(item.id);
+
     if (item.source === 'account') {
-      const { success } = await removeAccountCounter(item.id);
+      const { success, error } = await removeAccountCounter(item.id);
       if (!success) {
-        setStatus("Could not remove this counter from your account.");
+        setStatus(error || "Could not remove this counter from your account.");
+        setRemovingId(null);
         return;
       }
       setStatus("Counter removed from your account.");
@@ -115,12 +148,14 @@ export function TimeSinceView() {
       const result = removeLocalCounter(item.id);
       if (!result.ok) {
         setStatus("Could not remove this counter in this browser.");
+        setRemovingId(null);
         return;
       }
       setList((items) => items.filter((i) => i.id !== item.id));
       setStatus("Counter removed from this device.");
     }
 
+    setRemovingId(null);
     setPendingDeleteId(null);
   };
 
@@ -130,7 +165,31 @@ export function TimeSinceView() {
       title={<span className="font-serif-italic text-[var(--lg-rose)]">time since</span>}
     >
       {/* Featured counter */}
-      {featured && (
+      {session?.user && accountCountersError && (
+        <div className="mx-4 sm:mx-7 mt-5 rounded-2xl border border-dashed border-[var(--lg-border)] bg-[var(--lg-paper)] px-4 py-3 text-center">
+          <p className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem" }}>
+            {accountCountersError}
+          </p>
+          <button
+            type="button"
+            onClick={refreshAccountCounters}
+            className="mt-2 min-h-11 font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4"
+            style={{ fontSize: "1rem" }}
+          >
+            try again
+          </button>
+        </div>
+      )}
+
+      {session?.user && accountCountersLoading && (
+        <div className="px-4 sm:px-7 py-7 text-center border-b border-dashed border-[var(--lg-border)]">
+          <p className="font-cute text-[var(--lg-rose)] animate-pulse" style={{ fontSize: "1.15rem" }}>
+            Loading your account counters...
+          </p>
+        </div>
+      )}
+
+      {!accountCountersLoading && featured && (
         <div className="relative px-4 sm:px-7 pt-7 pb-6 border-b border-dashed border-[var(--lg-border)] text-center">
           <img
             src={blooms.pinkDaisy}
@@ -178,10 +237,11 @@ export function TimeSinceView() {
             <button
               type="button"
               onClick={() => removeCounter(featured)}
-              className="min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
+              disabled={removingId === featured.id}
+              className="min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-500"
               style={{ fontSize: "1rem" }}
             >
-              {pendingDeleteId === featured.id ? "remove this counter?" : (featured.source === 'account' ? "remove from account" : "remove from this device")}
+              {removingId === featured.id ? "removing..." : pendingDeleteId === featured.id ? "remove this counter?" : (featured.source === 'account' ? "remove from account" : "remove from this device")}
             </button>
             {pendingDeleteId === featured.id && (
               <button
@@ -202,7 +262,7 @@ export function TimeSinceView() {
 
       {/* Other counters */}
       <div className="px-4 sm:px-7 py-5 grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[180px]">
-        {combinedList.length === 0 && !adding && (
+        {!accountCountersLoading && combinedList.length === 0 && !adding && (
           <div className="sm:col-span-2">
             <EmptyState
               message={session?.user ? "No counters in your account yet." : "No counters on this device yet."}
@@ -233,10 +293,11 @@ export function TimeSinceView() {
               <button
                 type="button"
                 onClick={() => removeCounter(c)}
-                className="mt-2 min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
+                disabled={removingId === c.id}
+                className="mt-2 min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-500"
                 style={{ fontSize: "0.95rem" }}
               >
-                {pendingDeleteId === c.id ? "remove this counter?" : (c.source === 'account' ? "remove from account" : "remove from this device")}
+                {removingId === c.id ? "removing..." : pendingDeleteId === c.id ? "remove this counter?" : (c.source === 'account' ? "remove from account" : "remove from this device")}
               </button>
             </div>
           </div>
@@ -262,23 +323,26 @@ export function TimeSinceView() {
             <input
               value={draft.title}
               onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+              disabled={saving}
               placeholder="what should this remember?"
-              className="w-full bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-1.5 focus:outline-none focus:border-[var(--lg-rose)] font-cute text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/45"
+              className="w-full bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-1.5 focus:outline-none focus:border-[var(--lg-rose)] font-cute text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/45 disabled:opacity-60 disabled:cursor-not-allowed"
               style={{ fontSize: "1.2rem" }}
             />
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <input
                 value={draft.start}
                 onChange={(e) => setDraft({ ...draft, start: e.target.value })}
+                disabled={saving}
                 type="date"
-                className="min-h-11 w-full sm:w-auto bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-1.5 focus:outline-none focus:border-[var(--lg-rose)] text-[var(--lg-ink)]"
+                className="min-h-11 w-full sm:w-auto bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-1.5 focus:outline-none focus:border-[var(--lg-rose)] text-[var(--lg-ink)] disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{ fontSize: "0.95rem" }}
               />
               <input
                 value={draft.context}
                 onChange={(e) => setDraft({ ...draft, context: e.target.value })}
+                disabled={saving}
                 placeholder="a small note…"
-                className="min-h-11 flex-1 bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-1.5 focus:outline-none focus:border-[var(--lg-rose)] font-cute text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/45"
+                className="min-h-11 flex-1 bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-1.5 focus:outline-none focus:border-[var(--lg-rose)] font-cute text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/45 disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{ fontSize: "1.1rem" }}
               />
             </div>
@@ -288,17 +352,19 @@ export function TimeSinceView() {
                   setAdding(false);
                   setStatus("");
                 }}
-                className="min-h-11 inline-flex items-center justify-center font-cute text-[var(--lg-cocoa)]"
+                disabled={saving}
+                className="min-h-11 inline-flex items-center justify-center font-cute text-[var(--lg-cocoa)] disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{ fontSize: "1rem" }}
               >
                 cancel
               </button>
               <button
                 onClick={saveCounter}
-                className="min-h-11 bg-[var(--lg-rose)] text-white px-4 py-2 rounded-full"
+                disabled={saving}
+                className="min-h-11 bg-[var(--lg-rose)] text-white px-4 py-2 rounded-full disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{ fontSize: "0.85rem", fontWeight: 600 }}
               >
-                save counter
+                {saving ? "saving..." : "save counter"}
               </button>
             </div>
           </div>

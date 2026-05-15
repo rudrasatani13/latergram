@@ -1,9 +1,10 @@
 import { supabase, authConfigAvailable } from "../auth/authClient";
 import type { DbTimeSinceCounter } from "./types";
+import { accountLoadErrorMessage, accountSaveErrorMessage } from "../utils/reliability";
 
 export async function listAccountCounters(): Promise<{ data: DbTimeSinceCounter[]; error: string | null }> {
   if (!authConfigAvailable || !supabase) {
-    return { data: [], error: "Database not connected" };
+    return { data: [], error: "Accounts are not connected in this environment." };
   }
 
   try {
@@ -20,13 +21,13 @@ export async function listAccountCounters(): Promise<{ data: DbTimeSinceCounter[
 
     if (error) {
       console.error("listAccountCounters error:", error);
-      return { data: [], error: "Could not load account counters right now." };
+      return { data: [], error: accountLoadErrorMessage("You can still use counters on this device.") };
     }
 
     return { data: data || [], error: null };
   } catch (err) {
     console.error("listAccountCounters exception:", err);
-    return { data: [], error: "Could not connect to account right now." };
+    return { data: [], error: accountLoadErrorMessage("You can still use counters on this device.") };
   }
 }
 
@@ -34,7 +35,7 @@ export async function createAccountCounter(
   input: Omit<DbTimeSinceCounter, "id" | "user_id" | "created_at" | "updated_at" | "deleted_at">
 ): Promise<{ data: DbTimeSinceCounter | null; error: string | null }> {
   if (!authConfigAvailable || !supabase) {
-    return { data: null, error: "Database not connected" };
+    return { data: null, error: "Accounts are not connected in this environment." };
   }
 
   try {
@@ -57,19 +58,19 @@ export async function createAccountCounter(
 
     if (error) {
       console.error("createAccountCounter error:", error);
-      return { data: null, error: "Could not save counter to your account right now." };
+      return { data: null, error: accountSaveErrorMessage("This counter was not saved to your account.") };
     }
 
     return { data, error: null };
   } catch (err) {
     console.error("createAccountCounter exception:", err);
-    return { data: null, error: "Could not connect to account right now." };
+    return { data: null, error: accountSaveErrorMessage("This counter was not saved to your account.") };
   }
 }
 
 export async function removeAccountCounter(id: string): Promise<{ success: boolean; error: string | null }> {
   if (!authConfigAvailable || !supabase) {
-    return { success: false, error: "Database not connected" };
+    return { success: false, error: "Accounts are not connected in this environment." };
   }
 
   try {
@@ -87,12 +88,12 @@ export async function removeAccountCounter(id: string): Promise<{ success: boole
 
     if (error) {
       console.error("removeAccountCounter error:", error);
-      return { success: false, error: "Could not remove counter from account right now." };
+      return { success: false, error: accountSaveErrorMessage("This counter was not removed.") };
     }
 
     return { success: true, error: null };
   } catch (err) {
     console.error("removeAccountCounter exception:", err);
-    return { success: false, error: "Could not connect to account right now." };
+    return { success: false, error: accountSaveErrorMessage("This counter was not removed.") };
   }
 }

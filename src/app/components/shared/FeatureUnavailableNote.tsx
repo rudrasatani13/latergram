@@ -17,7 +17,7 @@ export function FeatureUnavailableNote({ message, visible = true }: FeatureUnava
           className="mt-6 p-4 rounded-2xl border border-[var(--lg-border)] bg-[var(--lg-paper)]/50 text-center"
         >
           <p className="font-cute text-[var(--lg-cocoa)] m-0" style={{ fontSize: "1.05rem" }}>
-            {message} <span className="text-[var(--lg-rose)] ml-1">✿</span>
+            {message}
           </p>
         </motion.div>
       )}

@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useParams } from "react-router";
 import { motion } from "motion/react";
 import { BackgroundPetals } from "../components/BackgroundPetals";
@@ -60,7 +60,7 @@ function unavailableCopy(reason: Exclude<OpenLetterResult, { status: "available"
     default:
       return {
         title: "This letter could not open right now.",
-        note: "Please try again later.",
+        note: "Latergram could not connect right now. Try again when your connection is available.",
       };
   }
 }
@@ -68,6 +68,7 @@ function unavailableCopy(reason: Exclude<OpenLetterResult, { status: "available"
 export function RecipientLetterPage() {
   const { token = "" } = useParams();
   const [result, setResult] = useState<OpenLetterResult | null>(null);
+  const [loadingLetter, setLoadingLetter] = useState(true);
   const [optOutEmail, setOptOutEmail] = useState("");
   const [optOutStatus, setOptOutStatus] = useState("");
   const [optingOut, setOptingOut] = useState(false);
@@ -77,13 +78,24 @@ export function RecipientLetterPage() {
   const [blockSender, setBlockSender] = useState(true);
   const [reporting, setReporting] = useState(false);
 
+  const loadLetter = useCallback(() => {
+    setResult(null);
+    setLoadingLetter(true);
+    openRecipientLetter(token).then((nextResult) => {
+      setResult(nextResult);
+      setLoadingLetter(false);
+    });
+  }, [token]);
+
   useEffect(() => {
     let cancelled = false;
 
     setResult(null);
+    setLoadingLetter(true);
     openRecipientLetter(token).then((nextResult) => {
       if (!cancelled) {
         setResult(nextResult);
+        setLoadingLetter(false);
       }
     });
 
@@ -94,6 +106,11 @@ export function RecipientLetterPage() {
 
   const submitOptOut = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (optingOut) {
+      return;
+    }
+
     setOptOutStatus("");
     setOptingOut(true);
     const { error } = await optOutRecipientEmail(optOutEmail);
@@ -110,6 +127,11 @@ export function RecipientLetterPage() {
 
   const submitReport = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (reporting) {
+      return;
+    }
+
     setReportStatus("");
     setReporting(true);
     const { error } = await reportRecipientLetter({
@@ -165,7 +187,7 @@ export function RecipientLetterPage() {
           </div>
 
           <div className="px-4 sm:px-7 py-7 md:px-9 md:py-10">
-            {!result ? (
+            {loadingLetter ? (
               <p className="font-cute text-[var(--lg-cocoa)] animate-pulse" style={{ fontSize: "1.2rem" }}>
                 Opening softly...
               </p>
@@ -202,6 +224,16 @@ export function RecipientLetterPage() {
                 <p className="mt-5 font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1.2rem", lineHeight: "30px" }}>
                   {unavailable?.note}
                 </p>
+                {result?.status === "unavailable" && result.reason === "server_error" && (
+                  <button
+                    type="button"
+                    onClick={loadLetter}
+                    className="mt-5 min-h-11 rounded-full border border-[var(--lg-border)] px-5 py-2 font-cute text-[var(--lg-rose)] hover:border-[var(--lg-rose-soft)] transition-colors duration-300"
+                    style={{ fontSize: "1rem" }}
+                  >
+                    Try opening again
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -215,11 +247,12 @@ export function RecipientLetterPage() {
                 <form onSubmit={submitReport} className="mt-4 space-y-3">
                   <select
                     value={reportReason}
+                    disabled={reporting}
                     onChange={(event) => {
                       setReportReason(event.target.value);
                       setReportStatus("");
                     }}
-                    className="min-h-11 w-full bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-2xl px-4 py-3 text-[var(--lg-ink)] focus:outline-none focus:border-[var(--lg-rose)]"
+                    className="min-h-11 w-full bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-2xl px-4 py-3 text-[var(--lg-ink)] focus:outline-none focus:border-[var(--lg-rose)] disabled:opacity-60 disabled:cursor-not-allowed"
                     style={{ fontSize: "0.95rem" }}
                   >
                     {reportReasons.map((reason) => (
@@ -230,19 +263,21 @@ export function RecipientLetterPage() {
                   </select>
                   <textarea
                     value={reportDetails}
+                    disabled={reporting}
                     onChange={(event) => {
                       setReportDetails(event.target.value);
                       setReportStatus("");
                     }}
                     rows={4}
                     placeholder="Share a little more if you want."
-                    className="w-full resize-y min-h-[120px] bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-2xl px-4 py-3 text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/55 focus:outline-none focus:border-[var(--lg-rose)]"
+                    className="w-full resize-y min-h-[120px] bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-2xl px-4 py-3 text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/55 focus:outline-none focus:border-[var(--lg-rose)] disabled:opacity-60 disabled:cursor-not-allowed"
                     style={{ fontSize: "0.95rem", lineHeight: "1.6" }}
                   />
                   <label className="flex items-start gap-3 text-[var(--lg-cocoa)]" style={{ fontSize: "0.95rem" }}>
                     <input
                       type="checkbox"
                       checked={blockSender}
+                      disabled={reporting}
                       onChange={(event) => {
                         setBlockSender(event.target.checked);
                         setReportStatus("");
@@ -280,8 +315,10 @@ export function RecipientLetterPage() {
                     setOptOutStatus("");
                   }}
                   type="email"
+                  required
+                  disabled={optingOut}
                   placeholder="your email"
-                  className="min-h-12 min-w-0 flex-1 bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-full px-4 py-3 text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/55 focus:outline-none focus:border-[var(--lg-rose)]"
+                  className="min-h-12 min-w-0 flex-1 bg-[var(--lg-paper)] border border-[var(--lg-border)] rounded-full px-4 py-3 text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/55 focus:outline-none focus:border-[var(--lg-rose)] disabled:opacity-60 disabled:cursor-not-allowed"
                   style={{ fontSize: "0.95rem" }}
                 />
                 <button

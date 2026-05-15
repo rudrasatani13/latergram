@@ -1,5 +1,6 @@
 import { authConfigAvailable, supabase } from "../auth/authClient";
 import { maskRecipientEmail } from "../utils/emailMasking";
+import { accountLoadErrorMessage, accountSaveErrorMessage } from "../utils/reliability";
 import type { DbLateLetter } from "./types";
 
 export type LateLetterRecord = Pick<
@@ -84,7 +85,7 @@ function safeLog(label: string, error: unknown) {
 
 async function getSignedInUserId() {
   if (!authConfigAvailable || !supabase) {
-    return { userId: null, error: "Database not connected" };
+    return { userId: null, error: "Accounts are not connected in this environment." };
   }
 
   const {
@@ -115,13 +116,13 @@ export async function listLateLetters(): DataResult<LateLetterRecord[]> {
 
     if (error) {
       safeLog("listLateLetters error:", error);
-      return { data: [], error: "Your scheduled letters could not load right now." };
+      return { data: [], error: accountLoadErrorMessage("Your scheduled letters could not load.") };
     }
 
     return { data: (data || []) as unknown as LateLetterRecord[], error: null };
   } catch (error) {
     safeLog("listLateLetters exception:", error);
-    return { data: [], error: "Could not connect to your letters right now." };
+    return { data: [], error: accountLoadErrorMessage("Your scheduled letters could not load.") };
   }
 }
 
@@ -152,13 +153,13 @@ export async function createLateLetter(input: CreateLateLetterInput): DataResult
 
     if (error) {
       safeLog("createLateLetter error:", error);
-      return { data: null, error: "Could not save this Late Letter. Your words are still here." };
+      return { data: null, error: accountSaveErrorMessage("This Late Letter was not scheduled. Your words are still here.") };
     }
 
     return { data: data as unknown as LateLetterRecord, error: null };
   } catch (error) {
     safeLog("createLateLetter exception:", error);
-    return { data: null, error: "Could not connect to your account right now." };
+    return { data: null, error: accountSaveErrorMessage("This Late Letter was not scheduled. Your words are still here.") };
   }
 }
 
@@ -186,7 +187,7 @@ export async function cancelLateLetter(id: string): DataResult<LateLetterRecord 
 
     if (error) {
       safeLog("cancelLateLetter error:", error);
-      return { data: null, error: "Could not cancel this Late Letter right now." };
+      return { data: null, error: accountSaveErrorMessage("This Late Letter was not cancelled.") };
     }
 
     if (!data) {
@@ -196,7 +197,7 @@ export async function cancelLateLetter(id: string): DataResult<LateLetterRecord 
     return { data: data as unknown as LateLetterRecord, error: null };
   } catch (error) {
     safeLog("cancelLateLetter exception:", error);
-    return { data: null, error: "Could not connect to your account right now." };
+    return { data: null, error: accountSaveErrorMessage("This Late Letter was not cancelled.") };
   }
 }
 
@@ -227,13 +228,13 @@ export async function reportLateLetter(
         return { data: null, error: "Choose a reason first." };
       }
 
-      return { data: null, error: "Could not submit that report right now." };
+      return { data: null, error: accountSaveErrorMessage("The report was not submitted.") };
     }
 
     const result = Array.isArray(data) ? data[0] : data;
     return { data: result as LateLetterReportResult, error: null };
   } catch (error) {
     safeLog("reportLateLetter exception:", error);
-    return { data: null, error: "Could not connect to your account right now." };
+    return { data: null, error: accountSaveErrorMessage("The report was not submitted.") };
   }
 }

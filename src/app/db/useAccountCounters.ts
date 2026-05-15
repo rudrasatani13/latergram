@@ -5,15 +5,17 @@ import type { DbTimeSinceCounter } from "./types";
 
 export function useAccountCounters() {
   const { authAvailable, session } = useAuth();
+  const userId = session?.user?.id;
   const [data, setData] = useState<DbTimeSinceCounter[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
-    if (!authAvailable || !session?.user) {
+    if (!authAvailable || !userId) {
       setData([]);
+      setError(null);
       setLoading(false);
-      return;
+      return { error: null };
     }
 
     setLoading(true);
@@ -25,7 +27,8 @@ export function useAccountCounters() {
       setError(null);
     }
     setLoading(false);
-  }, [authAvailable, session]);
+    return { error: err };
+  }, [authAvailable, userId]);
 
   useEffect(() => {
     refresh();

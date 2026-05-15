@@ -12,6 +12,7 @@ export function Logo({ size = "md" }: LogoProps) {
       <img
         src={brand.logo}
         alt="Latergram"
+        decoding="async"
         style={{ width: dim, height: dim }}
         className="object-contain"
       />

@@ -1,4 +1,5 @@
 import { authConfigAvailable, supabase } from "../auth/authClient";
+import { recipientActionErrorMessage } from "../utils/reliability";
 
 export interface RecipientLetter {
   body: string;
@@ -19,12 +20,21 @@ export async function openRecipientLetter(token: string): Promise<OpenLetterResu
     return { status: "unavailable", reason: "server_error" };
   }
 
-  const { data, error } = await supabase.functions.invoke("open-letter", {
-    body: { token },
-  });
+  let data: unknown = null;
+  let error: { context?: { status?: number } } | null = null;
+
+  try {
+    const result = await supabase.functions.invoke("open-letter", {
+      body: { token },
+    });
+    data = result.data;
+    error = result.error;
+  } catch {
+    return { status: "unavailable", reason: "server_error" };
+  }
 
   if (error) {
-    const status = (error as { context?: { status?: number } }).context?.status;
+    const status = error.context?.status;
 
     if (status === 404) {
       return { status: "unavailable", reason: "invalid" };
@@ -41,7 +51,7 @@ export async function openRecipientLetter(token: string): Promise<OpenLetterResu
     return { status: "unavailable", reason: "server_error" };
   }
 
-  if (data?.status === "available" && data.letter) {
+  if (isRecord(data) && data.status === "available" && data.letter) {
     return {
       status: "available",
       letter: data.letter as RecipientLetter,
@@ -50,7 +60,7 @@ export async function openRecipientLetter(token: string): Promise<OpenLetterResu
 
   return {
     status: "unavailable",
-    reason: toUnavailableReason(data?.reason),
+    reason: toUnavailableReason(isRecord(data) ? data.reason : undefined),
   };
 }
 
@@ -59,18 +69,25 @@ export async function optOutRecipientEmail(email: string): Promise<{ error: stri
     return { error: "Latergram is not connected right now." };
   }
 
-  const { error } = await supabase.functions.invoke("recipient-opt-out", {
-    body: { email },
-  });
+  let error: { context?: { status?: number } } | null = null;
+
+  try {
+    const result = await supabase.functions.invoke("recipient-opt-out", {
+      body: { email },
+    });
+    error = result.error;
+  } catch {
+    return { error: recipientActionErrorMessage("The opt-out request was not saved.") };
+  }
 
   if (error) {
-    const status = (error as { context?: { status?: number } }).context?.status;
+    const status = error.context?.status;
 
     if (status === 400) {
       return { error: "Enter a valid-looking email." };
     }
 
-    return { error: "Could not save that request right now." };
+    return { error: recipientActionErrorMessage("The opt-out request was not saved.") };
   }
 
   return { error: null };
@@ -86,17 +103,24 @@ export async function reportRecipientLetter(input: {
     return { error: "Latergram is not connected right now." };
   }
 
-  const { error } = await supabase.functions.invoke("report-letter", {
-    body: {
-      token: input.token,
-      reason: input.reason,
-      details: input.details ?? null,
-      block_sender: Boolean(input.blockSender),
-    },
-  });
+  let error: { context?: { status?: number } } | null = null;
+
+  try {
+    const result = await supabase.functions.invoke("report-letter", {
+      body: {
+        token: input.token,
+        reason: input.reason,
+        details: input.details ?? null,
+        block_sender: Boolean(input.blockSender),
+      },
+    });
+    error = result.error;
+  } catch {
+    return { error: recipientActionErrorMessage("The report was not submitted.") };
+  }
 
   if (error) {
-    const status = (error as { context?: { status?: number } }).context?.status;
+    const status = error.context?.status;
 
     if (status === 400) {
       return { error: "Choose a reason first." };
@@ -114,7 +138,7 @@ export async function reportRecipientLetter(input: {
       return { error: "This letter is unavailable." };
     }
 
-    return { error: "Could not submit that report right now." };
+    return { error: recipientActionErrorMessage("The report was not submitted.") };
   }
 
   return { error: null };
@@ -126,4 +150,8 @@ function toUnavailableReason(value: unknown): UnavailableReason {
   }
 
   return "server_error";
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

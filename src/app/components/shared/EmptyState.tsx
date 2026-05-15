@@ -18,6 +18,8 @@ export function EmptyState({ message, note }: EmptyStateProps) {
         src={decor.envelopeMini}
         alt=""
         aria-hidden="true"
+        loading="lazy"
+        decoding="async"
         className="w-12 h-12 object-contain mx-auto mb-3 opacity-70"
       />
       <p

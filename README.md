@@ -4,9 +4,9 @@ Some words arrive late. Latergram gives them a place.
 
 ## Current Status
 
-Phase 14 Mobile Polish implemented in the repo.
+Phase 15 Performance and Error Handling implemented in the repo.
 
-The app now has a mobile-polished shell for launch preparation: small-screen navigation, writer spacing, sticky writer actions, auth form layout, Keepsake Box browsing, Late Letter forms/cards, recipient letter safety forms, Garden closed state, and Memory Cards unavailable state have been audited and tightened for 320px through 768px widths.
+The app now has reliability hardening for launch preparation: async loading/disabled states, honest account/network error copy, recipient token error handling, local draft auto-save and restore, app-level crash fallback, large Keepsake list limiting, and route-level bundle splitting. This does not mean public launch readiness is complete.
 
 The app has a fully wired authentication foundation using Supabase Auth and a true backend persistence model for "Keep Private", "Time Since" counters, and scheduled Late Letter records. Real accounts are strictly segregated from local writing. Signed-in users save private Lategrams and Time Since counters to their account archive, while signed-out users continue to save supported local records to their local device. No automatic migration occurs; local saves can be explicitly imported by the user.
 
@@ -63,7 +63,7 @@ After the current migrations and Edge Functions are applied:
 - A main app shell with section navigation via URL query params (`/app`).
 - Mobile app navigation for the live core app sections.
 - A writing surface for drafting text on screen.
-- One local draft that can be saved, restored, and cleared on this device.
+- One local draft that auto-saves locally, restores on refresh, and can be manually saved/restored/cleared on this device.
 - A real copy action for the write flow using the browser clipboard.
 - Recipient, subject, and intended-destination context inside the write flow.
 - Clear/reset behavior that asks before removing current words.
@@ -212,6 +212,18 @@ After the current migrations and Edge Functions are applied:
 - [x] Confirmed no fake Garden posts, fake card sources, fake counters, fake letters, or fake analytics were added.
 - [x] Confirmed no new Supabase migrations, dependency upgrades, or production config changes were needed.
 
+### Phase 15: Performance and Error Handling
+- [x] Audited auth, account storage, Time Since, Late Letters, recipient letter, Garden closed, and Memory Card unavailable async flows.
+- [x] Added calmer offline/network/account error handling without exposing raw technical details in user UI.
+- [x] Added local draft auto-save and refresh restore without automatic account migration, scheduling, or sending.
+- [x] Added app-level render error fallback with a safe recovery path back to writing.
+- [x] Added large-list "show more" behavior for Keepsake Lategrams and counters using real loaded items only.
+- [x] Improved Late Letter schedule/cancel/report loading states and kept status labels database-backed.
+- [x] Improved recipient token loading/unavailable/retry states and report/block/opt-out submission handling.
+- [x] Split route/vendor bundles and lazy-loaded route pages to reduce initial app chunk pressure.
+- [x] Confirmed Garden remains closed/unavailable and Memory Cards remain unavailable.
+- [x] Documented Phase 15 in [`docs/phase-15-performance-error-handling.md`](./docs/phase-15-performance-error-handling.md).
+
 ## Run Locally
 
 ```bash
@@ -227,4 +239,4 @@ npm run build
 
 ## Asset Hosting Note
 
-Product assets are currently served from local `/assets` paths. Phase 14 confirmed no runtime raw GitHub asset dependency is used.
+Product assets are currently served from local `/assets` paths. Phase 15 confirmed no runtime raw GitHub asset dependency is used.

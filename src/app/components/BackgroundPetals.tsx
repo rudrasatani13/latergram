@@ -17,6 +17,8 @@ export function BackgroundPetals() {
           key={i}
           src={it.src}
           alt=""
+          loading="lazy"
+          decoding="async"
           style={{
             position: "absolute",
             top: it.top,

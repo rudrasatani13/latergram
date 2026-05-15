@@ -50,6 +50,7 @@ const destinationNotes: Record<LocalDestination, string> = {
 
 type KeepPrivateTab = (typeof tabs)[number]["id"];
 type DestinationFilter = (typeof destinationFilters)[number]["id"];
+const PAGE_SIZE = 12;
 
 interface KeepPrivateViewProps {
   onViewSection?: (section: "write") => void;
@@ -173,6 +174,10 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
   const [status, setStatus] = useState("");
   const [isImporting, setIsImporting] = useState(false);
   const [importStatus, setImportStatus] = useState<string | null>(null);
+  const [refreshingArchive, setRefreshingArchive] = useState(false);
+  const [visibleLategramCount, setVisibleLategramCount] = useState(PAGE_SIZE);
+  const [visibleCounterCount, setVisibleCounterCount] = useState(PAGE_SIZE);
+  const [removingItemId, setRemovingItemId] = useState<string | null>(null);
 
   useEffect(() => {
     if (session?.user) {
@@ -212,6 +217,11 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
   }, [accountCounters]);
 
   const refreshArchive = async (message = "Archive refreshed.") => {
+    if (refreshingArchive) {
+      return;
+    }
+
+    setRefreshingArchive(true);
     const snapshot = readArchiveSnapshot();
     setLategrams(snapshot.lategrams);
     setCounters(snapshot.counters);
@@ -224,12 +234,15 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
       setSelectedLategramId(null);
     }
     
-    if (session?.user) {
-      await refreshAccountLategrams();
-      await refreshAccountCounters();
-    }
+    try {
+      if (session?.user) {
+        await Promise.all([refreshAccountLategrams(), refreshAccountCounters()]);
+      }
 
-    setStatus(message);
+      setStatus(message);
+    } finally {
+      setRefreshingArchive(false);
+    }
   };
 
   const copyLategram = async (lategram: LocalLategram) => {
@@ -273,13 +286,16 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
       return;
     }
 
+    setRemovingItemId(lategram.id);
     const { success, error } = await removeAccountLategram(lategram.id);
 
     if (!success) {
       setStatus(error || "Could not remove this saved Lategram from your account.");
+      setRemovingItemId(null);
       return;
     }
 
+    setRemovingItemId(null);
     setPendingLategramDeleteId(null);
 
     if (selectedLategramId === lategram.id) {
@@ -324,13 +340,16 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
       return;
     }
 
+    setRemovingItemId(counter.id);
     const { success, error } = await removeAccountCounter(counter.id);
 
     if (!success) {
       setStatus(error || "Could not remove this counter from your account.");
+      setRemovingItemId(null);
       return;
     }
 
+    setRemovingItemId(null);
     setPendingCounterDeleteId(null);
     setStatus("Counter removed from your account.");
   };
@@ -407,6 +426,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
     let successCount = 0;
     let failCount = 0;
     let duplicateCount = 0;
+    let firstError: string | null = null;
 
     for (const local of lategrams) {
       // Simple duplicate detection: check if an account lategram with same body and destination exists
@@ -430,6 +450,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
 
       if (error) {
         failCount++;
+        firstError = firstError || error;
       } else {
         successCount++;
       }
@@ -449,7 +470,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
       setImportStatus(msg);
       await refreshAccountLategrams();
     } else if (failCount > 0) {
-      setImportStatus("Import failed. Could not save to your account.");
+      setImportStatus(firstError || "Import failed. Could not save to your account.");
     } else {
       setImportStatus("Nothing new to import.");
     }
@@ -465,10 +486,11 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
     setPendingCounterDeleteId(null);
     setPendingDraftDelete(false);
     setStatus("");
+    setVisibleLategramCount(PAGE_SIZE);
+    setVisibleCounterCount(PAGE_SIZE);
     
     if (session?.user) {
-      await refreshAccountLategrams();
-      await refreshAccountCounters();
+      await Promise.all([refreshAccountLategrams(), refreshAccountCounters()]);
     }
   };
 
@@ -616,6 +638,8 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
     const allItems = viewType === "account" ? accountLategrams : lategrams;
     const isLoading = viewType === "account" && accountLategramsLoading;
     const hasError = viewType === "account" && accountLategramsError;
+    const visibleItems = activeItems.slice(0, visibleLategramCount);
+    const hiddenCount = Math.max(0, activeItems.length - visibleItems.length);
 
     return (
       <>
@@ -629,6 +653,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                 setViewType("account");
                 setPendingLategramDeleteId(null);
                 setSelectedLategramId(null);
+                setVisibleLategramCount(PAGE_SIZE);
                 setStatus("");
               }}
               className={`min-h-11 rounded-full border px-4 py-2 font-cute transition-colors duration-300 ${
@@ -643,6 +668,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                 setViewType("device");
                 setPendingLategramDeleteId(null);
                 setSelectedLategramId(null);
+                setVisibleLategramCount(PAGE_SIZE);
                 setStatus("");
               }}
               className={`min-h-11 rounded-full border px-4 py-2 font-cute transition-colors duration-300 ${
@@ -664,7 +690,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
         ) : hasError ? (
           <div className="py-12 text-center">
             <p className="font-cute text-[var(--lg-rose)]" style={{ fontSize: "1.2rem" }}>
-              Account archive could not load right now.
+              {accountLategramsError || "Account archive could not load right now."}
             </p>
             <p className="font-cute text-[var(--lg-cocoa)] mt-2" style={{ fontSize: "1rem" }}>
               You can still view saves on this device.
@@ -682,6 +708,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                       setFilter(item.id);
                       setPendingLategramDeleteId(null);
                       setSelectedLategramId(null);
+                      setVisibleLategramCount(PAGE_SIZE);
                       setStatus("");
                     }}
                   >
@@ -710,7 +737,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
 
             {activeItems.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {activeItems.map((lategram) => {
+                {visibleItems.map((lategram) => {
                   const isSelected = selectedLategramId === lategram.id;
                   const isAccount = 'user_id' in lategram;
                   const updatedAt = isAccount ? lategram.updated_at : lategram.updatedAt;
@@ -774,11 +801,14 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                             <button
                               type="button"
                               onClick={() => isAccount ? removeAccountLategramAction(lategram as DbPrivateLategram) : removeLategram(lategram as LocalLategram)}
-                              className="min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
+                              disabled={removingItemId === lategram.id}
+                              className="min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-500"
                               style={{ fontSize: "1rem" }}
                             >
-                              {pendingLategramDeleteId === lategram.id 
-                                ? (isAccount ? "remove from account" : "remove from this device") 
+                              {removingItemId === lategram.id
+                                ? "removing..."
+                                : pendingLategramDeleteId === lategram.id
+                                ? (isAccount ? "remove from account" : "remove from this device")
                                 : (isAccount ? "Remove from account" : "Remove from this device")}
                             </button>
                             {pendingLategramDeleteId === lategram.id && (
@@ -803,6 +833,22 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                 })}
               </div>
             )}
+
+            {hiddenCount > 0 && (
+              <div className="mt-5 text-center">
+                <button
+                  type="button"
+                  onClick={() => setVisibleLategramCount((current) => current + PAGE_SIZE)}
+                  className="min-h-11 rounded-full border border-[var(--lg-border)] px-5 py-2 font-cute text-[var(--lg-rose)] hover:border-[var(--lg-rose-soft)] transition-colors duration-300"
+                  style={{ fontSize: "1rem" }}
+                >
+                  Show {Math.min(PAGE_SIZE, hiddenCount)} more saved Lategram{Math.min(PAGE_SIZE, hiddenCount) === 1 ? "" : "s"}
+                </button>
+                <p className="mt-2 font-cute text-[var(--lg-cocoa)]/65" style={{ fontSize: "0.9rem" }}>
+                  Showing {visibleItems.length} of {activeItems.length} real save{activeItems.length === 1 ? "" : "s"}.
+                </p>
+              </div>
+            )}
           </>
         )}
       </>
@@ -814,6 +860,8 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
     const allItems = viewType === "account" ? accountCounters : counters;
     const isLoading = viewType === "account" && accountCountersLoading;
     const hasError = viewType === "account" && accountCountersError;
+    const visibleItems = activeItems.slice(0, visibleCounterCount);
+    const hiddenCount = Math.max(0, activeItems.length - visibleItems.length);
 
     return (
       <>
@@ -823,6 +871,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
               onClick={() => {
                 setViewType("account");
                 setPendingCounterDeleteId(null);
+                setVisibleCounterCount(PAGE_SIZE);
                 setStatus("");
               }}
               className={`min-h-11 rounded-full border px-4 py-2 font-cute transition-colors duration-300 ${
@@ -836,6 +885,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
               onClick={() => {
                 setViewType("device");
                 setPendingCounterDeleteId(null);
+                setVisibleCounterCount(PAGE_SIZE);
                 setStatus("");
               }}
               className={`min-h-11 rounded-full border px-4 py-2 font-cute transition-colors duration-300 ${
@@ -857,7 +907,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
         ) : hasError ? (
           <div className="py-12 text-center">
             <p className="font-cute text-[var(--lg-rose)]" style={{ fontSize: "1.2rem" }}>
-              Account archive could not load right now.
+              {accountCountersError || "Account archive could not load right now."}
             </p>
             <p className="font-cute text-[var(--lg-cocoa)] mt-2" style={{ fontSize: "1rem" }}>
               You can still view counters on this device.
@@ -881,7 +931,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
 
             {activeItems.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {activeItems.map((counter) => {
+                {visibleItems.map((counter) => {
                   const isAccount = 'user_id' in counter;
                   const title = counter.title;
                   const start = isAccount ? counter.start_date : counter.start;
@@ -918,11 +968,14 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                           <button
                             type="button"
                             onClick={() => isAccount ? removeAccountCounterAction(counter as DbTimeSinceCounter) : removeCounter(counter as LocalCounter)}
-                            className="min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
+                            disabled={removingItemId === counter.id}
+                            className="min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-500"
                             style={{ fontSize: "1rem" }}
                           >
-                            {pendingCounterDeleteId === counter.id 
-                              ? (isAccount ? "remove from account" : "remove from this device") 
+                            {removingItemId === counter.id
+                              ? "removing..."
+                              : pendingCounterDeleteId === counter.id
+                              ? (isAccount ? "remove from account" : "remove from this device")
                               : (isAccount ? "Remove from account" : "Remove from this device")}
                           </button>
                           {pendingCounterDeleteId === counter.id && (
@@ -943,6 +996,22 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
                     </div>
                   );
                 })}
+              </div>
+            )}
+
+            {hiddenCount > 0 && (
+              <div className="mt-5 text-center">
+                <button
+                  type="button"
+                  onClick={() => setVisibleCounterCount((current) => current + PAGE_SIZE)}
+                  className="min-h-11 rounded-full border border-[var(--lg-border)] px-5 py-2 font-cute text-[var(--lg-rose)] hover:border-[var(--lg-rose-soft)] transition-colors duration-300"
+                  style={{ fontSize: "1rem" }}
+                >
+                  Show {Math.min(PAGE_SIZE, hiddenCount)} more counter{Math.min(PAGE_SIZE, hiddenCount) === 1 ? "" : "s"}
+                </button>
+                <p className="mt-2 font-cute text-[var(--lg-cocoa)]/65" style={{ fontSize: "0.9rem" }}>
+                  Showing {visibleItems.length} of {activeItems.length} real counter{activeItems.length === 1 ? "" : "s"}.
+                </p>
               </div>
             )}
           </>
@@ -1012,15 +1081,16 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
       <div className="px-4 sm:px-7 py-6 min-h-[280px]">
         <div className="mb-5 rounded-[22px] border border-dashed border-[var(--lg-border)] bg-[var(--lg-cream)]/50 px-4 sm:px-5 py-4 flex items-center justify-between gap-4 flex-wrap">
           <p className="font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem" }}>
-            {authAvailable ? "Accounts are connected, but this archive is still stored only in this browser." : "Saved on this device only. Clearing browser data may remove these. Accounts are not connected yet."}
+            {authAvailable ? "Use Account archive for account saves, or This device for browser-only saves. Local copies are imported only when you choose import." : "Saved on this device only. Clearing browser data may remove these. Accounts are not connected yet."}
           </p>
           <button
             type="button"
             onClick={() => refreshArchive()}
-            className="min-h-11 inline-flex items-center font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
+            disabled={refreshingArchive}
+            className="min-h-11 inline-flex items-center font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] disabled:opacity-60 disabled:cursor-not-allowed underline decoration-[var(--lg-rose-soft)] underline-offset-4 transition-colors duration-500"
             style={{ fontSize: "1rem" }}
           >
-            Refresh archive
+            {refreshingArchive ? "Refreshing..." : "Refresh archive"}
           </button>
         </div>
 

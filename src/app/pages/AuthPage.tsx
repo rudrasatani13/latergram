@@ -36,7 +36,7 @@ export function AuthPage() {
     setIsSubmitting(false);
     if (error) {
       setIsError(true);
-      setStatusMsg("Password reset could not be sent right now.");
+      setStatusMsg(error);
     } else {
       setIsError(false);
       setStatusMsg("Reset link sent. Check your email.");
@@ -56,7 +56,7 @@ export function AuthPage() {
       setIsSubmitting(false);
       if (error) {
         setIsError(true);
-        setStatusMsg("That sign-in did not work. Check your email and password.");
+        setStatusMsg(error);
       } else {
         navigate("/app");
       }
@@ -65,7 +65,7 @@ export function AuthPage() {
       setIsSubmitting(false);
       if (error) {
         setIsError(true);
-        setStatusMsg("This email may already have a place. Try signing in.");
+        setStatusMsg(error);
       } else if (needsEmailConfirmation) {
         setIsError(false);
         setStatusMsg("Check your email to continue.");

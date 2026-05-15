@@ -45,7 +45,14 @@ function buildScheduledDate(dateValue: string, timeValue: string) {
 
   const scheduledAt = new Date(year, month - 1, day, hours, minutes);
 
-  if (Number.isNaN(scheduledAt.getTime())) {
+  if (
+    Number.isNaN(scheduledAt.getTime()) ||
+    scheduledAt.getFullYear() !== year ||
+    scheduledAt.getMonth() !== month - 1 ||
+    scheduledAt.getDate() !== day ||
+    scheduledAt.getHours() !== hours ||
+    scheduledAt.getMinutes() !== minutes
+  ) {
     return null;
   }
 
@@ -181,6 +188,7 @@ export function LateLettersView() {
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
   const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [selectedLetterId, setSelectedLetterId] = useState<string | null>(null);
   const [reportReason, setReportReason] = useState("delivery_issue");
   const [reportDetails, setReportDetails] = useState("");
@@ -213,7 +221,11 @@ export function LateLettersView() {
 
     const scheduledAt = draft.date && draft.time ? buildScheduledDate(draft.date, draft.time) : null;
 
-    if (!errors.scheduledFor && (!scheduledAt || scheduledAt.getTime() <= Date.now())) {
+    if (!errors.scheduledFor && !scheduledAt) {
+      errors.scheduledFor = "Enter a real date and time.";
+    }
+
+    if (!errors.scheduledFor && scheduledAt && scheduledAt.getTime() <= Date.now()) {
       errors.scheduledFor = "Pick a future date and time.";
     }
 
@@ -230,6 +242,10 @@ export function LateLettersView() {
   const saveLetter = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    if (saving) {
+      return;
+    }
+
     const scheduledAt = validateDraft();
 
     if (!scheduledAt) {
@@ -237,6 +253,7 @@ export function LateLettersView() {
     }
 
     setSaving(true);
+    setStatus("Saving this Late Letter...");
     const { data: savedLetter, error } = await create({
       body: draft.body.trim(),
       recipient_name: draft.recipientName.trim() || null,
@@ -260,6 +277,10 @@ export function LateLettersView() {
   };
 
   const cancelLetter = async (letter: LateLetterRecord) => {
+    if (cancellingId) {
+      return;
+    }
+
     if (!canCancel(letter.status)) {
       setStatus("Only scheduled Late Letters can be cancelled here.");
       return;
@@ -271,7 +292,10 @@ export function LateLettersView() {
       return;
     }
 
+    setCancellingId(letter.id);
+    setStatus("Cancelling this Late Letter...");
     const { error } = await cancel(letter.id);
+    setCancellingId(null);
 
     if (error) {
       setStatus(error);
@@ -283,6 +307,10 @@ export function LateLettersView() {
   };
 
   const submitLetterReport = async (letter: LateLetterRecord) => {
+    if (submittingReport) {
+      return;
+    }
+
     setReportStatus("");
     setSubmittingReport(true);
 
@@ -374,8 +402,9 @@ export function LateLettersView() {
             <input
               value={draft.recipientName}
               onChange={(event) => updateDraft("recipientName", event.target.value)}
+              disabled={saving}
               placeholder="amma, ravi, future me..."
-              className="w-full bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-2 focus:outline-none focus:border-[var(--lg-rose)] font-cute text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/45"
+              className="w-full bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-2 focus:outline-none focus:border-[var(--lg-rose)] font-cute text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/45 disabled:opacity-60 disabled:cursor-not-allowed"
               style={{ fontSize: "1.3rem" }}
             />
           </Row>
@@ -385,9 +414,10 @@ export function LateLettersView() {
               <input
                 value={draft.recipientEmail}
                 onChange={(event) => updateDraft("recipientEmail", event.target.value)}
+                disabled={saving}
                 placeholder="name@example.com"
                 autoComplete="email"
-                className="w-full bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-2 focus:outline-none focus:border-[var(--lg-rose)] font-cute text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/45"
+                className="w-full bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-2 focus:outline-none focus:border-[var(--lg-rose)] font-cute text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/45 disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{ fontSize: "1.2rem" }}
               />
             </FieldBlock>
@@ -397,8 +427,9 @@ export function LateLettersView() {
             <input
               value={draft.subject}
               onChange={(event) => updateDraft("subject", event.target.value)}
+              disabled={saving}
               placeholder="optional"
-              className="w-full bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-2 focus:outline-none focus:border-[var(--lg-rose)] font-cute text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/45"
+              className="w-full bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-2 focus:outline-none focus:border-[var(--lg-rose)] font-cute text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/45 disabled:opacity-60 disabled:cursor-not-allowed"
               style={{ fontSize: "1.2rem" }}
             />
           </Row>
@@ -409,15 +440,17 @@ export function LateLettersView() {
                 <input
                   value={draft.date}
                   onChange={(event) => updateDraft("date", event.target.value)}
+                  disabled={saving}
                   type="date"
-                  className="min-h-11 w-full sm:w-auto bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-2 focus:outline-none focus:border-[var(--lg-rose)] text-[var(--lg-ink)]"
+                  className="min-h-11 w-full sm:w-auto bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-2 focus:outline-none focus:border-[var(--lg-rose)] text-[var(--lg-ink)] disabled:opacity-60 disabled:cursor-not-allowed"
                   style={{ fontSize: "1.05rem" }}
                 />
                 <input
                   value={draft.time}
                   onChange={(event) => updateDraft("time", event.target.value)}
+                  disabled={saving}
                   type="time"
-                  className="min-h-11 w-full sm:w-auto bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-2 focus:outline-none focus:border-[var(--lg-rose)] text-[var(--lg-ink)]"
+                  className="min-h-11 w-full sm:w-auto bg-transparent border-0 border-b border-dashed border-[var(--lg-border)] py-2 focus:outline-none focus:border-[var(--lg-rose)] text-[var(--lg-ink)] disabled:opacity-60 disabled:cursor-not-allowed"
                   style={{ fontSize: "1.05rem" }}
                 />
               </div>
@@ -429,9 +462,10 @@ export function LateLettersView() {
               <textarea
                 value={draft.body}
                 onChange={(event) => updateDraft("body", event.target.value)}
+                disabled={saving}
                 rows={6}
                 placeholder="dear ..."
-                className="w-full bg-transparent border-0 focus:outline-none resize-none font-cute text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/45"
+                className="w-full bg-transparent border-0 focus:outline-none resize-none font-cute text-[var(--lg-ink)] placeholder:text-[var(--lg-cocoa)]/45 disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{ fontSize: "1.4rem", lineHeight: "32px" }}
               />
             </FieldBlock>
@@ -440,12 +474,13 @@ export function LateLettersView() {
           <div className="pt-2 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 sm:gap-4">
             <button
               type="button"
+              disabled={saving}
               onClick={() => {
                 setComposing(false);
                 setFieldErrors({});
                 setStatus("");
               }}
-              className="min-h-11 inline-flex items-center justify-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)]"
+              className="min-h-11 inline-flex items-center justify-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] disabled:opacity-60 disabled:cursor-not-allowed"
               style={{ fontSize: "1.1rem" }}
             >
               close
@@ -477,10 +512,11 @@ export function LateLettersView() {
               <button
                 type="button"
                 onClick={refresh}
-                className="font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)]"
+                disabled={lettersLoading}
+                className="min-h-11 font-cute text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{ fontSize: "1rem" }}
               >
-                try again
+                {lettersLoading ? "loading..." : "try again"}
               </button>
             </div>
           )}
@@ -496,6 +532,7 @@ export function LateLettersView() {
                   key={letter.id}
                   letter={letter}
                   pendingCancel={pendingCancelId === letter.id}
+                  cancelling={cancellingId === letter.id}
                   selected={selectedLetterId === letter.id}
                   onView={() => {
                     setSelectedLetterId((current) => (current === letter.id ? null : letter.id));
@@ -552,6 +589,7 @@ export function LateLettersView() {
 function LetterCard({
   letter,
   pendingCancel,
+  cancelling,
   selected,
   onView,
   onCancel,
@@ -559,6 +597,7 @@ function LetterCard({
 }: {
   letter: LateLetterRecord;
   pendingCancel: boolean;
+  cancelling: boolean;
   selected: boolean;
   onView: () => void;
   onCancel: () => void;
@@ -608,10 +647,11 @@ function LetterCard({
           <button
             type="button"
             onClick={onCancel}
-            className="min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-500"
+            disabled={cancelling}
+            className="min-h-11 inline-flex items-center font-cute text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-500"
             style={{ fontSize: "1rem" }}
           >
-            {pendingCancel ? "confirm cancel" : "cancel before it is sent"}
+            {cancelling ? "cancelling..." : pendingCancel ? "confirm cancel" : "cancel before it is sent"}
           </button>
         )}
         {pendingCancel && (

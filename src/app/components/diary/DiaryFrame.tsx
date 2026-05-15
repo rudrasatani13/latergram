@@ -44,6 +44,8 @@ export function DiaryFrame({ caption, title, children, ribbon = true, seal = tru
             src={decor.pinkRibbonBow}
             alt=""
             aria-hidden
+            loading="lazy"
+            decoding="async"
             className="pointer-events-none absolute -top-5 left-5 sm:-top-6 sm:left-8 w-12 h-12 sm:w-14 sm:h-14 object-contain rotate-[-8deg]"
           />
         )}
@@ -52,6 +54,8 @@ export function DiaryFrame({ caption, title, children, ribbon = true, seal = tru
             src={decor.heartWaxSeal}
             alt=""
             aria-hidden
+            loading="lazy"
+            decoding="async"
             className="pointer-events-none absolute -top-4 -right-2 sm:-top-5 sm:-right-3 w-12 h-12 sm:w-14 sm:h-14 object-contain rotate-[10deg]"
           />
         )}
