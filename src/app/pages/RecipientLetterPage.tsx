@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { useParams } from "react-router";
+import { useParams, Link } from "react-router";
 import { motion } from "motion/react";
 import { BackgroundPetals } from "../components/BackgroundPetals";
 import { Grain } from "../components/Grain";
@@ -338,6 +338,13 @@ export function RecipientLetterPage() {
             </div>
           </div>
         </motion.section>
+        <div className="max-w-[680px] mx-auto mt-6 text-center">
+          <nav aria-label="Legal and support" className="flex items-center justify-center gap-4 flex-wrap">
+            <Link to="/privacy" className="text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-300" style={{ fontSize: "0.82rem" }}>Privacy</Link>
+            <Link to="/terms" className="text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-300" style={{ fontSize: "0.82rem" }}>Terms</Link>
+            <Link to="/support" className="text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-300" style={{ fontSize: "0.82rem" }}>Support</Link>
+          </nav>
+        </div>
       </main>
     </div>
   );

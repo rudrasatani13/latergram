@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { Header } from "../components/Header";
 import { Grain } from "../components/Grain";
@@ -342,7 +342,15 @@ export function AuthPage() {
                 className="mt-6 font-cute text-center text-[var(--lg-cocoa)]"
                 style={{ fontSize: "1.05rem" }}
               >
-                by continuing you agree to our soft terms ✿
+                by continuing you agree to our{" "}
+                <Link to="/terms" className="text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline underline-offset-2">
+                  terms
+                </Link>{" "}
+                and{" "}
+                <Link to="/privacy" className="text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline underline-offset-2">
+                  privacy policy
+                </Link>
+                {" "}✿
               </p>
             </motion.form>
 

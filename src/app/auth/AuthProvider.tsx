@@ -5,6 +5,15 @@ import { AuthContext, AuthContextType } from "./useAuth";
 import { upsertOwnProfile } from "../db/profiles";
 import { connectionActionMessage, isOffline } from "../utils/reliability";
 
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("Request timed out")), ms)
+    ),
+  ]);
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -37,6 +46,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
       });
 
+    const timeout = setTimeout(() => {
+      setLoading(false);
+    }, 5000);
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
@@ -50,7 +63,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   const value: AuthContextType = {
@@ -62,7 +78,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!supabase) return { error: "Accounts are not connected in this environment." };
 
       try {
-        const { error } = await supabase.auth.signInWithPassword({ email, password: password || "" });
+        const { error } = await withTimeout(
+          supabase.auth.signInWithPassword({ email, password: password || "" }),
+          10000
+        );
         if (error) {
           return { error: "That sign-in did not work. Check your email and password." };
         }
@@ -70,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return {
           error: isOffline()
             ? "You appear to be offline. Sign in was not completed."
-            : "Sign in could not connect right now.",
+            : "Sign in could not connect right now. Try again in a moment.",
         };
       }
 
@@ -80,11 +99,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!supabase) return { error: "Accounts are not connected in this environment.", needsEmailConfirmation: false };
 
       try {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password: password || "",
-          options: { data: metadata },
-        });
+        const { data, error } = await withTimeout(
+          supabase.auth.signUp({
+            email,
+            password: password || "",
+            options: { data: metadata },
+          }),
+          10000
+        );
         if (error) {
           return { error: "Account creation did not complete. Try signing in if this email already has an account.", needsEmailConfirmation: false };
         }
@@ -114,7 +136,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       try {
         const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/auth` : undefined;
-        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+        const { error } = await withTimeout(
+          supabase.auth.resetPasswordForEmail(email, { redirectTo }),
+          10000
+        );
         if (error) {
           return { error: "Password reset could not be sent right now." };
         }

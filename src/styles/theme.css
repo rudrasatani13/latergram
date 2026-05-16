@@ -219,3 +219,32 @@
     line-height: 1.5;
   }
 }
+
+.trust-heading {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: 1.25rem;
+  letter-spacing: -0.015em;
+  color: var(--lg-ink);
+  margin-bottom: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.trust-subheading {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: 1.05rem;
+  color: var(--lg-ink);
+  margin-bottom: 0.4rem;
+  margin-top: 1.2rem;
+}
+
+.trust-list {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin-top: 0.5rem;
+}
+
+.trust-list li {
+  margin-bottom: 0.35rem;
+}

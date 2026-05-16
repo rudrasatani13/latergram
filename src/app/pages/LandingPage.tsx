@@ -3,6 +3,7 @@ import { useNavigate, Navigate } from "react-router";
 import { Header } from "../components/Header";
 import { Grain } from "../components/Grain";
 import { BackgroundPetals } from "../components/BackgroundPetals";
+import { TrustFooter } from "../components/TrustFooter";
 import { useAuth } from "../auth/useAuth";
 
 const easeSoft = [0.22, 1, 0.36, 1] as const;
@@ -306,11 +307,12 @@ export function LandingPage() {
 
           <footer className="max-w-[1100px] mx-auto py-12 border-t border-[var(--lg-border)] text-center">
             <p
-              className="font-cute text-[var(--lg-cocoa)]"
+              className="font-cute text-[var(--lg-cocoa)] mb-4"
               style={{ fontSize: "1.15rem" }}
             >
               made gently — © Latergram ✿
             </p>
+            <TrustFooter />
           </footer>
         </main>
       </div>

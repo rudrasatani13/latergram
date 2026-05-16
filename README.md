@@ -4,9 +4,9 @@ Some words arrive late. Latergram gives them a place.
 
 ## Current Status
 
-Phase 16 Memory Card Export implemented in the repo.
+Phase 17 Privacy, Terms, and Support implemented in the repo.
 
-The app now has real export-only Memory Cards: users can explicitly choose one saved Lategram or one saved Time Since counter from either their device archive or, when signed in, their account archive, preview the privacy-safe card text, and download a real PNG in square, story, or phone wallpaper format. This does not mean public launch readiness is complete.
+The app now has honest, product-specific trust pages: a privacy policy explaining what data Latergram stores and how, terms of service with user responsibilities and service limitations, and a support page with data deletion instructions, abuse reporting, and crisis redirection. All trust content is written in plain language specific to Latergram's actual features and data model. Legal review disclaimers are clearly marked.
 
 The app has a fully wired authentication foundation using Supabase Auth and a true backend persistence model for "Keep Private", "Time Since" counters, and scheduled Late Letter records. Real accounts are strictly segregated from local writing. Signed-in users save private Lategrams and Time Since counters to their account archive, while signed-out users continue to save supported local records to their local device. No automatic migration occurs; local saves can be explicitly imported by the user.
 
@@ -76,6 +76,10 @@ After the current migrations and Edge Functions are applied:
 - A soft Latergram-style 404 page for unknown routes.
 - Stable design system with shared components (Phase 2).
 - Browser back/forward navigation and direct URL access.
+- Privacy policy page at `/privacy` with Latergram-specific data handling explanation.
+- Terms of service page at `/terms` with honest user responsibilities and limitations.
+- Support page at `/support` with data deletion, abuse reporting, and crisis redirection.
+- Trust footer links on landing, auth, and recipient letter pages.
 
 ## What Is Not Live Yet
 
@@ -88,6 +92,8 @@ After the current migrations and Edge Functions are applied:
 - Received letters.
 - Guaranteed delivery or guaranteed read receipts.
 - Analytics, payments, AI, or public launch infrastructure.
+- Self-serve full account deletion (available via support request).
+- Formal legal review of privacy policy and terms of service.
 
 ## Completed Phases
 
@@ -236,6 +242,17 @@ After the current migrations and Edge Functions are applied:
 - [x] Kept saved card history/metadata deferred and did not add sharing, cloud sync, analytics, AI, or fake card sources.
 - [x] Confirmed Garden remains closed/unavailable and no Garden cards or Garden RPC changes were added.
 - [x] Documented Phase 16 in [`docs/phase-16-memory-card-export.md`](./docs/phase-16-memory-card-export.md).
+
+### Phase 17: Privacy, Terms, and Support
+- [x] Added `/privacy` route with Latergram-specific privacy policy.
+- [x] Added `/terms` route with honest terms of service.
+- [x] Added `/support` route with data deletion, abuse reporting, and crisis redirection.
+- [x] Integrated trust footer links on landing, auth, and recipient letter pages.
+- [x] Auth page "agree to terms" text now links to actual `/terms` and `/privacy` pages.
+- [x] No fake support form, no fake compliance claims, no fake support email.
+- [x] Self-serve account deletion documented as future work (available via support request).
+- [x] Legal review disclaimers clearly marked on privacy and terms pages.
+- [x] Documented Phase 17 in [`docs/phase-17-privacy-terms-support.md`](./docs/phase-17-privacy-terms-support.md).
 
 ## Run Locally
 
