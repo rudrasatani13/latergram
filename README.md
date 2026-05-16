@@ -4,7 +4,7 @@ Some words arrive late. Latergram gives them a place.
 
 ## Current Status
 
-Phase 20 Public Launch V1 Readiness audit is complete. Latergram is not publicly launched.
+Phase 21 Private Beta Execution & Launch Blocker Resolution is complete. Latergram is not publicly launched.
 
 **Launch Decision: NO-LAUNCH**
 
@@ -13,7 +13,9 @@ Three critical blockers prevent public launch:
 2. Support inbox not configured (`SUPPORT_EMAIL_CONFIGURED = false`)
 3. Formal legal review of privacy policy and terms pending
 
-The codebase is structurally ready for launch. Core features are implemented, no fake data exists, trust pages are honest, and the product follows the live-only development rule. However, operational readiness (beta validation, support infrastructure, legal review) is incomplete. See [`docs/phase-20-public-launch-v1.md`](./docs/phase-20-public-launch-v1.md) for the complete launch gate audit.
+Phase 21 provides the operational infrastructure to execute the private beta and close launch blockers: a beta execution runbook, launch blocker tracker, manual testing template, GitHub issue templates for feedback collection, and production environment readiness checklist. The actual beta execution must be performed separately by the founder with real users and real feedback collected off-platform.
+
+The codebase is structurally ready for launch. Core features are implemented, no fake data exists, trust pages are honest, and the product follows the live-only development rule. However, operational readiness (beta validation, support infrastructure, legal review) is incomplete. See [`docs/phase-20-public-launch-v1.md`](./docs/phase-20-public-launch-v1.md) for the launch gate audit and [`docs/launch-blockers.md`](./docs/launch-blockers.md) for current blocker status.
 
 Privacy-safe analytics instrumentation exists behind environment gates and is disabled by default. The wrapper supports a Plausible-compatible provider only when `VITE_ANALYTICS_ENABLED=true`, `VITE_ANALYTICS_PROVIDER=plausible`, `VITE_PLAUSIBLE_DOMAIN`, and `VITE_PLAUSIBLE_SCRIPT_SRC` are configured. With missing or disabled env, analytics is a no-op and no analytics network request is sent by the wrapper. No analytics provider, production domain, secret, fake dashboard, fake metrics, session replay, heatmap, ad pixel, or Google Analytics integration was added.
 
@@ -303,6 +305,19 @@ After the current migrations and Edge Functions are applied:
 - [x] Made launch decision: NO-LAUNCH until critical blockers resolved.
 - [x] Documented Phase 20 in [`docs/phase-20-public-launch-v1.md`](./docs/phase-20-public-launch-v1.md).
 - [x] Updated README to reflect Phase 20 audit complete, public launch not ready.
+
+### Phase 21: Private Beta Execution & Launch Blocker Resolution
+- [x] Created private beta execution runbook with invite process, testing script, feedback questions, bug/safety/support workflows, and success/failure criteria.
+- [x] Created launch blocker tracker documenting all critical, conditional, and operational blockers with clear status tracking.
+- [x] Created manual testing template with privacy-safe evidence structure for route checks, auth flows, Late Letter delivery, recipient flows, Memory Card export, and mobile testing.
+- [x] Added GitHub issue templates for beta feedback, bug reports, and internal safety reports with privacy reminders.
+- [x] Documented production environment readiness checklist covering deployment, Supabase, Resend, secrets, and testing.
+- [x] Kept `SUPPORT_EMAIL_CONFIGURED = false` (support inbox not verified configured).
+- [x] Kept Garden closed and documented as conditional blocker if V1 includes Garden.
+- [x] Kept analytics disabled by default.
+- [x] Confirmed no fake beta results, fake support infrastructure, fake legal review, fake Garden activity, or fake public launch behavior was added.
+- [x] Documented Phase 21 in [`docs/phase-21-private-beta-execution.md`](./docs/phase-21-private-beta-execution.md).
+- [x] Updated README to reflect Phase 21 operational infrastructure complete, actual beta execution pending.
 
 ## Run Locally
 

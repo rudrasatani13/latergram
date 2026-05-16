@@ -115,7 +115,7 @@ export function BetaPage() {
                   </p>
                 )}
                 <p>
-                  Please do not send private emotional content to the founder as feedback. It is enough to describe where you felt confused, unsafe, uncertain, or blocked.
+                  <strong>Important:</strong> Please do not send private emotional content, real recipient emails, real letter text, or personal information as feedback. It is enough to describe where you felt confused, unsafe, uncertain, or blocked. Generic descriptions protect your privacy and help improve the product.
                 </p>
               </section>
 
