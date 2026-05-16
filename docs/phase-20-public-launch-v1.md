@@ -79,7 +79,7 @@ Latergram remains in private beta readiness state. Three critical blockers preve
 - No real report handling verification
 - Opening Garden requires dedicated safety checkpoint beyond Phase 20 scope
 
-**Not a blocker:** Garden closure is intentional. Public launch V1 can proceed without Garden if other gates pass.
+**Blocker status:** Garden closure is acceptable only for a revised V1 launch scope that explicitly excludes Garden. If V1 launch scope includes Garden as described in the original master plan, Garden remains a launch blocker until the Garden UI is safely opened, moderated, verified, and staffed. Opening Garden requires: separate safety checkpoint, moderation staffing, verified report handling, verified moderation queue, safe RPC grants, and updated docs/privacy/support.
 
 ### Gate 3: Support Readiness Gate
 
@@ -419,12 +419,12 @@ Before marking production ready:
    - Impact: Legal risk for public launch without review
    - Next step: Engage legal counsel, review privacy/terms, update pages
 
-### Non-Critical Items (Can Launch With These)
+### Non-Critical Items (Conditional or Acceptable)
 
 1. **Garden Closed**
    - Status: Intentionally closed
    - Impact: Garden not available in V1
-   - Decision: Acceptable for public launch V1
+   - Decision: Acceptable only if V1 launch scope explicitly excludes Garden. If original master plan V1 scope includes Garden, this becomes a critical blocker requiring Garden UI opening, moderation staffing, verified safety operations, and updated documentation.
 
 2. **Analytics Disabled**
    - Status: Intentionally disabled by default
@@ -440,11 +440,12 @@ Before marking production ready:
 
 ### Files Changed
 
-None. Phase 20 is an audit phase, not an implementation phase.
+- `README.md` - Updated Current Status section with Phase 20 audit results and launch decision
+- `docs/phase-20-public-launch-v1.md` - Created comprehensive launch readiness documentation
 
-### Files Created
+### App Code Changes
 
-- `docs/phase-20-public-launch-v1.md` (this document)
+None. Phase 20 is an audit phase, not an implementation phase. No app code files, package files, Supabase files, Garden files, analytics provider configuration, or runtime product behavior were changed.
 
 ### Supabase Changes
 
@@ -578,18 +579,19 @@ npm run build                  # ✅ Passed (1.33s)
    - Verify Edge Functions deployed
    - Test production deployment
 
-### Optional Actions (Can Defer)
+### Optional Actions (Conditional on Launch Scope)
 
-1. **Open Garden** (if desired for V1)
+1. **Open Garden** (required if V1 includes Garden per original master plan)
    - Complete separate Garden safety checkpoint
    - Staff moderation operations
    - Test moderation queue end-to-end
    - Test report handling
-   - Unlock Garden user-facing RPCs
+   - Unlock Garden user-facing RPCs only after safety verification
    - Update Garden UI to show available state
+   - Update privacy/support/docs with Garden moderation details
    - Document Garden launch separately
 
-2. **Enable Analytics** (if desired)
+2. **Enable Analytics** (optional)
    - Choose privacy-respecting provider (Plausible recommended)
    - Configure analytics environment variables
    - Update privacy policy with provider details
@@ -605,6 +607,8 @@ Latergram is not ready for public launch. Three critical blockers must be resolv
 1. Actual private beta execution (20-50 real users)
 2. Support inbox configuration
 3. Formal legal review of privacy/terms
+
+Additionally, if the original master plan V1 scope includes Garden, Garden opening becomes a fourth critical blocker requiring full safety verification, moderation staffing, and operational readiness.
 
 The codebase is structurally ready for launch. Core features are implemented, no fake data exists, trust pages are honest, and the product follows the live-only development rule. However, operational readiness (beta validation, support infrastructure, legal review) is incomplete.
 
