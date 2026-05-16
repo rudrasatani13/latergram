@@ -56,7 +56,6 @@ Downloads use safe filenames:
 - Saved card metadata/history is intentionally deferred.
 - The Keepsake "Saved Cards" tab remains not live.
 - Sharing, auto-upload, cloud sync, card analytics, and card templates beyond the three local styles are not live.
-- Account-backed card source behavior was implemented through existing account hooks, but browser manual testing in this pass was signed-out only.
 
 ## Commands Run
 
@@ -114,6 +113,7 @@ Memory Card behavior checked:
 - Download action reached the success state: "PNG download created. Nothing was uploaded, shared, or saved to account history."
 - The in-app browser does not support download-event/file inspection, so the saved file itself could not be opened from that browser session.
 - Follow-up animation check: square-to-wallpaper format changes and style changes were checked in the local browser; the preview remained real-data-backed and Download PNG stayed enabled after valid selections.
+- Account-backed verification was attempted in the configured local/dev Supabase environment, but signup was rejected and the documented local/dev seed accounts did not sign in, so account-backed Memory Card export could not be manually verified in this pass.
 
 Mobile widths checked:
 
@@ -136,6 +136,6 @@ Garden checks:
 
 ## Remaining Risks
 
-- Account-backed source selection should be manually checked again with a real signed-in test account.
 - The Codex in-app browser could not inspect the downloaded PNG file after clicking Download, though the Canvas renderer defines the required dimensions and build/browser UI checks passed.
+- Account-backed Lategram and Time Since source export still need a real signed-in local/dev account for final browser verification.
 - Canvas export depends on browser support for Canvas, `toBlob`, Blob URLs, and programmatic downloads; unsupported browsers show an export error state.

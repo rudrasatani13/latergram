@@ -252,4 +252,4 @@ npm run build
 
 ## Asset Hosting Note
 
-Product assets are currently served from local `/assets` paths. Phase 15 confirmed no runtime raw GitHub asset dependency is used.
+Product assets are currently served from local `/assets` paths. No runtime raw GitHub asset dependency is used.

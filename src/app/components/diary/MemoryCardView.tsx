@@ -57,7 +57,7 @@ const SOURCE_PAGE_SIZE = 12;
 const PREVIEW_FORMAT_STYLES: Record<MemoryCardFormat, { width: number; height: number }> = {
   square: { width: 280, height: 280 },
   story: { width: 200, height: 320 },
-  wallpaper: { width: 320, height: 220 },
+  wallpaper: { width: 156, height: 338 },
 };
 
 const PREVIEW_THEME_STYLES: Record<MemoryCardThemeKey, { bloom: string; background: string }> = {
