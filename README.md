@@ -4,7 +4,9 @@ Some words arrive late. Latergram gives them a place.
 
 ## Current Status
 
-Phase 17 Privacy, Terms, and Support implemented in the repo.
+Phase 18 Private Beta readiness implemented in the repo. Latergram is not publicly launched.
+
+The app now has an honest private beta state: a `/beta` page, subtle beta notices on landing/auth/app surfaces, and documentation for a small real beta with 20 to 50 users. Beta access is **not** enforced by invite code or allowlist yet. Access distribution is manual/off-platform by direct link for now, and the UI says that plainly. No fake waitlist counts, fake beta users, fake testimonials, fake feedback forms, fake analytics, or fake launch claims were added.
 
 The app now has honest, product-specific trust pages: a privacy policy explaining what data Latergram stores and how, terms of service with user responsibilities and service limitations, and a support page with data deletion instructions, abuse reporting, and crisis redirection. All trust content is written in plain language specific to Latergram's actual features and data model. Legal review disclaimers are clearly marked.
 
@@ -12,7 +14,7 @@ The app has a fully wired authentication foundation using Supabase Auth and a tr
 
 Late Letters can now be delivered through Resend when the Supabase Edge Function secrets and delivery job are configured. Scheduled letters are sent server-side, receive real Resend message IDs, and open through secure recipient links. Sender status labels are backed by database/provider/page-open state. Recipient email remains masked in the saved-letter UI after saving. Sender cancellation still works before send. After send, the letter cannot be recalled. Recipients can now report a letter and block future letters from the same sender without exposing sender identity.
 
-The Garden backend now has a real safety foundation: moderator/admin membership, moderator-only queue/review RPCs, server-side content filtering, per-user submission rate limiting, and real report handling. The Garden product UI remains closed/unavailable. Anonymous public Garden execution remains locked. Authenticated Garden RPCs are safety-hardened for future opening and internal testing only after the Phase 13 migration is applied.
+The Garden backend now has a real safety foundation: moderator/admin membership, moderator-only queue/review RPCs, server-side content filtering, per-user submission rate limiting, and real report handling. The Garden product UI remains closed/unavailable for the initial private beta. Anonymous public Garden execution remains locked. Authenticated user-facing Garden RPCs remain re-locked after Phase 17. Garden testing requires a separate safety checkpoint before any opening.
 
 Memory Card export is live only for real saved Lategrams and real saved Time Since counters. Saved card history/metadata, sharing, auto-upload, and cloud sync are not active. Phase 13 migrations and cleanup migrations live under `supabase/migrations`. The master development plan is [`LATERGRAM_DETAILED_PHASE_PLAN.md`](./LATERGRAM_DETAILED_PHASE_PLAN.md).
 
@@ -79,7 +81,9 @@ After the current migrations and Edge Functions are applied:
 - Privacy policy page at `/privacy` with Latergram-specific data handling explanation.
 - Terms of service page at `/terms` with honest user responsibilities and limitations.
 - Support page at `/support` with data deletion, abuse reporting, and crisis redirection.
-- Trust footer links on landing, auth, and recipient letter pages.
+- Private beta readiness page at `/beta` with direct-link/manual access strategy, test guidance, safety boundaries, and Garden-closed decision.
+- Private beta notices on landing, auth, and app home surfaces.
+- Trust/legal links on landing, auth, trust, beta, and recipient letter pages.
 
 ## What Is Not Live Yet
 
@@ -92,6 +96,8 @@ After the current migrations and Edge Functions are applied:
 - Received letters.
 - Guaranteed delivery or guaranteed read receipts.
 - Analytics, payments, AI, or public launch infrastructure.
+- Real invite-code or allowlist beta access enforcement.
+- Real configured support inbox (`SUPPORT_EMAIL_CONFIGURED` is still `false`).
 - Self-serve full account deletion (available via support request).
 - Formal legal review of privacy policy and terms of service.
 
@@ -253,6 +259,17 @@ After the current migrations and Edge Functions are applied:
 - [x] Self-serve account deletion documented as future work (available via support request).
 - [x] Legal review disclaimers clearly marked on privacy and terms pages.
 - [x] Documented Phase 17 in [`docs/phase-17-privacy-terms-support.md`](./docs/phase-17-privacy-terms-support.md).
+
+### Phase 18: Private Beta Readiness
+- [x] Added `/beta` route with honest private beta scope, test guidance, support status, and safety boundaries.
+- [x] Chose direct-link/manual off-platform invite distribution for beta access; no fake invite enforcement was added.
+- [x] Kept `SUPPORT_EMAIL_CONFIGURED = false` and kept support inbox pending copy honest.
+- [x] Kept Garden closed for the initial private beta and did not change Garden RPC grants.
+- [x] Added subtle private beta notices to landing, auth, and app home surfaces.
+- [x] Added recipient letter function timeout fallback so invalid/unavailable letter routes do not stay on an opening state if the function request hangs.
+- [x] Added founder-facing beta checklist, user test script, feedback questions, Late Letter delivery test plan, Garden safety checkpoint, rollback conditions, and remaining risks.
+- [x] Confirmed no fake beta users, fake feedback, fake support form, fake Garden activity, fake analytics, payments, AI, or public launch behavior were added.
+- [x] Documented Phase 18 in [`docs/phase-18-private-beta.md`](./docs/phase-18-private-beta.md).
 
 ## Run Locally
 

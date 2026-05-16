@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { Header } from "../components/Header";
 import { Grain } from "../components/Grain";
@@ -11,6 +11,7 @@ import { LateLettersView } from "../components/diary/LateLettersView";
 import { TimeSinceView } from "../components/diary/TimeSinceView";
 import { MemoryCardView } from "../components/diary/MemoryCardView";
 import { useAuth } from "../auth/useAuth";
+import { SUPPORT_EMAIL_CONFIGURED } from "../constants";
 
 const easeSoft = [0.22, 1, 0.36, 1] as const;
 
@@ -156,6 +157,20 @@ export function HomePage() {
               >
                 {heroStorageCopy}
               </p>
+
+              <div className="mt-7 mx-auto max-w-[640px] rounded-2xl border border-[var(--lg-border)] bg-[var(--lg-paper)]/75 px-5 py-4 text-left">
+                <p className="font-cute text-[var(--lg-rose)] mb-1" style={{ fontSize: "1.08rem" }}>
+                  private beta
+                </p>
+                <p className="text-[var(--lg-cocoa)] leading-[1.7]" style={{ fontSize: "0.94rem" }}>
+                  Please test real writing, account saves, Memory Cards, and Late Letter delivery with yourself or trusted testers only. The Garden remains closed, and{" "}
+                  {SUPPORT_EMAIL_CONFIGURED ? "support is configured for issue reports" : "the support inbox is still pending before public launch"}.{" "}
+                  <Link to="/beta" className="text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline underline-offset-4">
+                    Read beta notes
+                  </Link>
+                  .
+                </p>
+              </div>
             </motion.div>
 
             {/* Categories */}

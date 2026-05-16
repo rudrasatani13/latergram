@@ -1,10 +1,11 @@
 import { motion } from "motion/react";
-import { useNavigate, Navigate } from "react-router";
+import { Link, useNavigate, Navigate } from "react-router";
 import { Header } from "../components/Header";
 import { Grain } from "../components/Grain";
 import { BackgroundPetals } from "../components/BackgroundPetals";
 import { TrustFooter } from "../components/TrustFooter";
 import { useAuth } from "../auth/useAuth";
+import { SUPPORT_EMAIL_CONFIGURED } from "../constants";
 
 const easeSoft = [0.22, 1, 0.36, 1] as const;
 
@@ -97,6 +98,25 @@ export function LandingPage() {
               Latergram is a quiet place for the things you didn't say in time. write them down,
               keep them close, or let them find a gentle home.
             </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, ease: easeSoft, delay: 0.62 }}
+              className="mt-8 mx-auto max-w-[620px] rounded-2xl border border-[var(--lg-border)] bg-[var(--lg-paper)]/75 px-5 py-4 text-left"
+            >
+              <p className="font-cute text-[var(--lg-rose)] mb-1" style={{ fontSize: "1.08rem" }}>
+                private beta readiness
+              </p>
+              <p className="text-[var(--lg-cocoa)] leading-[1.7]" style={{ fontSize: "0.94rem" }}>
+                Latergram is not publicly launched. Access for this beta is shared manually by direct link, the Garden stays closed, and{" "}
+                {SUPPORT_EMAIL_CONFIGURED ? "support is configured for tester reports" : "the support inbox is still pending before public launch"}.{" "}
+                <Link to="/beta" className="text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline underline-offset-4">
+                  Read beta notes
+                </Link>
+                .
+              </p>
+            </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 10 }}

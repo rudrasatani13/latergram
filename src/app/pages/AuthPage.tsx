@@ -5,9 +5,11 @@ import { motion, AnimatePresence } from "motion/react";
 import { Header } from "../components/Header";
 import { Grain } from "../components/Grain";
 import { BackgroundPetals } from "../components/BackgroundPetals";
+import { TrustFooter } from "../components/TrustFooter";
 import { FeatureUnavailableNote } from "../components/shared";
 import { SoftField } from "../components/shared";
 import { useAuth } from "../auth/useAuth";
+import { SUPPORT_EMAIL_CONFIGURED } from "../constants";
 
 const easeSoft = [0.22, 1, 0.36, 1] as const;
 
@@ -141,6 +143,7 @@ export function AuthPage() {
                 </button>
               </div>
             </div>
+            <TrustFooter className="mt-12 border-t border-[var(--lg-border)]" />
           </main>
         </div>
       </div>
@@ -224,6 +227,25 @@ export function AuthPage() {
                   ? "Sign in to your Latergram account to access your private archive."
                   : "Create your Latergram account. Signed-in users can save private writing to their account."}
             </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, ease: easeSoft, delay: 0.48 }}
+              className="mt-6 rounded-2xl border border-[var(--lg-border)] bg-[var(--lg-paper)]/75 px-4 py-3 text-left"
+            >
+              <p className="font-cute text-[var(--lg-rose)] mb-1" style={{ fontSize: "1.05rem" }}>
+                private beta note
+              </p>
+              <p className="text-[var(--lg-cocoa)] leading-[1.65]" style={{ fontSize: "0.92rem" }}>
+                Access is manual by direct link during this beta. There is no invite-code gate yet, no public launch, and{" "}
+                {SUPPORT_EMAIL_CONFIGURED ? "support is configured for tester reports" : "the support inbox is still pending before public launch"}.{" "}
+                <Link to="/beta" className="text-[var(--lg-rose)] hover:text-[var(--lg-focus-rose)] underline underline-offset-4">
+                  Read beta notes
+                </Link>
+                .
+              </p>
+            </motion.div>
 
             <motion.form
               initial={{ opacity: 0, y: 12 }}
@@ -358,6 +380,7 @@ export function AuthPage() {
               ✿ ❀ ✿
             </div>
           </div>
+          <TrustFooter className="mt-12 border-t border-[var(--lg-border)]" />
         </main>
       </div>
     </div>

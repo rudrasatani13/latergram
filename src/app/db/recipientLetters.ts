@@ -1,6 +1,8 @@
 import { authConfigAvailable, supabase } from "../auth/authClient";
 import { recipientActionErrorMessage } from "../utils/reliability";
 
+const RECIPIENT_FUNCTION_TIMEOUT_MS = 10_000;
+
 export interface RecipientLetter {
   body: string;
   subject: string;
@@ -24,9 +26,11 @@ export async function openRecipientLetter(token: string): Promise<OpenLetterResu
   let error: { context?: { status?: number } } | null = null;
 
   try {
-    const result = await supabase.functions.invoke("open-letter", {
-      body: { token },
-    });
+    const result = await withFunctionTimeout(
+      supabase.functions.invoke("open-letter", {
+        body: { token },
+      }),
+    );
     data = result.data;
     error = result.error;
   } catch {
@@ -72,9 +76,11 @@ export async function optOutRecipientEmail(email: string): Promise<{ error: stri
   let error: { context?: { status?: number } } | null = null;
 
   try {
-    const result = await supabase.functions.invoke("recipient-opt-out", {
-      body: { email },
-    });
+    const result = await withFunctionTimeout(
+      supabase.functions.invoke("recipient-opt-out", {
+        body: { email },
+      }),
+    );
     error = result.error;
   } catch {
     return { error: recipientActionErrorMessage("The opt-out request was not saved.") };
@@ -106,14 +112,16 @@ export async function reportRecipientLetter(input: {
   let error: { context?: { status?: number } } | null = null;
 
   try {
-    const result = await supabase.functions.invoke("report-letter", {
-      body: {
-        token: input.token,
-        reason: input.reason,
-        details: input.details ?? null,
-        block_sender: Boolean(input.blockSender),
-      },
-    });
+    const result = await withFunctionTimeout(
+      supabase.functions.invoke("report-letter", {
+        body: {
+          token: input.token,
+          reason: input.reason,
+          details: input.details ?? null,
+          block_sender: Boolean(input.blockSender),
+        },
+      }),
+    );
     error = result.error;
   } catch {
     return { error: recipientActionErrorMessage("The report was not submitted.") };
@@ -154,4 +162,23 @@ function toUnavailableReason(value: unknown): UnavailableReason {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+async function withFunctionTimeout<T>(request: Promise<T>): Promise<T> {
+  let timeoutId: ReturnType<typeof window.setTimeout> | null = null;
+
+  try {
+    return await Promise.race([
+      request,
+      new Promise<T>((_, reject) => {
+        timeoutId = window.setTimeout(() => {
+          reject(new Error("recipient request timed out"));
+        }, RECIPIENT_FUNCTION_TIMEOUT_MS);
+      }),
+    ]);
+  } finally {
+    if (timeoutId !== null) {
+      window.clearTimeout(timeoutId);
+    }
+  }
 }

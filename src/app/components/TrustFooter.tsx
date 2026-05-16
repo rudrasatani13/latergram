@@ -38,6 +38,16 @@ export function TrustFooter({ className = "" }: TrustFooterProps) {
         >
           Support
         </Link>
+        <span className="text-[var(--lg-border)]" aria-hidden="true">
+          ·
+        </span>
+        <Link
+          to="/beta"
+          className="text-[var(--lg-cocoa)] hover:text-[var(--lg-rose)] transition-colors duration-300"
+          style={{ fontSize: "0.88rem" }}
+        >
+          Private beta
+        </Link>
       </nav>
     </footer>
   );

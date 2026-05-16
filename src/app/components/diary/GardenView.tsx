@@ -19,10 +19,10 @@ export function GardenView() {
           />
           <EmptyState
             message="The Garden is not open yet."
-            note="No public Garden activity or anonymous browsing is shown in the product UI."
+            note="No public Garden activity, anonymous browsing, posting, reactions, or reports are shown in the product UI."
           />
           <p className="mx-auto mt-4 max-w-[34rem] font-cute text-[var(--lg-cocoa)]" style={{ fontSize: "1rem", lineHeight: 1.55 }}>
-            Safety and moderation are in place for future authenticated testing. The public Garden stays closed here until it is intentionally opened.
+            Garden private beta testing will happen only after a separate safety checkpoint confirms real access gating, moderation review, and reporting operations are ready.
           </p>
         </div>
       </div>
