@@ -4,9 +4,18 @@ Some words arrive late. Latergram gives them a place.
 
 ## Current Status
 
-Phase 19 Privacy-Respecting Analytics is implemented/prepared in the repo. Latergram is not publicly launched.
+Phase 20 Public Launch V1 Readiness audit is complete. Latergram is not publicly launched.
 
-Privacy-safe analytics instrumentation now exists behind environment gates and is disabled by default. The wrapper supports a Plausible-compatible provider only when `VITE_ANALYTICS_ENABLED=true`, `VITE_ANALYTICS_PROVIDER=plausible`, `VITE_PLAUSIBLE_DOMAIN`, and `VITE_PLAUSIBLE_SCRIPT_SRC` are configured. With missing or disabled env, analytics is a no-op and no analytics network request is sent by the wrapper. No analytics provider, production domain, secret, fake dashboard, fake metrics, session replay, heatmap, ad pixel, or Google Analytics integration was added.
+**Launch Decision: NO-LAUNCH**
+
+Three critical blockers prevent public launch:
+1. Actual private beta (20-50 real users) has not been executed
+2. Support inbox not configured (`SUPPORT_EMAIL_CONFIGURED = false`)
+3. Formal legal review of privacy policy and terms pending
+
+The codebase is structurally ready for launch. Core features are implemented, no fake data exists, trust pages are honest, and the product follows the live-only development rule. However, operational readiness (beta validation, support infrastructure, legal review) is incomplete. See [`docs/phase-20-public-launch-v1.md`](./docs/phase-20-public-launch-v1.md) for the complete launch gate audit.
+
+Privacy-safe analytics instrumentation exists behind environment gates and is disabled by default. The wrapper supports a Plausible-compatible provider only when `VITE_ANALYTICS_ENABLED=true`, `VITE_ANALYTICS_PROVIDER=plausible`, `VITE_PLAUSIBLE_DOMAIN`, and `VITE_PLAUSIBLE_SCRIPT_SRC` are configured. With missing or disabled env, analytics is a no-op and no analytics network request is sent by the wrapper. No analytics provider, production domain, secret, fake dashboard, fake metrics, session replay, heatmap, ad pixel, or Google Analytics integration was added.
 
 The app now has an honest private beta state: a `/beta` page, subtle beta notices on landing/auth/app surfaces, and documentation for a small real beta with 20 to 50 users. Beta access is **not** enforced by invite code or allowlist yet. Access distribution is manual/off-platform by direct link for now, and the UI says that plainly. No fake waitlist counts, fake beta users, fake testimonials, fake feedback forms, fake analytics, or fake launch claims were added.
 
@@ -283,6 +292,17 @@ After the current migrations and Edge Functions are applied:
 - [x] Added category-only error observation without sending raw messages, stacks, user content, tokens, auth IDs, or database IDs.
 - [x] Updated privacy copy and documentation to describe the disabled-by-default analytics status honestly.
 - [x] Documented Phase 19 in [`docs/phase-19-privacy-respecting-analytics.md`](./docs/phase-19-privacy-respecting-analytics.md).
+
+### Phase 20: Public Launch V1 Readiness
+- [x] Completed comprehensive launch readiness audit across 12 gates.
+- [x] Audited private beta reality, Garden launch readiness, support infrastructure, legal/trust status, core product implementation, analytics configuration, environment setup, asset hosting, mobile responsiveness, and documentation.
+- [x] Identified three critical launch blockers: actual private beta not executed, support inbox not configured, formal legal review pending.
+- [x] Documented launch environment checklist with all required env vars, secrets, and deployment steps.
+- [x] Created manual testing checklist for auth, private saves, Late Letters, Memory Cards, trust pages, mobile responsive, and all public routes.
+- [x] Confirmed Garden intentionally closed (not a blocker), analytics intentionally disabled (not a blocker), and codebase structurally ready.
+- [x] Made launch decision: NO-LAUNCH until critical blockers resolved.
+- [x] Documented Phase 20 in [`docs/phase-20-public-launch-v1.md`](./docs/phase-20-public-launch-v1.md).
+- [x] Updated README to reflect Phase 20 audit complete, public launch not ready.
 
 ## Run Locally
 
