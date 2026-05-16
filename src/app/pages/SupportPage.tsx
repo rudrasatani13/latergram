@@ -2,7 +2,14 @@ import { Header } from "../components/Header";
 import { Grain } from "../components/Grain";
 import { BackgroundPetals } from "../components/BackgroundPetals";
 import { TrustFooter } from "../components/TrustFooter";
-import { SUPPORT_EMAIL } from "../constants";
+import { SUPPORT_EMAIL, SUPPORT_EMAIL_CONFIGURED } from "../constants";
+
+function SupportContact() {
+  if (SUPPORT_EMAIL_CONFIGURED) {
+    return <>{SUPPORT_EMAIL}</>;
+  }
+  return <span className="italic text-[var(--lg-cocoa)]">{SUPPORT_EMAIL} (inbox pending before public launch)</span>;
+}
 
 export function SupportPage() {
   return (
@@ -34,7 +41,7 @@ export function SupportPage() {
               <section>
                 <h2 className="trust-heading">General support</h2>
                 <p>
-                  For questions, issues, or feedback about Latergram, email {SUPPORT_EMAIL}.
+                  For questions, issues, or feedback about Latergram, email <SupportContact />.
                 </p>
               </section>
 
@@ -46,7 +53,7 @@ export function SupportPage() {
                 <ul className="trust-list">
                   <li>Use the "Report this letter" option on the letter page if you still have the link.</li>
                   <li>You can also block future letters from the same sender through that link.</li>
-                  <li>If you no longer have the link, email {SUPPORT_EMAIL} with as much detail as you can provide.</li>
+                  <li>If you no longer have the link, email <SupportContact /> with as much detail as you can provide.</li>
                 </ul>
                 <p>
                   Reports are reviewed for safety. The sender's identity is not disclosed to you.
@@ -60,7 +67,7 @@ export function SupportPage() {
                 </p>
                 <ul className="trust-list">
                   <li>Use the opt-out option on the letter page to block future letters from that sender.</li>
-                  <li>If you no longer have the link, email {SUPPORT_EMAIL} and we can add your email to the opt-out list.</li>
+                  <li>If you no longer have the link, email <SupportContact /> and we can add your email to the opt-out list.</li>
                 </ul>
               </section>
 
@@ -73,7 +80,7 @@ export function SupportPage() {
                   <li>Check the letter status in your archive — it will show scheduled, sending, sent, failed, or cancelled.</li>
                   <li>Failed letters may be due to invalid email addresses, recipient opt-outs, or delivery provider issues.</li>
                   <li>Latergram cannot resend a failed letter automatically. You may need to schedule a new one.</li>
-                  <li>For persistent delivery issues, contact {SUPPORT_EMAIL}.</li>
+                  <li>For persistent delivery issues, contact <SupportContact />.</li>
                 </ul>
               </section>
 
@@ -100,7 +107,7 @@ export function SupportPage() {
 
                 <h3 className="trust-subheading">Full account deletion</h3>
                 <p>
-                  Self-serve full account deletion is not yet available. To request complete account and data deletion, email {SUPPORT_EMAIL}. We will remove your account and all associated data. Some data may temporarily remain in database backups or delivery provider logs until those systems rotate.
+                  Self-serve full account deletion is not yet available. To request complete account and data deletion, email <SupportContact />. We will remove your account and all associated data. Some data may temporarily remain in database backups or delivery provider logs until those systems rotate.
                 </p>
 
                 <h3 className="trust-subheading">Memory Cards</h3>
@@ -112,7 +119,7 @@ export function SupportPage() {
               <section>
                 <h2 className="trust-heading">The Garden</h2>
                 <p>
-                  The Garden is currently closed in the product UI. When it opens, Garden posts will be moderated. If you need to report or remove a Garden post, contact {SUPPORT_EMAIL}.
+                  The Garden is currently closed in the product UI. When it opens, Garden posts will be moderated. If you need to report or remove a Garden post, contact <SupportContact />.
                 </p>
               </section>
 

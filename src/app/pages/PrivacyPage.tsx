@@ -2,7 +2,14 @@ import { Header } from "../components/Header";
 import { Grain } from "../components/Grain";
 import { BackgroundPetals } from "../components/BackgroundPetals";
 import { TrustFooter } from "../components/TrustFooter";
-import { SUPPORT_EMAIL } from "../constants";
+import { SUPPORT_EMAIL, SUPPORT_EMAIL_CONFIGURED } from "../constants";
+
+function SupportContact() {
+  if (SUPPORT_EMAIL_CONFIGURED) {
+    return <>{SUPPORT_EMAIL}</>;
+  }
+  return <span className="italic text-[var(--lg-cocoa)]">{SUPPORT_EMAIL} (inbox pending before public launch)</span>;
+}
 
 export function PrivacyPage() {
   return (
@@ -130,7 +137,7 @@ export function PrivacyPage() {
                 </p>
                 <ul className="trust-list">
                   <li><strong>Local/device data:</strong> clear your browser's local storage or use the remove actions in the app.</li>
-                  <li><strong>Account data:</strong> you can delete individual Lategrams, counters, and letters from within the app. To request full account and data deletion, contact {SUPPORT_EMAIL}.</li>
+                  <li><strong>Account data:</strong> you can delete individual Lategrams, counters, and letters from within the app. To request full account and data deletion, contact <SupportContact />.</li>
                 </ul>
                 <p>
                   Self-serve full account deletion is not yet available. When you request deletion through support, we will remove your account and associated data. Some data may temporarily remain in database backups or provider logs (e.g., Resend delivery records) before those systems rotate.
@@ -165,7 +172,7 @@ export function PrivacyPage() {
               <section>
                 <h2 className="trust-heading">Contact</h2>
                 <p>
-                  For privacy questions or data deletion requests, reach us at {SUPPORT_EMAIL}.
+                  For privacy questions or data deletion requests, reach us at <SupportContact />.
                 </p>
               </section>
 

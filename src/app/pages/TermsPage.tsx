@@ -2,7 +2,14 @@ import { Header } from "../components/Header";
 import { Grain } from "../components/Grain";
 import { BackgroundPetals } from "../components/BackgroundPetals";
 import { TrustFooter } from "../components/TrustFooter";
-import { SUPPORT_EMAIL } from "../constants";
+import { SUPPORT_EMAIL, SUPPORT_EMAIL_CONFIGURED } from "../constants";
+
+function SupportContact() {
+  if (SUPPORT_EMAIL_CONFIGURED) {
+    return <>{SUPPORT_EMAIL}</>;
+  }
+  return <span className="italic text-[var(--lg-cocoa)]">{SUPPORT_EMAIL} (inbox pending before public launch)</span>;
+}
 
 export function TermsPage() {
   return (
@@ -106,7 +113,7 @@ export function TermsPage() {
               <section>
                 <h2 className="trust-heading">Contact</h2>
                 <p>
-                  For questions about these terms, contact {SUPPORT_EMAIL}.
+                  For questions about these terms, contact <SupportContact />.
                 </p>
               </section>
 
