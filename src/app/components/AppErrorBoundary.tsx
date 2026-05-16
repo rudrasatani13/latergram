@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { trackError } from "../analytics/analytics";
 
 interface AppErrorBoundaryProps {
   children: ReactNode;
@@ -16,6 +17,8 @@ export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorB
   }
 
   componentDidCatch(error: unknown, info: ErrorInfo) {
+    trackError("app_render_error");
+
     console.error("Unexpected Latergram render error", {
       message: error instanceof Error ? error.message : "Unknown render error",
       componentStack: info.componentStack,

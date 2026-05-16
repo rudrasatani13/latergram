@@ -13,6 +13,7 @@ import type { LocalDestination, LocalDraft, LocalLategram } from "../storage/typ
 import { useAuth } from "../auth/useAuth";
 import { createAccountLategram } from "../db/privateLategrams";
 import { accountSaveErrorMessage } from "../utils/reliability";
+import { trackError, trackEvent } from "../analytics/analytics";
 
 const easeSoft = [0.22, 1, 0.36, 1] as const;
 
@@ -87,10 +88,17 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
   const [autoSaveStatus, setAutoSaveStatus] = useState(initialDraft ? "Draft restored from this device." : "");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const skipFirstAutoSave = useRef(true);
+  const trackedWriteStarted = useRef(false);
 
   const selectedDestination = destinations.find((item) => item.id === destination) ?? destinations[0];
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
   const characterCount = text.trim().length;
+
+  useEffect(() => {
+    if (initialDraft) {
+      trackEvent("local_draft_restored", { storage_scope: "local", signed_in: Boolean(session?.user) });
+    }
+  }, []);
 
   useEffect(() => {
     if (skipFirstAutoSave.current) {
@@ -131,6 +139,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
       const result = writeLocalDraft(draft);
 
       if (!result.ok) {
+        trackError("local_storage_error", { storage_scope: "local" });
         setAutoSaveStatus("Unable to save draft locally.");
         setNote("Unable to save draft locally in this browser. Copy your words before leaving.");
         return;
@@ -160,6 +169,11 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
   };
 
   const markEdited = () => {
+    if (!trackedWriteStarted.current) {
+      trackedWriteStarted.current = true;
+      trackEvent("write_started", { section: "write", signed_in: Boolean(session?.user) });
+    }
+
     setHasEdited(true);
     setClearNeedsConfirm(false);
     setCopyFailed(false);
@@ -192,6 +206,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
     if (!text.trim()) {
       setCopyFailed(false);
       setNote("Write a few words first.");
+      trackEvent("write_copied", { result: "failure", reason: "invalid", signed_in: Boolean(session?.user) });
       return;
     }
 
@@ -199,9 +214,11 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
       await navigator.clipboard.writeText(buildCopyText());
       setCopyFailed(false);
       setNote("Copied. Save on this device if you want these words to stay here.");
+      trackEvent("write_copied", { result: "success", signed_in: Boolean(session?.user) });
     } catch {
       setCopyFailed(true);
       setNote("Copy did not work in this browser. Select the words and copy them manually.");
+      trackEvent("write_copied", { result: "failure", reason: "unsupported", signed_in: Boolean(session?.user) });
     }
   };
 
@@ -268,17 +285,21 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
   const saveOnDevice = () => {
     setClearNeedsConfirm(false);
     setCopyFailed(false);
+    trackEvent("private_save_attempted", { storage_scope: "local", signed_in: Boolean(session?.user) });
 
     const lategram = buildLocalLategram();
 
     if (!lategram) {
       setNote("Write a few words first.");
+      trackEvent("private_save_completed", { storage_scope: "local", result: "failure", reason: "invalid", signed_in: Boolean(session?.user) });
       return;
     }
 
     const result = addLocalLategram(lategram);
 
     if (!result.ok) {
+      trackError("local_storage_error", { storage_scope: "local" });
+      trackEvent("private_save_completed", { storage_scope: "local", result: "failure", reason: "unsupported", signed_in: Boolean(session?.user) });
       setNote("Could not save in this browser. Copy your words before leaving.");
       return;
     }
@@ -286,6 +307,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
     setSaveState("saved on this device");
     setHasEdited(false);
     setNote("Saved on this device.");
+    trackEvent("private_save_completed", { storage_scope: "local", result: "success", signed_in: Boolean(session?.user) });
   };
 
   const saveToAccount = async () => {
@@ -296,8 +318,11 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
       return;
     }
 
+    trackEvent("private_save_attempted", { storage_scope: "account", signed_in: Boolean(session?.user) });
+
     if (!text.trim()) {
       setNote("Write a few words first.");
+      trackEvent("private_save_completed", { storage_scope: "account", result: "failure", reason: "invalid", signed_in: Boolean(session?.user) });
       return;
     }
 
@@ -314,6 +339,8 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
     setSavingAccount(false);
 
     if (error) {
+      trackError("account_save_error", { storage_scope: "account" });
+      trackEvent("private_save_completed", { storage_scope: "account", result: "failure", reason: "server_error", signed_in: Boolean(session?.user) });
       setSaveState(autoSaveStatus === "Draft saved locally on this device." ? "draft saved locally" : "not saved yet");
       setNote(error || accountSaveErrorMessage("Your words are still on this page."));
       return;
@@ -334,6 +361,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
       : "Written for a memory card, saved privately to your account. Open Memory Cards to export it if you choose.";
       
     setNote(noteText);
+    trackEvent("private_save_completed", { storage_scope: "account", result: "success", signed_in: Boolean(session?.user) });
   };
 
   const saveDraft = () => {
@@ -356,6 +384,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
     const result = writeLocalDraft(draft);
 
     if (!result.ok) {
+      trackError("local_storage_error", { storage_scope: "local" });
       setNote("Could not save a draft in this browser. Copy your words before leaving.");
       setAutoSaveStatus("Unable to save draft locally.");
       return;
@@ -383,6 +412,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
     setCopyFailed(false);
     setAutoSaveStatus("Draft restored from this device.");
     setNote("Draft restored. Only available in this browser unless you save to your account.");
+    trackEvent("local_draft_restored", { storage_scope: "local", signed_in: Boolean(session?.user) });
     textareaRef.current?.focus();
   };
 
@@ -390,6 +420,7 @@ export function DiaryComposer({ active, onViewSection }: DiaryComposerProps) {
     const result = deleteLocalDraft();
 
     if (!result.ok) {
+      trackError("local_storage_error", { storage_scope: "local" });
       setNote("Could not clear draft in this browser.");
       return;
     }

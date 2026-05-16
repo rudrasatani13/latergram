@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate, Link } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
@@ -10,6 +10,7 @@ import { FeatureUnavailableNote } from "../components/shared";
 import { SoftField } from "../components/shared";
 import { useAuth } from "../auth/useAuth";
 import { SUPPORT_EMAIL_CONFIGURED } from "../constants";
+import { trackError, trackEvent } from "../analytics/analytics";
 
 const easeSoft = [0.22, 1, 0.36, 1] as const;
 
@@ -25,6 +26,11 @@ export function AuthPage() {
   
   const { authAvailable, session, user, signIn, signUp, resetPassword, signOut } = useAuth();
   const navigate = useNavigate();
+  const signedIn = Boolean(session || user);
+
+  useEffect(() => {
+    trackEvent("auth_viewed", { signed_in: signedIn });
+  }, []);
 
   const handleResetPassword = async () => {
     if (!email) {
@@ -37,6 +43,7 @@ export function AuthPage() {
     const { error } = await resetPassword(email);
     setIsSubmitting(false);
     if (error) {
+      trackError("auth_error", { reason: authAvailable ? "server_error" : "missing_config" });
       setIsError(true);
       setStatusMsg(error);
     } else {
@@ -47,25 +54,32 @@ export function AuthPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!authAvailable) return;
+    if (!authAvailable) {
+      trackError("auth_error", { reason: "missing_config" });
+      return;
+    }
     
     setIsSubmitting(true);
     setStatusMsg("");
     setIsError(false);
 
     if (mode === "signin") {
+      trackEvent("auth_sign_in_attempted", { signed_in: false });
       const { error } = await signIn(email, password);
       setIsSubmitting(false);
       if (error) {
+        trackError("auth_error", { reason: "server_error" });
         setIsError(true);
         setStatusMsg(error);
       } else {
         navigate("/app");
       }
     } else {
+      trackEvent("auth_sign_up_attempted", { signed_in: false });
       const { error, needsEmailConfirmation } = await signUp(email, password, { name });
       setIsSubmitting(false);
       if (error) {
+        trackError("auth_error", { reason: "server_error" });
         setIsError(true);
         setStatusMsg(error);
       } else if (needsEmailConfirmation) {
@@ -77,7 +91,7 @@ export function AuthPage() {
     }
   };
 
-  if (session || user) {
+  if (signedIn) {
     return (
       <div className="min-h-screen relative overflow-hidden bg-[var(--lg-cream)]">
         <BackgroundPetals />

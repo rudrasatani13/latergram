@@ -17,6 +17,7 @@ import { useAuth } from "../../auth/useAuth";
 import { useAccountLategrams } from "../../db/useAccountLategrams";
 import { useAccountCounters } from "../../db/useAccountCounters";
 import type { DbPrivateLategram, DbTimeSinceCounter } from "../../db/types";
+import { trackError, trackEvent } from "../../analytics/analytics";
 
 const tabs = [
   { id: "lategrams", label: "My Lategrams" },
@@ -420,6 +421,7 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
       return;
     }
 
+    trackEvent("local_to_account_import_attempted", { source_type: "lategram", storage_scope: "account", signed_in: true });
     setIsImporting(true);
     setImportStatus("Importing...");
 
@@ -469,10 +471,34 @@ export function KeepPrivateView({ onViewSection }: KeepPrivateViewProps) {
       msg += " Local copies remain on this device.";
       setImportStatus(msg);
       await refreshAccountLategrams();
+      trackEvent("local_to_account_import_completed", {
+        source_type: "lategram",
+        storage_scope: "account",
+        result: failCount > 0 ? "failure" : "success",
+        reason: failCount > 0 ? "server_error" : undefined,
+        signed_in: true,
+      });
+      if (failCount > 0) {
+        trackError("account_save_error", { storage_scope: "account" });
+      }
     } else if (failCount > 0) {
       setImportStatus(firstError || "Import failed. Could not save to your account.");
+      trackEvent("local_to_account_import_completed", {
+        source_type: "lategram",
+        storage_scope: "account",
+        result: "failure",
+        reason: "server_error",
+        signed_in: true,
+      });
+      trackError("account_save_error", { storage_scope: "account" });
     } else {
       setImportStatus("Nothing new to import.");
+      trackEvent("local_to_account_import_completed", {
+        source_type: "lategram",
+        storage_scope: "account",
+        result: "success",
+        signed_in: true,
+      });
     }
   };
 

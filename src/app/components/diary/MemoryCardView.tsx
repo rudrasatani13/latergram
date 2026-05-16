@@ -20,6 +20,7 @@ import {
   type MemoryCardSourceKind,
   type MemoryCardThemeKey,
 } from "../../utils/memoryCardCanvas";
+import { trackError, trackEvent, type AnalyticsProps } from "../../analytics/analytics";
 
 type SourceType = MemoryCardSourceKind;
 type SourceScope = "account" | "device";
@@ -45,6 +46,33 @@ const SOURCE_OPTIONS: Array<{ id: SourceType; label: string; note: string }> = [
   { id: "lategram", label: "Lategram", note: "saved writing only" },
   { id: "counter", label: "Time Since", note: "saved counters only" },
 ];
+
+function memoryCardAnalyticsProps(input: {
+  sourceType?: SourceType | null;
+  sourceScope?: SourceScope;
+  format?: MemoryCardFormat | null;
+  signedIn: boolean;
+}): AnalyticsProps {
+  const props: AnalyticsProps = { signed_in: input.signedIn };
+
+  if (input.sourceType === "lategram") {
+    props.source_type = "lategram";
+  }
+
+  if (input.sourceType === "counter") {
+    props.source_type = "time_since";
+  }
+
+  if (input.sourceScope) {
+    props.storage_scope = input.sourceScope === "account" ? "account" : "local";
+  }
+
+  if (input.format) {
+    props.format = input.format;
+  }
+
+  return props;
+}
 
 const TEXT_LIMITS: Record<MemoryCardFormat, Record<SourceType, number>> = {
   square: { lategram: 260, counter: 140 },
@@ -460,9 +488,18 @@ export function MemoryCardView() {
   const downloadDisabled = Boolean(disabledReason) || exportState === "exporting";
 
   const downloadCard = async () => {
+    const analyticsProps = memoryCardAnalyticsProps({
+      sourceType: payload?.sourceKind ?? sourceType,
+      sourceScope: selectedSource?.scope ?? sourceScope,
+      format,
+      signedIn: Boolean(session?.user),
+    });
+    trackEvent("memory_card_export_attempted", analyticsProps);
+
     if (!payload || !format) {
       setExportState("missing");
       setStatus(disabledReason || "Choose a real source item and format first.");
+      trackEvent("memory_card_export_completed", { ...analyticsProps, result: "failure", reason: "invalid" });
       return;
     }
 
@@ -470,6 +507,8 @@ export function MemoryCardView() {
       setExportSupported(false);
       setExportState("unsupported");
       setStatus("This browser cannot create Memory Card images with Canvas.");
+      trackError("memory_card_export_error", { ...analyticsProps, reason: "unsupported" });
+      trackEvent("memory_card_export_completed", { ...analyticsProps, result: "failure", reason: "unsupported" });
       return;
     }
 
@@ -489,9 +528,12 @@ export function MemoryCardView() {
       window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
       setExportState("success");
       setStatus("PNG download created. Nothing was uploaded, shared, or saved to account history.");
+      trackEvent("memory_card_export_completed", { ...analyticsProps, result: "success" });
     } catch {
       setExportState("error");
       setStatus("Export failed. Try again, or use another browser if downloads are blocked.");
+      trackError("memory_card_export_error", { ...analyticsProps, reason: "server_error" });
+      trackEvent("memory_card_export_completed", { ...analyticsProps, result: "failure", reason: "server_error" });
     }
   };
 

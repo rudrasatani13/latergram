@@ -6,6 +6,7 @@ import { addLocalCounter, createLocalId, readLocalCounters, removeLocalCounter }
 import type { LocalCounter } from "../../storage/types";
 import { useAuth } from "../../auth/useAuth";
 import { useAccountCounters } from "../../db/useAccountCounters";
+import { trackError, trackEvent } from "../../analytics/analytics";
 
 function daysBetween(iso: string) {
   const d1 = new Date(iso);
@@ -73,10 +74,19 @@ export function TimeSinceView() {
       return;
     }
 
+    const storageScope = session?.user ? "account" : "local";
+    trackEvent("time_counter_create_attempted", { source_type: "time_since", storage_scope: storageScope, signed_in: Boolean(session?.user) });
     const title = draft.title.trim();
 
     if (!title || !draft.start) {
       setStatus("Add a title and date first.");
+      trackEvent("time_counter_create_completed", {
+        source_type: "time_since",
+        storage_scope: storageScope,
+        result: "failure",
+        reason: "invalid",
+        signed_in: Boolean(session?.user),
+      });
       return;
     }
 
@@ -91,11 +101,25 @@ export function TimeSinceView() {
       });
 
       if (error) {
+        trackError("account_save_error", { source_type: "time_since", storage_scope: "account" });
+        trackEvent("time_counter_create_completed", {
+          source_type: "time_since",
+          storage_scope: "account",
+          result: "failure",
+          reason: "server_error",
+          signed_in: true,
+        });
         setStatus(error);
         setSaving(false);
         return;
       }
       setStatus("Counter saved to your account.");
+      trackEvent("time_counter_create_completed", {
+        source_type: "time_since",
+        storage_scope: "account",
+        result: "success",
+        signed_in: true,
+      });
     } else {
       const now = new Date().toISOString();
       const counter: LocalCounter = {
@@ -109,12 +133,26 @@ export function TimeSinceView() {
 
       const result = addLocalCounter(counter);
       if (!result.ok) {
+        trackError("local_storage_error", { source_type: "time_since", storage_scope: "local" });
+        trackEvent("time_counter_create_completed", {
+          source_type: "time_since",
+          storage_scope: "local",
+          result: "failure",
+          reason: "unsupported",
+          signed_in: false,
+        });
         setStatus("Could not save this counter in this browser.");
         setSaving(false);
         return;
       }
       setList((items) => [counter, ...items]);
       setStatus("Counter saved on this device.");
+      trackEvent("time_counter_create_completed", {
+        source_type: "time_since",
+        storage_scope: "local",
+        result: "success",
+        signed_in: false,
+      });
     }
 
     setSaving(false);

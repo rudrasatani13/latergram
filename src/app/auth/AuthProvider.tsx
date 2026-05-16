@@ -4,6 +4,7 @@ import { authConfigAvailable, supabase } from "./authClient";
 import { AuthContext, AuthContextType } from "./useAuth";
 import { upsertOwnProfile } from "../db/profiles";
 import { connectionActionMessage, isOffline } from "../utils/reliability";
+import { trackError } from "../analytics/analytics";
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return Promise.race([
@@ -36,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       })
       .catch((error) => {
+        trackError("auth_error", { reason: "server_error" });
         console.error("getSession failed", {
           message: error instanceof Error ? error.message : "Unknown auth error",
         });
@@ -126,6 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         await supabase.auth.signOut();
       } catch (error) {
+        trackError("auth_error", { reason: "server_error" });
         console.error("signOut failed", {
           message: error instanceof Error ? error.message : "Unknown auth error",
         });

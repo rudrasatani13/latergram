@@ -6,6 +6,7 @@ import { useAuth } from "../../auth/useAuth";
 import { useLateLetters } from "../../db/useLateLetters";
 import type { LateLetterRecord } from "../../db/lateLetters";
 import { isValidLookingEmail } from "../../utils/emailMasking";
+import { trackError, trackEvent } from "../../analytics/analytics";
 
 interface ComposeDraft {
   recipientName: string;
@@ -246,9 +247,16 @@ export function LateLettersView() {
       return;
     }
 
+    trackEvent("late_letter_schedule_attempted", { storage_scope: "account", signed_in: Boolean(session?.user) });
     const scheduledAt = validateDraft();
 
     if (!scheduledAt) {
+      trackEvent("late_letter_schedule_completed", {
+        storage_scope: "account",
+        result: "failure",
+        reason: "invalid",
+        signed_in: Boolean(session?.user),
+      });
       return;
     }
 
@@ -264,6 +272,13 @@ export function LateLettersView() {
     setSaving(false);
 
     if (error || !savedLetter) {
+      trackError("late_letter_schedule_error", { storage_scope: "account" });
+      trackEvent("late_letter_schedule_completed", {
+        storage_scope: "account",
+        result: "failure",
+        reason: "server_error",
+        signed_in: Boolean(session?.user),
+      });
       setStatus(error || "Could not save this Late Letter. Your words are still here.");
       return;
     }
@@ -274,6 +289,7 @@ export function LateLettersView() {
     setSelectedLetterId(savedLetter.id);
     setPendingCancelId(null);
     setStatus("Scheduled. Cancel before it is sent.");
+    trackEvent("late_letter_schedule_completed", { storage_scope: "account", result: "success", signed_in: Boolean(session?.user) });
   };
 
   const cancelLetter = async (letter: LateLetterRecord) => {
@@ -292,18 +308,27 @@ export function LateLettersView() {
       return;
     }
 
+    trackEvent("late_letter_cancel_attempted", { storage_scope: "account", signed_in: Boolean(session?.user) });
     setCancellingId(letter.id);
     setStatus("Cancelling this Late Letter...");
     const { error } = await cancel(letter.id);
     setCancellingId(null);
 
     if (error) {
+      trackError("account_save_error", { storage_scope: "account" });
+      trackEvent("late_letter_cancel_completed", {
+        storage_scope: "account",
+        result: "failure",
+        reason: "server_error",
+        signed_in: Boolean(session?.user),
+      });
       setStatus(error);
       return;
     }
 
     setPendingCancelId(null);
     setStatus("Cancelled.");
+    trackEvent("late_letter_cancel_completed", { storage_scope: "account", result: "success", signed_in: Boolean(session?.user) });
   };
 
   const submitLetterReport = async (letter: LateLetterRecord) => {

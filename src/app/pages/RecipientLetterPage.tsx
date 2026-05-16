@@ -10,6 +10,7 @@ import {
   reportRecipientLetter,
   type OpenLetterResult,
 } from "../db/recipientLetters";
+import { trackError, trackEvent } from "../analytics/analytics";
 
 const easeSoft = [0.22, 1, 0.36, 1] as const;
 const reportReasons = [
@@ -65,6 +66,19 @@ function unavailableCopy(reason: Exclude<OpenLetterResult, { status: "available"
   }
 }
 
+function trackRecipientOpenResult(result: OpenLetterResult) {
+  if (result.status === "available") {
+    trackEvent("recipient_letter_open_available", { result: "success" });
+    return;
+  }
+
+  trackEvent("recipient_letter_open_unavailable", { result: "unavailable", reason: result.reason });
+
+  if (result.reason === "server_error") {
+    trackError("recipient_letter_error", { reason: "server_error" });
+  }
+}
+
 export function RecipientLetterPage() {
   const { token = "" } = useParams();
   const [result, setResult] = useState<OpenLetterResult | null>(null);
@@ -81,7 +95,9 @@ export function RecipientLetterPage() {
   const loadLetter = useCallback(() => {
     setResult(null);
     setLoadingLetter(true);
+    trackEvent("recipient_letter_open_attempted");
     openRecipientLetter(token).then((nextResult) => {
+      trackRecipientOpenResult(nextResult);
       setResult(nextResult);
       setLoadingLetter(false);
     });
@@ -92,8 +108,10 @@ export function RecipientLetterPage() {
 
     setResult(null);
     setLoadingLetter(true);
+    trackEvent("recipient_letter_open_attempted");
     openRecipientLetter(token).then((nextResult) => {
       if (!cancelled) {
+        trackRecipientOpenResult(nextResult);
         setResult(nextResult);
         setLoadingLetter(false);
       }
@@ -113,16 +131,20 @@ export function RecipientLetterPage() {
 
     setOptOutStatus("");
     setOptingOut(true);
+    trackEvent("recipient_opt_out_attempted");
     const { error } = await optOutRecipientEmail(optOutEmail);
     setOptingOut(false);
 
     if (error) {
+      trackEvent("recipient_opt_out_completed", { result: "failure", reason: "server_error" });
+      trackError("recipient_letter_error", { reason: "server_error" });
       setOptOutStatus(error);
       return;
     }
 
     setOptOutEmail("");
     setOptOutStatus("Future Late Letters to this email will be blocked.");
+    trackEvent("recipient_opt_out_completed", { result: "success" });
   };
 
   const submitReport = async (event: FormEvent<HTMLFormElement>) => {
@@ -134,6 +156,7 @@ export function RecipientLetterPage() {
 
     setReportStatus("");
     setReporting(true);
+    trackEvent("recipient_report_attempted");
     const { error } = await reportRecipientLetter({
       token,
       reason: reportReason,
@@ -143,6 +166,8 @@ export function RecipientLetterPage() {
     setReporting(false);
 
     if (error) {
+      trackEvent("recipient_report_completed", { result: "failure", reason: "server_error" });
+      trackError("recipient_letter_error", { reason: "server_error" });
       setReportStatus(error);
       return;
     }
@@ -153,6 +178,7 @@ export function RecipientLetterPage() {
         ? "This letter has been reported. Future letters from this sender will be blocked."
         : "This letter has been reported.",
     );
+    trackEvent("recipient_report_completed", { result: "success" });
   };
 
   const unavailable = result?.status === "unavailable" ? unavailableCopy(result.reason) : null;

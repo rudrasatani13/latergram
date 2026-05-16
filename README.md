@@ -4,7 +4,9 @@ Some words arrive late. Latergram gives them a place.
 
 ## Current Status
 
-Phase 18 Private Beta readiness implemented in the repo. Latergram is not publicly launched.
+Phase 19 Privacy-Respecting Analytics is implemented/prepared in the repo. Latergram is not publicly launched.
+
+Privacy-safe analytics instrumentation now exists behind environment gates and is disabled by default. The wrapper supports a Plausible-compatible provider only when `VITE_ANALYTICS_ENABLED=true`, `VITE_ANALYTICS_PROVIDER=plausible`, `VITE_PLAUSIBLE_DOMAIN`, and `VITE_PLAUSIBLE_SCRIPT_SRC` are configured. With missing or disabled env, analytics is a no-op and no analytics network request is sent by the wrapper. No analytics provider, production domain, secret, fake dashboard, fake metrics, session replay, heatmap, ad pixel, or Google Analytics integration was added.
 
 The app now has an honest private beta state: a `/beta` page, subtle beta notices on landing/auth/app surfaces, and documentation for a small real beta with 20 to 50 users. Beta access is **not** enforced by invite code or allowlist yet. Access distribution is manual/off-platform by direct link for now, and the UI says that plainly. No fake waitlist counts, fake beta users, fake testimonials, fake feedback forms, fake analytics, or fake launch claims were added.
 
@@ -83,6 +85,7 @@ After the current migrations and Edge Functions are applied:
 - Support page at `/support` with data deletion, abuse reporting, and crisis redirection.
 - Private beta readiness page at `/beta` with direct-link/manual access strategy, test guidance, safety boundaries, and Garden-closed decision.
 - Private beta notices on landing, auth, and app home surfaces.
+- Privacy-safe analytics wrapper, route scrubbing, fixed product-event instrumentation, and category-only error observation prepared behind disabled-by-default env gates.
 - Trust/legal links on landing, auth, trust, beta, and recipient letter pages.
 
 ## What Is Not Live Yet
@@ -95,7 +98,8 @@ After the current migrations and Edge Functions are applied:
 - Memory Card sharing, auto-upload, or cloud sync.
 - Received letters.
 - Guaranteed delivery or guaranteed read receipts.
-- Analytics, payments, AI, or public launch infrastructure.
+- Analytics collection is not enabled by default and no provider is configured in committed env templates.
+- Payments, AI, or public launch infrastructure.
 - Real invite-code or allowlist beta access enforcement.
 - Real configured support inbox (`SUPPORT_EMAIL_CONFIGURED` is still `false`).
 - Self-serve full account deletion (available via support request).
@@ -270,6 +274,15 @@ After the current migrations and Edge Functions are applied:
 - [x] Added founder-facing beta checklist, user test script, feedback questions, Late Letter delivery test plan, Garden safety checkpoint, rollback conditions, and remaining risks.
 - [x] Confirmed no fake beta users, fake feedback, fake support form, fake Garden activity, fake analytics, payments, AI, or public launch behavior were added.
 - [x] Documented Phase 18 in [`docs/phase-18-private-beta.md`](./docs/phase-18-private-beta.md).
+
+### Phase 19: Privacy-Respecting Analytics
+- [x] Added a dependency-free analytics wrapper that is disabled by default and no-ops when env is missing or misconfigured.
+- [x] Supports only a Plausible-compatible provider through public frontend env variables; no Google Analytics, ad pixels, session replay, heatmaps, cookies, or package changes were added.
+- [x] Added route-level page view tracking with canonical paths and `/letter/:token` token scrubbing.
+- [x] Added fixed product events with enum/boolean props only for auth, writing, saves/imports, Time Since, Late Letters, recipient actions, Memory Card export, beta/support views, and closed Garden viewing.
+- [x] Added category-only error observation without sending raw messages, stacks, user content, tokens, auth IDs, or database IDs.
+- [x] Updated privacy copy and documentation to describe the disabled-by-default analytics status honestly.
+- [x] Documented Phase 19 in [`docs/phase-19-privacy-respecting-analytics.md`](./docs/phase-19-privacy-respecting-analytics.md).
 
 ## Run Locally
 

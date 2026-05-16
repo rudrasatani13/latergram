@@ -211,7 +211,7 @@ Garden testing is deferred until a separate gated safety checkpoint.
 - Export square, story, and wallpaper formats.
 - Confirm export text does not include raw recipient email, user IDs, tokens, Garden metadata, or delivery state.
 - Confirm no saved card history is created.
-- Confirm no upload, sharing, analytics, or cloud sync occurs.
+- Confirm no upload, sharing, saved card history, cloud sync, or card-text analytics occurs.
 
 ## Mobile Test Plan
 
@@ -289,7 +289,7 @@ Pause or stop the beta if:
 - Support inbox remains pending.
 - Garden remains closed.
 - No moderator/admin web UI.
-- No analytics or error monitoring provider yet.
+- No analytics provider configured in the repo. Phase 19 may add prepared privacy-respecting instrumentation, but collection must stay disabled unless explicitly configured.
 - No self-serve full account deletion.
 - Late Letter reliability depends on Supabase Edge Function secrets, Resend configuration, and the delivery job.
 - Legal review of privacy and terms remains pending.
@@ -370,7 +370,7 @@ Results:
 - Support requests need a real off-platform handling channel until the support inbox is configured.
 - Late Letter delivery needs real environment and provider checks outside the repo.
 - Garden safety still needs a separate gated beta plan before any opening.
-- No analytics or error monitoring provider exists yet, so beta observation relies on direct feedback and manual checks.
+- No analytics provider is configured in committed env templates. If Phase 19 instrumentation is present, it must remain privacy-respecting and disabled unless explicitly configured.
 
 ## Before Phase 19 or Public Launch
 
@@ -380,5 +380,5 @@ Results:
 - Complete a real Late Letter delivery pass.
 - Decide whether to build server-side beta gating before any larger rollout.
 - Keep Garden closed or complete a separate gated Garden safety checkpoint.
-- Add privacy-respecting analytics only in Phase 19.
+- Use the Phase 19 privacy-respecting analytics wrapper only if it is explicitly configured, documented, and kept free of message content, recipient data, tokens, IDs, Garden content, and card text.
 - Complete legal review before public launch.

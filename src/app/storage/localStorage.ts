@@ -1,4 +1,5 @@
 import type { LocalCounter, LocalDestination, LocalDraft, LocalLategram } from "./types";
+import { trackError } from "../analytics/analytics";
 
 export const LOCAL_STORAGE_SCHEMA_VERSION = 1;
 export const LOCAL_STORAGE_NAMESPACE = "latergram:v1";
@@ -26,6 +27,7 @@ function getLocalStorage(): Storage | null {
   try {
     return window.localStorage;
   } catch {
+    trackError("local_storage_error");
     return null;
   }
 }
@@ -138,6 +140,7 @@ export function safeRead<T>(
 
     return validate(parsed.value) ? parsed.value : fallback;
   } catch {
+    trackError("local_storage_error");
     return fallback;
   }
 }
@@ -158,6 +161,7 @@ export function safeWrite<T>(key: string, value: T): StorageWriteResult {
     storage.setItem(key, JSON.stringify(envelope));
     return { ok: true };
   } catch {
+    trackError("local_storage_error");
     return { ok: false };
   }
 }
@@ -173,6 +177,7 @@ export function safeDelete(key: string): StorageWriteResult {
     storage.removeItem(key);
     return { ok: true };
   } catch {
+    trackError("local_storage_error");
     return { ok: false };
   }
 }

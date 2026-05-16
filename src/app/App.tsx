@@ -1,7 +1,8 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useAuth } from "./auth/useAuth";
+import { trackEvent, trackPageView } from "./analytics/analytics";
 
 const easeSoft = [0.22, 1, 0.36, 1] as const;
 const LandingPage = lazy(() => import("./pages/LandingPage").then((module) => ({ default: module.LandingPage })));
@@ -26,7 +27,28 @@ function LoadingFallback() {
 
 export default function App() {
   const location = useLocation();
-  const { loading } = useAuth();
+  const { loading, session } = useAuth();
+  const signedIn = Boolean(session?.user);
+
+  useEffect(() => {
+    if (loading) {
+      return;
+    }
+
+    const pageView = trackPageView(`${location.pathname}${location.search}`);
+
+    if (pageView.path === "/beta") {
+      trackEvent("beta_page_viewed", { signed_in: signedIn });
+    }
+
+    if (pageView.path === "/support") {
+      trackEvent("support_page_viewed", { signed_in: signedIn });
+    }
+
+    if (pageView.path === "/app" && pageView.props.section === "garden") {
+      trackEvent("garden_closed_viewed", { section: "garden", signed_in: signedIn });
+    }
+  }, [loading, location.pathname, location.search, signedIn]);
 
   if (loading) {
     return <LoadingFallback />;

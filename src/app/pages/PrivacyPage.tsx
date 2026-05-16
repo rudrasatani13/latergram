@@ -3,6 +3,7 @@ import { Grain } from "../components/Grain";
 import { BackgroundPetals } from "../components/BackgroundPetals";
 import { TrustFooter } from "../components/TrustFooter";
 import { SUPPORT_EMAIL, SUPPORT_EMAIL_CONFIGURED } from "../constants";
+import { getAnalyticsStatus } from "../analytics/analytics";
 
 function SupportContact() {
   if (SUPPORT_EMAIL_CONFIGURED) {
@@ -12,6 +13,8 @@ function SupportContact() {
 }
 
 export function PrivacyPage() {
+  const analyticsStatus = getAnalyticsStatus();
+
   return (
     <div className="min-h-screen relative overflow-hidden bg-[var(--lg-cream)]">
       <BackgroundPetals />
@@ -146,9 +149,31 @@ export function PrivacyPage() {
 
               <section>
                 <h2 className="trust-heading">Analytics and tracking</h2>
-                <p>
-                  Latergram does not currently run analytics, tracking pixels, or third-party advertising scripts. If analytics are added in the future, this policy will be updated.
-                </p>
+                {analyticsStatus.enabled && analyticsStatus.provider === "plausible" ? (
+                  <>
+                    <p>
+                      Latergram is configured to use Plausible-compatible, privacy-respecting analytics to understand basic route-level usage and fixed product events.
+                    </p>
+                    <p>
+                      Analytics events do not include message bodies, drafts, recipient emails, recipient names, subjects, secure letter tokens, report details, Memory Card text, Garden content, browser local storage, auth IDs, or database IDs.
+                    </p>
+                    <p>
+                      Latergram does not use cross-site tracking, advertising pixels, session replay, heatmaps, screenshots, or keystroke recording.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p>
+                      Latergram has analytics instrumentation prepared, but it is disabled unless a privacy-respecting provider is explicitly configured through environment variables. When analytics are disabled or misconfigured, no analytics network request is sent by Latergram's analytics wrapper.
+                    </p>
+                    <p>
+                      Latergram does not currently use cross-site tracking, advertising pixels, session replay, heatmaps, screenshots, or keystroke recording.
+                    </p>
+                    <p>
+                      Prepared analytics events are limited to route-level page views and fixed product events. They do not include message bodies, drafts, recipient emails, recipient names, subjects, secure letter tokens, report details, Memory Card text, Garden content, browser local storage, auth IDs, or database IDs. If a provider is configured later, this policy must be updated with the provider name and purpose.
+                    </p>
+                  </>
+                )}
               </section>
 
               <section>

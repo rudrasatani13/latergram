@@ -88,7 +88,8 @@ export function BetaPage() {
                   <li>Public Garden browsing, posting, reactions, or reports in the product UI.</li>
                   <li>Anonymous Garden access.</li>
                   <li>Saved Memory Card history, sharing, upload, or cloud sync.</li>
-                  <li>Analytics, payments, AI, or public launch infrastructure.</li>
+                  <li>Analytics collection by default. Privacy-safe instrumentation is prepared, but it no-ops unless explicitly configured.</li>
+                  <li>Payments, AI, or public launch infrastructure.</li>
                   <li>Self-serve full account deletion.</li>
                 </ul>
               </section>
